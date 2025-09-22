@@ -23,7 +23,7 @@ const WarrantyFiling: React.FC = () => {
   // Fetch warranties from API
   const fetchWarranties = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/warranties');
+      const response = await fetch('http://95.111.247.129:8000/api/warranties');
       if (response.ok) {
         const data = await response.json();
         setWarranties(data.warranties);
@@ -45,7 +45,7 @@ const WarrantyFiling: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/warranties', {
+      const response = await fetch('http://95.111.247.129:8000/api/warranties', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
