@@ -23,7 +23,7 @@ const WarrantyFiling: React.FC = () => {
   // Fetch warranties from API
   const fetchWarranties = async () => {
     try {
-      const response = await fetch('http://95.111.247.129/api/warranties');
+      const response = await fetch('http://localhost:8000/api/warranties');
       if (response.ok) {
         const data = await response.json();
         setWarranties(data.warranties);
@@ -288,6 +288,27 @@ const WarrantyFiling: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Color
+                </label>
+                <select
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                >
+                  <option value="">Select color...</option>
+                  <option value="Black">Black</option>
+                  <option value="White">White</option>
+                  <option value="Blue">Blue</option>
+                  <option value="Red">Red</option>
+                  <option value="Green">Green</option>
+                  <option value="Purple">Purple</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Silver">Silver</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <HardDrive className="inline h-4 w-4 mr-1" />
                   Storage
                 </label>
@@ -319,19 +340,20 @@ const WarrantyFiling: React.FC = () => {
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  IMEI Number
-                </label>
-                <input
-                  type="text"
-                  value={imeiNumber}
-                  onChange={(e) => setImeiNumber(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter IMEI number"
-                  required
-                />
-              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                IMEI Number
+              </label>
+              <input
+                type="text"
+                value={imeiNumber}
+                onChange={(e) => setImeiNumber(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Enter IMEI number"
+                required
+              />
             </div>
 
 
