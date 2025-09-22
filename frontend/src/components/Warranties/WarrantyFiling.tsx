@@ -285,7 +285,7 @@ const WarrantyFiling: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <HardDrive className="inline h-4 w-4 mr-1" />
@@ -303,27 +303,6 @@ const WarrantyFiling: React.FC = () => {
                   <option value="256GB">256GB</option>
                   <option value="512GB">512GB</option>
                   <option value="1TB">1TB</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Color
-                </label>
-                <select
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                >
-                  <option value="">Select color...</option>
-                  <option value="Black">Black</option>
-                  <option value="White">White</option>
-                  <option value="Blue">Blue</option>
-                  <option value="Green">Green</option>
-                  <option value="Purple">Purple</option>
-                  <option value="Orange">Orange</option>
-                  <option value="Red">Red</option>
-                  <option value="Gold">Gold</option>
                 </select>
               </div>
               <div>
