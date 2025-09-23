@@ -10,6 +10,7 @@ import ProductSelectionModal from './components/QRCode/ProductSelectionModal';
 import SaleForm from './components/Sales/SaleForm';
 import SalesReport from './components/Sales/SalesReport';
 import WarrantyFiling from './components/Warranties/WarrantyFiling';
+import WarrantyView from './components/Warranties/WarrantyView';
 import Reports from './components/Reports/Reports';
 import SalesmanSales from './components/Sales/SalesmanSales';
 import ProductManagement from './components/Products/ProductManagement';
@@ -82,7 +83,9 @@ const AppContent: React.FC = () => {
       case 'staff':
         return <StaffPage />;
       case 'warranties':
-        return <WarrantyFiling />;
+        return <WarrantyView onFileWarranty={() => setActiveTab('file-warranty')} />;
+      case 'file-warranty':
+        return <WarrantyFiling onBack={() => setActiveTab('warranties')} />;
       case 'reports':
         return <Reports />;
       case 'inventory':

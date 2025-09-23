@@ -17,7 +17,7 @@ class Cors
     {
         $response = $next($request);
 
-        $allowedOrigins = ['http://localhost:5173', 'http://95.111.247.129'];
+        $allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://95.111.247.129'];
         $origin = $request->headers->get('Origin');
 
         if (in_array($origin, $allowedOrigins)) {
