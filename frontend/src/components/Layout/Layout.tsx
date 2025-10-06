@@ -19,15 +19,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
       </div>
       
       <div className="flex pt-16"> {/* Add top padding to account for fixed navbar */}
-        {/* Fixed Sidebar */}
-        <div className="fixed left-0 top-16 bottom-0 z-20"> {/* Position below navbar */}
-          <Sidebar 
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            activeTab={activeTab}
-            onTabChange={onTabChange}
-          />
-        </div>
+        <Sidebar 
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+        />
         
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 min-h-screen overflow-y-auto">
