@@ -15,23 +15,37 @@ class Cors
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
-
-        $allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://95.111.247.129'];
+        $allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174',
+            'http://95.111.247.129'
+        ];
         $origin = $request->headers->get('Origin');
+
+        // Preflight handling
+        if ($request->getMethod() === 'OPTIONS') {
+            $response = response()->noContent(204);
+            if (in_array($origin, $allowedOrigins)) {
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+            }
+            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+            $response->headers->set('Access-Control-Allow-Credentials', 'true');
+            $response->headers->set('Vary', 'Origin');
+            return $response;
+        }
+
+        $response = $next($request);
 
         if (in_array($origin, $allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         }
-
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
-
-        // Handle preflight OPTIONS requests
-        if ($request->getMethod() === 'OPTIONS') {
-            $response->setStatusCode(200);
-        }
+        $response->headers->set('Vary', 'Origin');
 
         return $response;
     }
