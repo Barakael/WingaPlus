@@ -80,17 +80,16 @@
         <h1>Warranty Confirmation</h1>
     </div>
     <div class="content">
-        <p>Dear {{ $warranty->customer_name }},</p>
-        <p>Thank you for purchasing a <strong>{{ $warranty->phone_name }}</strong>. Your warranty is now active.</p>
+        <p>Dear {{ $sale->customer_name }},</p>
+        <p>Thank you for purchasing a <strong>{{ $sale->product_name }}</strong>. Your warranty is now active.</p>
 
         <div class="meta">
-            <div class="meta-item"><strong>Phone Type:</strong> {{ $warranty->phone_name }}</div>
-            <div class="meta-item"><strong>IMEI/Serial:</strong> {{ $warranty->imei_number }}</div>
-            <div class="meta-item"><strong>Phone Specs:</strong> {{ $warranty->color }} - {{ $warranty->storage }}</div>
-            <div class="meta-item"><strong>Purchase Date:</strong> {{ $warranty->created_at->format('M d, Y') }}</div>
-            <div class="meta-item"><strong>Warranty Period:</strong> {{ $warranty->warranty_period }} months</div>
-            <div class="meta-item"><strong>Warrant is Due:</strong> {{ $warranty->expiry_date->format('M d, Y') }}</div>
-
+            <div class="meta-item"><strong>Phone Type:</strong> {{ $sale->product_name }}</div>
+            <div class="meta-item"><strong>IMEI/Serial:</strong> {{ $warrantyDetails['imei_number'] ?? 'N/A' }}</div>
+            <div class="meta-item"><strong>Phone Specs:</strong> {{ $warrantyDetails['color'] ?? 'N/A' }} - {{ $warrantyDetails['storage'] ?? 'N/A' }}</div>
+            <div class="meta-item"><strong>Purchase Date:</strong> {{ $sale->created_at->format('M d, Y') }}</div>
+            <div class="meta-item"><strong>Warranty Period:</strong> {{ $sale->warranty_months }} months</div>
+            <div class="meta-item"><strong>Warranty Expires:</strong> {{ $sale->warranty_end ? $sale->warranty_end->format('M d, Y') : 'N/A' }}</div>
         </div>      
           <div class="terms">
             <strong>Warranty Terms:</strong>
