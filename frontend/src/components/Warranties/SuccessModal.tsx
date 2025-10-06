@@ -16,6 +16,12 @@ interface WarrantyData {
   expiry_date: string;
   submitted_at: string;
   email_sent: boolean;
+  linked_sale?: {
+    id: number;
+    product_name: string;
+    total_amount: string | number;
+    warranty_months: number | null;
+  } | null;
 }
 
 interface SuccessModalProps {
@@ -149,6 +155,34 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
               </div>
             </div>
           </div>
+{/* 
+          {warrantyData.linked_sale && (
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold mb-2 text-green-800 dark:text-green-200 flex items-center">
+                <CheckCircle className="h-5 w-5 mr-2" /> Linked Sale Created
+              </h3>
+              <div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                  <span className="text-green-700 dark:text-green-300">Sale ID:</span>
+                  <span className="ml-2 font-medium">{warrantyData.linked_sale.id}</span>
+                </div>
+                <div>
+                  <span className="text-green-700 dark:text-green-300">Product:</span>
+                  <span className="ml-2 font-medium">{warrantyData.linked_sale.product_name}</span>
+                </div>
+                <div>
+                  <span className="text-green-700 dark:text-green-300">Total Amount:</span>
+                  <span className="ml-2 font-medium">Tsh {warrantyData.linked_sale.total_amount}</span>
+                </div>
+                {warrantyData.linked_sale.warranty_months && (
+                  <div>
+                    <span className="text-green-700 dark:text-green-300">Warranty Months:</span>
+                    <span className="ml-2 font-medium">{warrantyData.linked_sale.warranty_months}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )} */}
 
           {/* Action Buttons */}
           <div className="flex space-x-3">

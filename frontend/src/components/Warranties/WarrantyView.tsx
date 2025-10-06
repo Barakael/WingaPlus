@@ -1,17 +1,41 @@
 import React, { useState } from 'react';
 import { Shield, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 
-const WarrantyView: React.FC<{ onFileWarranty: () => void }> = ({ onFileWarranty }) => {
+interface WarrantyViewProps {
+  onFileWarranty: () => void;
+  openSaleForm?: (prefill?: any) => void;
+}
+
+const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleForm }) => {
   const [warranties, setWarranties] = useState<any[]>([]);
   const [loadingWarranties, setLoadingWarranties] = useState(true);
 
-  // Fetch warranties from API
+  // Fetch sales that have warranties
   const fetchWarranties = async () => {
     try {
-      const response = await fetch('http://95.111.247.129/api/warranties');
+      const response = await fetch('http://localhost:8000/api/sales');
       if (response.ok) {
         const data = await response.json();
-        setWarranties(data.warranties);
+        // Our API wraps responses as { success, data: { data: [...], total: ... }, message }
+        const sales = data?.data?.data ?? [];
+        // Filter only sales that have warranties
+        const warrantySales = (sales || []).filter((s: any) => s.has_warranty === true || s.has_warranty === 1);
+        // Map to the warranty shape expected by the UI
+        const mapped = warrantySales.map((s: any) => ({
+          id: s.id,
+          phone_name: s.product_name || (s.warranty_details?.phone_name ?? ''),
+          customer_name: s.customer_name || (s.warranty_details?.customer_name ?? ''),
+          customer_phone: s.customer_phone || (s.warranty_details?.customer_phone ?? ''),
+          color: s.warranty_details?.color ?? '',
+          storage: s.warranty_details?.storage ?? '',
+          store_name: s.warranty_details?.store_name ?? '',
+          expiry_date: s.warranty_end ?? null,
+          warranty_months: s.warranty_months ?? (s.warranty_details?.warranty_months ?? null),
+          status: s.warranty_status ?? 'unknown',
+          created_at: s.created_at,
+        }));
+
+        setWarranties(mapped);
       }
     } catch (error) {
       console.error('Error fetching warranties:', error);
@@ -98,9 +122,9 @@ const WarrantyView: React.FC<{ onFileWarranty: () => void }> = ({ onFileWarranty
         </div>
         <button
           onClick={onFileWarranty}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
+          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
         >
-          <Shield className="h-5 w-5 mr-2" />
+         
           File New Warranty
         </button>
       </div>
@@ -173,8 +197,23 @@ const WarrantyView: React.FC<{ onFileWarranty: () => void }> = ({ onFileWarranty
                   </div>
                 </div>
 
-                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                  Filed on {new Date(warranty.created_at).toLocaleDateString()}
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Filed on {new Date(warranty.created_at).toLocaleDateString()}
+                  </div>
+                  {/* {openSaleForm && (
+                    <button
+                      onClick={() => openSaleForm({
+                        customer_name: warranty.customer_name,
+                        customer_phone: warranty.customer_phone,
+                        warranty_months: 12,
+                        // Map to product if possible; placeholder product_id left undefined
+                      })}
+                      className="text-xs bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-md hover:from-green-600 hover:to-emerald-700 transition-colors"
+                    >
+                      Create Sale
+                    </button>
+                  )} */}
                 </div>
               </div>
             ))
