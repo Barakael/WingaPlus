@@ -23,6 +23,12 @@ class Warranty extends Model
 
     protected $appends = ['calculated_status'];
 
+    // Relationship: A warranty may have one associated sale
+    public function sale()
+    {
+        return $this->hasOne(Sale::class);
+    }
+
     /**
      * Get the calculated status based on warranty period
      */
