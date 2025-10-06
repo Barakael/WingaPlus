@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Warranty;
+use App\Models\Sale;
 use App\Mail\WarrantyFiled;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class WarrantyController extends Controller
 {
@@ -22,15 +24,45 @@ class WarrantyController extends Controller
             'price' => 'required|numeric',
             'imei_number' => 'required|string',
             'warranty_period' => 'required|integer',
+            // Optional salesman_id if front-end later supplies it
+            'salesman_id' => 'nullable|exists:users,id',
         ]);
 
-        $warranty = Warranty::create($validated);
+        $result = DB::transaction(function () use ($validated) {
+            // 1. Create the warranty record
+            $warranty = Warranty::create($validated);
 
-        // Send email
-        Mail::to($warranty->customer_email)->send(new WarrantyFiled($warranty));
+            // 2. Automatically create a corresponding sale
+            $saleData = [
+                'product_name' => $warranty->phone_name,
+                'warranty_id' => $warranty->id,
+                'salesman_id' => $validated['salesman_id'] ?? null,
+                'customer_name' => $warranty->customer_name,
+                'customer_phone' => $warranty->customer_phone,
+                'quantity' => 1,
+                'unit_price' => $warranty->price,
+                'total_amount' => $warranty->price, // quantity * unit_price
+                'warranty_months' => $warranty->warranty_period,
+                'sale_date' => now(),
+            ];
+
+            $sale = Sale::create($saleData);
+
+            return [$warranty, $sale];
+        });
+
+        [$warranty, $sale] = $result;
+
+        // Send email after transaction succeeds
+        try {
+            Mail::to($warranty->customer_email)->send(new WarrantyFiled($warranty));
+        } catch (\Exception $e) {
+            // Log email error but don't fail the warranty creation
+            \Log::error('Failed to send warranty email: ' . $e->getMessage());
+        }
 
         return response()->json([
-            'message' => 'Warranty filed successfully',
+            'message' => 'Warranty filed successfully (sale created)',
             'warranty' => [
                 'id' => $warranty->id,
                 'phone_name' => $warranty->phone_name,
@@ -47,7 +79,8 @@ class WarrantyController extends Controller
                 'expiry_date' => $warranty->expiry_date->toDateString(),
                 'created_at' => $warranty->created_at,
                 'updated_at' => $warranty->updated_at,
-            ]
+            ],
+            'sale' => $sale,
         ], 201);
     }
 

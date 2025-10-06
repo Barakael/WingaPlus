@@ -32,7 +32,7 @@ class WarrantyFiled extends Mailable
      */
     public function envelope(): Envelope
     {
-        $userName = $this->user ? $this->user->name : 'TheConnectStore';
+        $userName = $this->user ? $this->user->name : 'The Connect Store';
         return new Envelope(
             subject: "Warranty Filed by {$userName} - {$this->warranty->phone_name}",
         );
@@ -43,7 +43,7 @@ class WarrantyFiled extends Mailable
      */
     public function content(): Content
     {
-        $userName = $this->user ? $this->user->name : 'TheConnectStore';
+        $userName = $this->user ? $this->user->name : 'The Connect Store';
         
         return new Content(
             view: 'emails.warranty_filed',
