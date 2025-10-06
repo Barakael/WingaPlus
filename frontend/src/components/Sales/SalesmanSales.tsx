@@ -1,32 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { TrendingUp, DollarSign, ShoppingCart, Target, Calendar, Filter, Download, FileText, FileSpreadsheet, RefreshCw } from 'lucide-react';
-import { listSales } from '../../services/sales';
+import React, { useEffect, useState, useCallback } from 'react';
+import { TrendingUp, ShoppingCart, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, Eye, Edit, Trash2 } from 'lucide-react';
+import { listSales, deleteSale } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
+import { Sale } from '../../types';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
+import ViewSaleModal from './ViewSaleModal';
+import EditSaleModal from './EditSaleModal';
 
 interface SalesmanSalesProps {
-  openSaleForm?: (prefill?: any) => void;
+  openSaleForm?: (prefill?: Sale) => void;
 }
 
 const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   const { user } = useAuth();
 
-  const [mySales, setMySales] = useState<any[]>([]);
+  const [mySales, setMySales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Target selection state
   const [selectedTargetLevel, setSelectedTargetLevel] = useState<string>('');
 
-  // Filter states
+  // Filter states - Enhanced
+  const [filterType, setFilterType] = useState<'daily' | 'monthly' | 'yearly' | 'range'>('daily');
   const [dateFilter, setDateFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
   const [productFilter, setProductFilter] = useState('');
-  const [filteredSales, setFilteredSales] = useState<any[]>([]);
+  const [filteredSales, setFilteredSales] = useState<Sale[]>([]);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Modal states
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
   // Define target levels (same as in TargetManagement)
   const targetLevels = [
@@ -67,7 +80,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   };
 
   // Load sales data function
-  const loadSalesData = async () => {
+  const loadSalesData = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -77,28 +90,48 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       // Don't limit here, let filtering handle pagination
       setFilteredSales(data);
       setCurrentPage(1); // Reset to first page when loading new data
-    } catch (e: any) {
-      setError(e.message || 'Failed to load sales');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load sales');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadSalesData();
-  }, [user]);
+  }, [loadSalesData]);
 
-  // Filter sales based on date and product filters
+  // Filter sales based on enhanced filters
   useEffect(() => {
     let filtered = mySales;
 
-    if (dateFilter) {
+    // Apply date filters based on filter type
+    if (filterType === 'daily' && dateFilter) {
       filtered = filtered.filter(sale => {
-        const saleDate = new Date(sale.sale_date).toISOString().split('T')[0];
+        const saleDate = new Date(sale.sale_date || '').toISOString().split('T')[0];
         return saleDate === dateFilter;
+      });
+    } else if (filterType === 'monthly' && monthFilter && yearFilter) {
+      filtered = filtered.filter(sale => {
+        const saleDate = new Date(sale.sale_date || '');
+        const saleMonth = (saleDate.getMonth() + 1).toString().padStart(2, '0');
+        const saleYear = saleDate.getFullYear().toString();
+        return saleMonth === monthFilter && saleYear === yearFilter;
+      });
+    } else if (filterType === 'yearly' && yearFilter) {
+      filtered = filtered.filter(sale => {
+        const saleDate = new Date(sale.sale_date || '');
+        const saleYear = saleDate.getFullYear().toString();
+        return saleYear === yearFilter;
+      });
+    } else if (filterType === 'range' && startDateFilter && endDateFilter) {
+      filtered = filtered.filter(sale => {
+        const saleDate = new Date(sale.sale_date || '').toISOString().split('T')[0];
+        return saleDate >= startDateFilter && saleDate <= endDateFilter;
       });
     }
 
+    // Apply product filter
     if (productFilter) {
       filtered = filtered.filter(sale =>
         sale.product_name?.toLowerCase().includes(productFilter.toLowerCase()) ||
@@ -108,7 +141,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
     setFilteredSales(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [mySales, dateFilter, productFilter]);
+  }, [mySales, filterType, dateFilter, monthFilter, yearFilter, startDateFilter, endDateFilter, productFilter]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
@@ -143,13 +176,13 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   const monthlyTarget = selectedTarget ? selectedTarget.target : 600000; // Default to amateur level
   const monthlyProgress = (totalGanji / monthlyTarget) * 100;
 
-  // Export functions
+  // Export functions - Enhanced with filter information
   const exportToPDF = () => {
     try {
       console.log('Starting PDF export...');
 
       if (filteredSales.length === 0) {
-        alert('No sales data to export. Please make some sales first.');
+        alert('No sales data to export. Please adjust your filters or make some sales first.');
         return;
       }
 
@@ -169,12 +202,22 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       let yPosition = 45;
 
       // Add filters info if applied
-      if (dateFilter || productFilter) {
+      if (dateFilter || monthFilter || yearFilter || startDateFilter || endDateFilter || productFilter) {
         doc.setFontSize(10);
         doc.setFont('helvetica', 'italic');
 
-        if (dateFilter) {
+        if (filterType === 'daily' && dateFilter) {
           doc.text(`Date Filter: ${dateFilter}`, 20, yPosition);
+          yPosition += 8;
+        } else if (filterType === 'monthly' && monthFilter && yearFilter) {
+          const monthName = new Date(parseInt(yearFilter), parseInt(monthFilter) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          doc.text(`Monthly Filter: ${monthName}`, 20, yPosition);
+          yPosition += 8;
+        } else if (filterType === 'yearly' && yearFilter) {
+          doc.text(`Yearly Filter: ${yearFilter}`, 20, yPosition);
+          yPosition += 8;
+        } else if (filterType === 'range' && startDateFilter && endDateFilter) {
+          doc.text(`Date Range: ${startDateFilter} to ${endDateFilter}`, 20, yPosition);
           yPosition += 8;
         }
 
@@ -189,7 +232,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       // Table headers
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      const headers = ['Date', 'Product', 'Customer', 'Qty', 'Cost Price', 'Sell Price', 'Profit'];
+      const headers = ['Date', 'Product', 'Customer', 'Qty', 'Zoezi', 'Sell Price', 'Ganji'];
       const columnWidths = [25, 35, 30, 15, 25, 25, 25];
       let xPosition = 20;
 
@@ -218,7 +261,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         const profit = (sellingPrice - costPrice) * quantity;
 
         const rowData = [
-          new Date(sale.sale_date).toLocaleDateString('en-GB'),
+          new Date(sale.sale_date || '').toLocaleDateString('en-GB'),
           (sale.product_name || sale.product_id || 'N/A').substring(0, 15),
           (sale.customer_name || 'N/A').substring(0, 12),
           quantity.toString(),
@@ -248,16 +291,27 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       doc.text('Summary:', 20, yPosition);
       yPosition += 8;
 
+      // Calculate filtered stats
+      const filteredTotalSales = filteredSales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
+      const filteredTotalItems = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
+      const filteredTotalGanji = filteredSales.reduce((sum, sale) => {
+        const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+        return sum + ganji;
+      }, 0);
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.text(`Total Sales: ${formatCurrency(totalSales)}`, 25, yPosition);
+      doc.text(`Total Sales: ${formatCurrency(filteredTotalSales)}`, 25, yPosition);
       yPosition += 6;
-      doc.text(`Total Profit: ${formatCurrency(totalGanji)}`, 25, yPosition);
+      doc.text(`Total Profit: ${formatCurrency(filteredTotalGanji)}`, 25, yPosition);
       yPosition += 6;
-      doc.text(`Total Items: ${totalItems}`, 25, yPosition);
+      doc.text(`Total Items: ${filteredTotalItems}`, 25, yPosition);
+      yPosition += 6;
+      doc.text(`Number of Records: ${filteredSales.length}`, 25, yPosition);
 
       // Save the PDF
-      const filename = `sales-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      const filterSuffix = filterType !== 'daily' || dateFilter || productFilter ? `-${filterType}` : '';
+      const filename = `sales-report${filterSuffix}-${new Date().toISOString().split('T')[0]}.pdf`;
       console.log('Saving PDF as:', filename);
       doc.save(filename);
 
@@ -277,14 +331,16 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       const profit = (sellingPrice - costPrice) * quantity;
 
       return {
-        'Date': new Date(sale.sale_date).toLocaleDateString('en-GB'),
+        'Date': new Date(sale.sale_date || '').toLocaleDateString('en-GB'),
         'Product': sale.product_name || sale.product_id || 'N/A',
         'Customer': sale.customer_name || 'N/A',
         'Quantity': quantity,
         'Cost Price': costPrice,
         'Selling Price': sellingPrice,
         'Profit': profit,
-        'Total Amount': Number(sale.total_amount) || 0
+        'Total Amount': Number(sale.total_amount) || 0,
+        'Warranty Months': sale.warranty_months || 0,
+        'Has Warranty': sale.has_warranty ? 'Yes' : 'No'
       };
     });
 
@@ -293,19 +349,82 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sales Data');
 
-    // Add summary sheet
+    // Add summary sheet with filtered data
+    const filteredTotalSales = filteredSales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
+    const filteredTotalItems = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
+    const filteredTotalGanji = filteredSales.reduce((sum, sale) => {
+      const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+      return sum + ganji;
+    }, 0);
+
     const summaryData = [
-      { 'Metric': 'Total Sales', 'Value': totalSales },
-      { 'Metric': 'Total Profit', 'Value': totalGanji },
-      { 'Metric': 'Total Items', 'Value': totalItems },
-      { 'Metric': 'Average Sale', 'Value': averageSale },
-      { 'Metric': 'Number of Sales', 'Value': filteredSales.length }
+      { 'Metric': 'Filter Type', 'Value': filterType },
+      { 'Metric': 'Date Filter', 'Value': filterType === 'daily' ? dateFilter : filterType === 'monthly' ? `${monthFilter}/${yearFilter}` : filterType === 'yearly' ? yearFilter : `${startDateFilter} - ${endDateFilter}` },
+      { 'Metric': 'Product Filter', 'Value': productFilter || 'None' },
+      { 'Metric': 'Total Sales', 'Value': filteredTotalSales },
+      { 'Metric': 'Total Profit', 'Value': filteredTotalGanji },
+      { 'Metric': 'Total Items', 'Value': filteredTotalItems },
+      { 'Metric': 'Average Sale', 'Value': filteredSales.length > 0 ? filteredTotalSales / filteredSales.length : 0 },
+      { 'Metric': 'Number of Sales', 'Value': filteredSales.length },
+      { 'Metric': 'Export Date', 'Value': new Date().toLocaleDateString() }
     ];
     const wsSummary = XLSX.utils.json_to_sheet(summaryData);
     XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
 
-    // Save the file
-    XLSX.writeFile(wb, `sales-report-${new Date().toISOString().split('T')[0]}.xlsx`);
+    // Save the file with filter info in filename
+    const filterSuffix = filterType !== 'daily' || dateFilter || productFilter ? `-${filterType}` : '';
+    XLSX.writeFile(wb, `sales-report${filterSuffix}-${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  // Action handlers
+  const handleViewSale = (sale: Sale) => {
+    setSelectedSale(sale);
+    setViewModalOpen(true);
+  };
+
+  const handleEditSale = (sale: Sale) => {
+    setSelectedSale(sale);
+    setEditModalOpen(true);
+  };
+
+  const handleDeleteSale = async (sale: Sale) => {
+    // TODO: Implement delete sale functionality
+    console.log('Delete sale:', sale);
+    
+    if (window.confirm(`Are you sure you want to delete this sale?\n\nProduct: ${sale.product_name || sale.product_id}\nAmount: TSh ${formatCurrency(sale.total_amount)}\nDate: ${new Date(sale.sale_date || '').toLocaleDateString()}\n\nThis action cannot be undone.`)) {
+      try {
+        setLoading(true);
+        await deleteSale(sale.id);
+        
+        // Remove the sale from local state
+        setMySales(prev => prev.filter(s => s.id !== sale.id));
+        setFilteredSales(prev => prev.filter(s => s.id !== sale.id));
+        
+        alert('Sale deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting sale:', error);
+        alert(`Failed to delete sale: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Modal handlers
+  const handleCloseViewModal = () => {
+    setViewModalOpen(false);
+    setSelectedSale(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedSale(null);
+  };
+
+  const handleSaleUpdated = (updatedSale: Sale) => {
+    // Update the sale in local state
+    setMySales(prev => prev.map(s => s.id === updatedSale.id ? updatedSale : s));
+    setFilteredSales(prev => prev.map(s => s.id === updatedSale.id ? updatedSale : s));
   };
 
   // Sales by product
@@ -327,7 +446,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
             My Sales Dashboard
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-600 dark:text-gray-400 ">
             Track your sales performance and achievements
           </p>
         </div>
@@ -343,63 +462,12 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         )}
       </div>
 
-      {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-4 w-4 md:h-6 md:w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(totalSales)}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 dark:bg-emerald-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(totalGanji)}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{totalItems}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Target className="h-5 w-5 md:h-6 md:w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Sale</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(averageSale)}</p>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
       {/* Monthly Target Progress - Compact */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 md:p-4 lg:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 md:p-4 lg:p-6">
         <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
           <h2 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
             <Target className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
-            Monthly Profit Target Progress
+            Monthly Profit Target
           </h2>
           <div className="flex items-center gap-2">
             <label className="text-xs lg:text-sm text-gray-600 dark:text-gray-400">Target Level:</label>
@@ -476,31 +544,175 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           </div>
         </div>
 
-        {/* Filters - Compact */}
-        <div className="mb-3 lg:mb-4 grid grid-cols-1 md:grid-cols-2 gap-2 lg:gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Filter by Date
-            </label>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+        {/* Enhanced Filters */}
+        <div className="mb-3 lg:mb-4 space-y-3">
+          {/* Filter Type Selector */}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Filter by:</label>
+            <div className="flex flex-wrap gap-1">
+              {[
+                { value: 'daily', label: 'Daily' },
+                { value: 'monthly', label: 'Monthly' },
+                { value: 'yearly', label: 'Yearly' },
+                
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setFilterType(option.value as any)}
+                  className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                    filterType === option.value
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Filter by Product
-            </label>
-            <input
-              type="text"
-              value={productFilter}
-              onChange={(e) => setProductFilter(e.target.value)}
-              placeholder="Search product name..."
-              className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+
+          {/* Dynamic Filter Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
+            {filterType === 'daily' && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Select Date
+                </label>
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            )}
+
+            {filterType === 'monthly' && (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Select Month
+                  </label>
+                  <select
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="">All Months</option>
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const month = (i + 1).toString().padStart(2, '0');
+                      const monthName = new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' });
+                      return (
+                        <option key={month} value={month}>
+                          {monthName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Select Year
+                  </label>
+                  <select
+                    value={yearFilter}
+                    onChange={(e) => setYearFilter(e.target.value)}
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {Array.from({ length: 5 }, (_, i) => {
+                      const year = (new Date().getFullYear() - i).toString();
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {filterType === 'yearly' && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Select Year
+                </label>
+                <select
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  {Array.from({ length: 10 }, (_, i) => {
+                    const year = (new Date().getFullYear() - i).toString();
+                    return (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+
+            {filterType === 'range' && (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={startDateFilter}
+                    onChange={(e) => setStartDateFilter(e.target.value)}
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={endDateFilter}
+                    onChange={(e) => setEndDateFilter(e.target.value)}
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </>
+            )}
+
+            <div className={filterType === 'daily' ? 'md:col-span-1' : ''}>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Filter by Product
+              </label>
+              <input
+                type="text"
+                value={productFilter}
+                onChange={(e) => setProductFilter(e.target.value)}
+                placeholder="Search product name..."
+                className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
           </div>
+
+          {/* Clear Filters Button */}
+          {(dateFilter || monthFilter || yearFilter || startDateFilter || endDateFilter || productFilter) && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setDateFilter('');
+                  setMonthFilter('');
+                  setYearFilter(new Date().getFullYear().toString());
+                  setStartDateFilter('');
+                  setEndDateFilter('');
+                  setProductFilter('');
+                }}
+                className="px-3 py-1 text-xs bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Sales Table */}
@@ -515,9 +727,10 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[70px] lg:min-w-[80px]">Date</th>
                   <th className="text-left py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[100px] lg:min-w-[120px]">Product</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Cost Price</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Selling Price</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[60px] lg:min-w-[80px]">Profit</th>
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Zoezi</th>
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Bei</th>
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[60px] lg:min-w-[80px]">Ganji</th>
+                  <th className="text-center py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[120px] lg:min-w-[140px]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -530,7 +743,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   return (
                     <tr key={sale.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-gray-900 dark:text-white text-xs">
-                        {new Date(sale.sale_date).toLocaleDateString('en-GB')}
+                        {new Date(sale.sale_date || '').toLocaleDateString('en-GB')}
                       </td>
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-gray-900 dark:text-white">
                         <div className="font-medium text-xs lg:text-sm">{sale.product_name || sale.product_id}</div>
@@ -548,6 +761,31 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                       </td>
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-right font-semibold text-green-600 dark:text-green-400 font-mono text-xs lg:text-sm">
                         {formatCurrency(profit)}
+                      </td>
+                      <td className="py-2 px-1 lg:py-3 lg:px-2 text-center">
+                        <div className="flex items-center justify-center space-x-1">
+                          <button
+                            onClick={() => handleViewSale(sale)}
+                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            title="View Sale Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEditSale(sale)}
+                            className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+                            title="Edit Sale"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSale(sale)}
+                            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                            title="Delete Sale"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -636,7 +874,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                 Customer Satisfaction
               </h3>
               <p className="text-xs lg:text-sm text-green-700 dark:text-green-300">
-                {mySales.filter(s => s.warranty_months > 0).length} warranties provided
+                {mySales.filter(s => (s.warranty_months || 0) > 0).length} warranties provided
               </p>
             </div>
 
@@ -692,6 +930,20 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <ViewSaleModal
+        sale={selectedSale}
+        isOpen={viewModalOpen}
+        onClose={handleCloseViewModal}
+      />
+
+      <EditSaleModal
+        sale={selectedSale}
+        isOpen={editModalOpen}
+        onClose={handleCloseEditModal}
+        onSaleUpdated={handleSaleUpdated}
+      />
     </div>
   );
 };

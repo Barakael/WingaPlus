@@ -16,43 +16,33 @@ class WarrantySaleFiled extends Mailable
     use Queueable, SerializesModels;
 
     public $sale;
+    public $warranty;
     public $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Sale $sale)
+    public function __construct(Sale $sale, $warranty = null)
     {
         $this->sale = $sale;
+        $this->warranty = $warranty;
         $this->user = Auth::user();
     }
 
     /**
-     * Get the message envelope.
+     * Build the message.
      */
-    public function envelope(): Envelope
+    public function build()
     {
         $userName = $this->user ? $this->user->name : 'The Connect Store';
-        return new Envelope(
-            subject: "Warranty Filed by {$userName} - {$this->sale->product_name}",
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        $userName = $this->user ? $this->user->name : 'The Connect Store';
+        $productName = $this->warranty ? $this->warranty->phone_name : $this->sale->product_name;
         
-        return new Content(
-            view: 'emails.warranty_filed',
-            with: [
-                'sale' => $this->sale,
-                'warrantyDetails' => $this->sale->warranty_details ?? [],
-                'userName' => $userName,
-            ],
-        );
+        return $this->subject("Warranty Filed by {$userName} - {$productName}")
+                    ->view('emails.warranty_filed')
+                    ->with('sale', $this->sale)
+                    ->with('warranty', $this->warranty)
+                    ->with('warrantyDetails', $this->sale->warranty_details ?? [])
+                    ->with('userName', $userName);
     }
 
     /**

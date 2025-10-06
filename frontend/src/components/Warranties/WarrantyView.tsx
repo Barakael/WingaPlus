@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Shield, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { Shield, CheckCircle, AlertTriangle, Clock, Eye, RefreshCw } from 'lucide-react';
+import ViewWarrantyModal from './ViewWarrantyModal';
 
 interface WarrantyViewProps {
   onFileWarranty: () => void;
@@ -9,6 +10,14 @@ interface WarrantyViewProps {
 const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleForm }) => {
   const [warranties, setWarranties] = useState<any[]>([]);
   const [loadingWarranties, setLoadingWarranties] = useState(true);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Modal states
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedWarranty, setSelectedWarranty] = useState<any>(null);
 
   // Fetch sales that have warranties
   const fetchWarranties = async () => {
@@ -48,6 +57,37 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
   React.useEffect(() => {
     fetchWarranties();
   }, []);
+
+  // Pagination logic
+  const totalPages = Math.ceil(warranties.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedWarranties = warranties.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToPrevious = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+  };
+
+  // Action handlers
+  const handleViewWarranty = (warranty: any) => {
+    setSelectedWarranty(warranty);
+    setViewModalOpen(true);
+  };
+
+  // Modal handlers
+  const handleCloseViewModal = () => {
+    setViewModalOpen(false);
+    setSelectedWarranty(null);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -129,97 +169,162 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Recent Warranties
-        </h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+            <Shield className="h-5 w-5 mr-2" />
+            Warranty Records
+          </h2>
+          <div className="flex space-x-2">
+            <button
+              onClick={fetchWarranties}
+              disabled={loadingWarranties}
+              className="flex items-center px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${loadingWarranties ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+        </div>
 
-        <div className="space-y-4">
+        {/* Warranty Table */}
+        <div className="overflow-x-auto">
           {loadingWarranties ? (
-            <div className="text-center py-8">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Loading warranties...</p>
-            </div>
-          ) : warranties.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-400">No warranties filed yet.</p>
-            </div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">Loading warranties...</div>
+          ) : warranties.length > 0 ? (
+            <table className="w-full text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[80px] sm:min-w-[100px]">Status</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[150px]">Product</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[100px] sm:min-w-[120px]">Customer</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell min-w-[100px]">Phone</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell min-w-[80px]">Color</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell min-w-[80px]">Storage</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[100px]">Expiry Date</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[140px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedWarranties.map((warranty) => (
+                  <tr key={warranty.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white">
+                      <div className="flex items-center space-x-2">
+                        {getStatusIcon(warranty.status || 'active')}
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(warranty.status || 'active')}`}>
+                          {warranty.status ? warranty.status.replace('_', ' ') : 'Active'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white">
+                      <div className="font-medium text-sm">{warranty.phone_name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {warranty.warranty_months ? `${warranty.warranty_months} months` : 'N/A'}
+                      </div>
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white">
+                      <div className="font-medium text-sm">{warranty.customer_name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{warranty.store_name}</div>
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden sm:table-cell">
+                      {warranty.customer_phone}
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden md:table-cell">
+                      {warranty.color || 'N/A'}
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden lg:table-cell">
+                      {warranty.storage || 'N/A'}
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden xl:table-cell">
+                      <div className="text-sm">
+                        {warranty.expiry_date ? new Date(warranty.expiry_date).toLocaleDateString() : 'N/A'}
+                      </div>
+                      {warranty.expiry_date && (
+                        <div className={`text-xs font-medium ${getDaysRemainingColor(warranty.expiry_date)}`}>
+                          {getDaysRemaining(warranty.expiry_date)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => handleViewWarranty(warranty)}
+                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          title="View Warranty Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
-            warranties.map((warranty) => (
-              <div key={warranty.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    {getStatusIcon(warranty.status || 'active')}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        Warranty #{warranty.id}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {warranty.phone_name}
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(warranty.status || 'active')}`}>
-                    {warranty.status ? warranty.status.replace('_', ' ') : 'Active'}
-                  </span>
-                </div>
+            <div className="text-center py-8">
+              <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">
+                No warranties filed yet
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                Start by filing your first warranty claim
+              </p>
+            </div>
+          )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Customer:</span>
-                    <span className="ml-2 text-gray-900 dark:text-white">{warranty.customer_name}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Phone:</span>
-                    <span className="ml-2 text-gray-900 dark:text-white">{warranty.customer_phone}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Color:</span>
-                    <span className="ml-2 text-gray-900 dark:text-white">{warranty.color}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Storage:</span>
-                    <span className="ml-2 text-gray-900 dark:text-white">{warranty.storage}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Store:</span>
-                    <span className="ml-2 text-gray-900 dark:text-white">{warranty.store_name}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Expiry Date:</span>
-                    <span className="ml-2 text-gray-900 dark:text-white">{new Date(warranty.expiry_date).toLocaleDateString()}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Days Remaining:</span>
-                    <span className={`ml-2 font-medium ${getDaysRemainingColor(warranty.expiry_date)}`}>
-                      {getDaysRemaining(warranty.expiry_date)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    Filed on {new Date(warranty.created_at).toLocaleDateString()}
-                  </div>
-                  {/* {openSaleForm && (
-                    <button
-                      onClick={() => openSaleForm({
-                        customer_name: warranty.customer_name,
-                        customer_phone: warranty.customer_phone,
-                        warranty_months: 12,
-                        // Map to product if possible; placeholder product_id left undefined
-                      })}
-                      className="text-xs bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-md hover:from-green-600 hover:to-emerald-700 transition-colors"
-                    >
-                      Create Sale
-                    </button>
-                  )} */}
-                </div>
+          {/* Pagination Controls */}
+          {warranties.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4 px-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Showing {startIndex + 1} to {Math.min(endIndex, warranties.length)} of {warranties.length} warranties
               </div>
-            ))
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={goToPrevious}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                  if (pageNum > totalPages) return null;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      className={`px-3 py-1 text-sm rounded-md ${
+                        currentPage === pageNum
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={goToNext}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <ViewWarrantyModal
+        warranty={selectedWarranty}
+        isOpen={viewModalOpen}
+        onClose={handleCloseViewModal}
+      />
     </div>
   );
 };

@@ -16,42 +16,44 @@ class WarrantyFiled extends Mailable
     use Queueable, SerializesModels;
 
     public $warranty;
+    public $sale;
     public $user;
+    public $userName;
+    public $warrantyDetails;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Warranty $warranty)
+    public function __construct(Warranty $warranty, $sale = null)
     {
         $this->warranty = $warranty;
+        $this->sale = $sale ?? (object) [
+            'customer_name' => $warranty->customer_name,
+            'product_name' => $warranty->phone_name,
+            'created_at' => $warranty->created_at,
+            'warranty_months' => $warranty->warranty_period,
+            'warranty_end' => $warranty->expiry_date,
+        ];
         $this->user = Auth::user();
+        $this->userName = $this->user ? $this->user->name : 'The Connect Store';
+        $this->warrantyDetails = [
+            'imei_number' => $this->warranty->imei_number,
+            'color' => $this->warranty->color,
+            'storage' => $this->warranty->storage,
+        ];
     }
 
     /**
-     * Get the message envelope.
+     * Build the message.
      */
-    public function envelope(): Envelope
+    public function build()
     {
-        $userName = $this->user ? $this->user->name : 'The Connect Store';
-        return new Envelope(
-            subject: "Warranty Filed by {$userName} - {$this->warranty->phone_name}",
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        $userName = $this->user ? $this->user->name : 'The Connect Store';
-        
-        return new Content(
-            view: 'emails.warranty_filed',
-            with: [
-                'warranty' => $this->warranty,
-                'userName' => $userName,
-            ],
-        );
+        return $this->subject("Warranty Filed by {$this->userName} - {$this->warranty->phone_name}")
+                    ->view('emails.warranty_filed')
+                    ->with('warranty', $this->warranty)
+                    ->with('sale', $this->sale)
+                    ->with('warrantyDetails', $this->warrantyDetails)
+                    ->with('userName', $this->userName);
     }
 
     /**

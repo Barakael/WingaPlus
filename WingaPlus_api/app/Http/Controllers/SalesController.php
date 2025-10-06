@@ -84,7 +84,19 @@ class SalesController extends BaseController
             // Send warranty email if sale has warranty
             if ($hasWarranty && !empty($validated['warranty_details']['customer_email'] ?? null)) {
                 try {
-                    Mail::to($validated['warranty_details']['customer_email'])->send(new WarrantySaleFiled($sale));
+                    // Create a mock warranty object from sale data for email template
+                    $mockWarranty = (object) [
+                        'phone_name' => $validated['phone_name'] ?? $validated['product_name'] ?? '',
+                        'customer_name' => $validated['customer_name'] ?? '',
+                        'customer_email' => $validated['warranty_details']['customer_email'] ?? '',
+                        'customer_phone' => $validated['customer_phone'] ?? '',
+                        'color' => $validated['color'] ?? '',
+                        'storage' => $validated['storage'] ?? '',
+                        'imei_number' => $validated['imei'] ?? $validated['warranty_details']['imei_number'] ?? '',
+                        'price' => $validated['selling_price'] ?? $validated['unit_price'] ?? 0,
+                    ];
+                    
+                    Mail::to($validated['warranty_details']['customer_email'])->send(new WarrantySaleFiled($sale, $mockWarranty));
                 } catch (\Exception $e) {
                     // Log email error but don't fail the sale
                     \Log::error('Failed to send warranty email: ' . $e->getMessage());

@@ -54,11 +54,25 @@ export async function listSales(params: { salesman_id?: string; date_from?: stri
   return data.data.data;
 }
 
-export async function getSale(id: string | number): Promise<Sale> {
+export async function updateSale(id: string | number, payload: Partial<CreateSalePayload>): Promise<Sale> {
   const res = await fetch(`${API_BASE}/sales/${id}`, {
-    headers: { 'Accept': 'application/json' },
-    credentials: 'include'
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
   });
   const data = await handleResponse<{ data: Sale }>(res);
   return data.data;
+}
+
+export async function deleteSale(id: string | number): Promise<void> {
+  const res = await fetch(`${API_BASE}/sales/${id}`, {
+    method: 'DELETE',
+    headers: { 'Accept': 'application/json' },
+    credentials: 'include'
+  });
+  await handleResponse<void>(res);
 }

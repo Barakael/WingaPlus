@@ -48,7 +48,16 @@ export interface Sale {
   ganji?: number | null; // New: profit = (unit_price - cost_price) * quantity
   warranty_id?: string | null; // Links back to warranty if auto-created
   warranty_months?: number; // Might be present for historical data
+  warranty_details?: any; // Warranty details object
+  warranty_status?: string; // Warranty status
+  has_warranty?: boolean; // Whether sale has warranty
   sale_date?: string; // Optional; backend may default
+  color?: string; // Product color
+  storage?: string; // Product storage capacity
+  imei?: string; // IMEI number for phones
+  phone_name?: string; // Phone model name
+  reference_store?: string; // Reference store
+  category?: string; // Product category
   created_at?: string;
   updated_at?: string;
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Warranty;
 use App\Models\Sale;
-use App\Mail\WarrantyFiled;
+use App\Mail\WarrantySaleFiled;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 
@@ -43,6 +43,19 @@ class WarrantyController extends Controller
                 'unit_price' => $warranty->price,
                 'total_amount' => $warranty->price, // quantity * unit_price
                 'warranty_months' => $warranty->warranty_period,
+                'warranty_end' => $warranty->expiry_date,
+                'warranty_details' => [
+                    'phone_name' => $warranty->phone_name,
+                    'customer_email' => $warranty->customer_email,
+                    'customer_name' => $warranty->customer_name,
+                    'customer_phone' => $warranty->customer_phone,
+                    'color' => $warranty->color,
+                    'storage' => $warranty->storage,
+                    'imei_number' => $warranty->imei_number,
+                    'price' => $warranty->price,
+                    'selling_price' => $warranty->price,
+                    'cost_price' => 0, // Not available in warranty
+                ],
                 'sale_date' => now(),
             ];
 
@@ -55,7 +68,7 @@ class WarrantyController extends Controller
 
         // Send email after transaction succeeds
         try {
-            Mail::to($warranty->customer_email)->send(new WarrantyFiled($warranty));
+            Mail::to($warranty->customer_email)->send(new WarrantySaleFiled($sale, $warranty));
         } catch (\Exception $e) {
             // Log email error but don't fail the warranty creation
             \Log::error('Failed to send warranty email: ' . $e->getMessage());
