@@ -4,9 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import LoginForm from './components/Auth/LoginForm';
 import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
-import QRScanner from './components/QRCode/QRScanner';
-import QRCodeGenerator from './components/QRCode/QRCodeGenerator';
-import ProductSelectionModal from './components/QRCode/ProductSelectionModal';
+// QR-related components removed (scanner, generator, product selection) as sales no longer depend on QR codes
 import SaleForm from './components/Sales/SaleForm';
 import SalesReport from './components/Sales/SalesReport';
 import WarrantyFiling from './components/Warranties/WarrantyFiling';
@@ -14,6 +12,9 @@ import WarrantyView from './components/Warranties/WarrantyView';
 import Reports from './components/Reports/Reports';
 import SalesmanSales from './components/Sales/SalesmanSales';
 import ProductManagement from './components/Products/ProductManagement';
+import SalesOrders from './components/Sales/SalesOrders';
+import CommissionTracking from './components/Sales/CommissionTracking';
+import TargetManagement from './components/Sales/TargetManagement';
 
 // Placeholder components for missing pages
 const ShopsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Shops Management</h1><p>Coming soon...</p></div>;
@@ -25,28 +26,24 @@ const StockMovementsPage = () => <div className="p-6"><h1 className="text-2xl fo
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [scannedQR, setScannedQR] = useState<string | null>(null);
+  // Generic Sale Form control (decoupled from QR scanning)
   const [showSaleForm, setShowSaleForm] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [showProductSelection, setShowProductSelection] = useState(false);
+  const [salePrefill, setSalePrefill] = useState<any>(null);
 
-  const handleQRScan = (qrCode: string) => {
-    setScannedQR(qrCode);
-    setShowProductSelection(true);
-  };
+  // Removed QR-specific state & handlers
 
-  const handleProductSelect = (product: any) => {
-    setSelectedProduct(product);
-    setShowProductSelection(false);
+  // New generic opening function to be passed to pages
+  const openSaleForm = (prefill?: any) => {
+    setSalePrefill(prefill || null);
     setShowSaleForm(true);
   };
 
   const handleSaleComplete = (saleData: any) => {
     console.log('Sale completed:', saleData);
     setShowSaleForm(false);
-    setScannedQR(null);
-    // Here you would typically save the sale to your database
-    alert('Sale completed successfully!');
+    setSalePrefill(null);
+    // Refresh the page to show updated sales data
+    window.location.reload();
   };
 
   if (loading) {
@@ -67,9 +64,8 @@ const AppContent: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />;
-      case 'qr-scanner':
-        return <QRScanner onScan={handleQRScan} />;
+        return <Dashboard onTabChange={setActiveTab} />;
+      // 'qr-scanner' route removed
       case 'shops':
         return <ShopsPage />;
       case 'users':
@@ -77,13 +73,13 @@ const AppContent: React.FC = () => {
       case 'products':
         return <ProductManagement />;
       case 'categories':
-        return <QRCodeGenerator />;
+        return <div className="p-6"><h1 className="text-2xl font-bold">Categories (QR Disabled)</h1><p>QR generation has been disabled.</p></div>;
       case 'sales':
         return <SalesReport />;
       case 'staff':
         return <StaffPage />;
       case 'warranties':
-        return <WarrantyView onFileWarranty={() => setActiveTab('file-warranty')} />;
+        return <WarrantyView onFileWarranty={() => setActiveTab('file-warranty')} openSaleForm={openSaleForm} />;
       case 'file-warranty':
         return <WarrantyFiling onBack={() => setActiveTab('warranties')} />;
       case 'reports':
@@ -93,7 +89,13 @@ const AppContent: React.FC = () => {
       case 'stock-movements':
         return <StockMovementsPage />;
       case 'my-sales':
-        return <SalesmanSales />;
+        return <SalesmanSales openSaleForm={openSaleForm} />;
+      case 'sales-orders':
+        return <SalesOrders openSaleForm={openSaleForm} />;
+      case 'commissions':
+        return <CommissionTracking />;
+      case 'targets':
+        return <TargetManagement />;
       default:
         return <Dashboard />;
     }
@@ -103,30 +105,18 @@ const AppContent: React.FC = () => {
     <Layout activeTab={activeTab} onTabChange={setActiveTab}>
       {renderContent()}
       
-      {showSaleForm && scannedQR && selectedProduct && (
+      {showSaleForm && (
         <SaleForm
-          qrCode={scannedQR}
-          selectedProduct={selectedProduct}
+          prefill={salePrefill}
           onClose={() => {
             setShowSaleForm(false);
-            setScannedQR(null);
-            setSelectedProduct(null);
+            setSalePrefill(null);
           }}
           onSale={handleSaleComplete}
         />
       )}
 
-      {showProductSelection && scannedQR && (
-        <ProductSelectionModal
-          isOpen={showProductSelection}
-          qrCode={scannedQR}
-          onProductSelect={handleProductSelect}
-          onClose={() => {
-            setShowProductSelection(false);
-            setScannedQR(null);
-          }}
-        />
-      )}
+      {/* QR product selection modal removed */}
     </Layout>
   );
 };

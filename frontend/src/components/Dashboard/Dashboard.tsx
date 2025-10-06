@@ -5,7 +5,11 @@ import ShopOwnerDashboard from './ShopOwnerDashboard';
 import SalesmanDashboard from './SalesmanDashboard';
 import StorekeeperDashboard from './StorekeeperDashboard';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onTabChange?: (tab: string) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const { user } = useAuth();
 
   if (!user) return null;
@@ -16,7 +20,7 @@ const Dashboard: React.FC = () => {
     case 'shop_owner':
       return <ShopOwnerDashboard />;
     case 'salesman':
-      return <SalesmanDashboard />;
+      return <SalesmanDashboard onTabChange={onTabChange} />;
     case 'storekeeper':
       return <StorekeeperDashboard />;
     default:
