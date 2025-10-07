@@ -64,11 +64,11 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-4 w-4 md:h-6 md:w-6 text-green-600 dark:text-green-400" />
+              <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-green-600 dark:text-green-400" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(totalSales)}</p>
+              <p className="text-sm md:text-md font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Tsh {formatCurrency(totalSales)}</p>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(totalGanji)}</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh <br></br> {formatCurrency(totalGanji)}</p>
             </div>
           </div>
         </div>
@@ -91,7 +91,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items <br /> Sold</p>
               <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{totalItems}</p>
             </div>
           </div>
@@ -104,7 +104,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Sale</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(averageSale)}</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh <br></br> {formatCurrency(averageSale)}</p>
             </div>
           </div>
         </div>
