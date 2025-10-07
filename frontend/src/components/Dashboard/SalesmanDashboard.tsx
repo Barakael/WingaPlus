@@ -155,15 +155,15 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <Clock className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">Orders</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Manage quotes & drafts</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Warranties</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage warranties & claims</p>
             </div>
           </div>
           <button 
-            onClick={() => onTabChange?.('sales-orders')}
+            onClick={() => onTabChange?.('warranties')}
             className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition-all duration-200 text-sm"
           >
-            View Orders
+            View Warranties
           </button>
         </div>
       </div>
