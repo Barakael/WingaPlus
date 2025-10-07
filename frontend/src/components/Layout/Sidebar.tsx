@@ -9,9 +9,9 @@ import {
   Shield,
   Warehouse,
   X,
-  FileText,
   DollarSign,
-  Target
+  Target,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -37,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           { id: 'shops', label: 'Shops', icon: Store },
           { id: 'users', label: 'Users', icon: Users },
           { id: 'reports', label: 'Reports', icon: BarChart3 },
+          { id: 'settings', label: 'Settings', icon: Settings },
         ];
       case 'shop_owner':
         return [
@@ -47,15 +48,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           { id: 'staff', label: 'Staff', icon: Users },
           { id: 'warranties', label: 'Warranties', icon: Shield },
           { id: 'reports', label: 'Reports', icon: BarChart3 },
+          { id: 'settings', label: 'Settings', icon: Settings },
         ];
       case 'salesman':
         return [
           ...baseItems,
           { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
-          { id: 'sales-orders', label: 'Sales Orders', icon: FileText },
-          { id: 'commissions', label: 'Commissions', icon: DollarSign },
+          // { id: 'sales-orders', label: 'Sales Orders', icon: FileText },
+          { id: 'commissions', label: 'Ganji', icon: DollarSign },
           { id: 'targets', label: 'Targets', icon: Target },
           { id: 'warranties', label: 'Warranties', icon: Shield },
+          { id: 'settings', label: 'Settings', icon: Settings },
         ];
       case 'storekeeper':
         return [
@@ -63,6 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           { id: 'inventory', label: 'Inventory', icon: Warehouse },
           { id: 'products', label: 'Products', icon: Package },
           { id: 'stock-movements', label: 'Stock Movements', icon: BarChart3 },
+          { id: 'settings', label: 'Settings', icon: Settings },
         ];
       default:
         return baseItems;
@@ -93,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
       >
         {/* Mobile header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700 lg:hidden">
-          <span className="text-lg font-semibold text-gray-900 dark:text-white">Menu</span>
+          <span className=" ml-10 text-lg font-semibold text-gray-900 dark:text-white ">Menu</span>
           <button
             onClick={onClose}
             aria-label="Close sidebar"
@@ -103,7 +107,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           </button>
         </div>
 
-        <nav className="mt-8 px-4 overflow-y-auto flex-1 pb-4" aria-label="Main navigation">
+      
+
+        <nav className="mt-4 px-6 overflow-y-auto flex-1 pb-4" aria-label="Main navigation">
           <ul className="space-y-2">
             {menuItems.map(item => {
               const Icon = item.icon;
