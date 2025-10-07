@@ -15,6 +15,7 @@ import ProductManagement from './components/Products/ProductManagement';
 import SalesOrders from './components/Sales/SalesOrders';
 import CommissionTracking from './components/Sales/CommissionTracking';
 import TargetManagement from './components/Sales/TargetManagement';
+import Settings from './components/Common/Settings';
 
 // Placeholder components for missing pages
 const ShopsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Shops Management</h1><p>Coming soon...</p></div>;
@@ -33,17 +34,23 @@ const AppContent: React.FC = () => {
   // Removed QR-specific state & handlers
 
   // New generic opening function to be passed to pages
-  const openSaleForm = (prefill?: any) => {
+  const openSaleForm = (prefill?: any, onComplete?: () => void) => {
     setSalePrefill(prefill || null);
     setShowSaleForm(true);
+    // Store the completion callback
+    (window as any).saleCompleteCallback = onComplete;
   };
 
   const handleSaleComplete = (saleData: any) => {
     console.log('Sale completed:', saleData);
     setShowSaleForm(false);
     setSalePrefill(null);
-    // Refresh the page to show updated sales data
-    window.location.reload();
+    
+    // Call the completion callback if provided, otherwise just close the modal
+    if ((window as any).saleCompleteCallback) {
+      (window as any).saleCompleteCallback();
+      (window as any).saleCompleteCallback = null;
+    }
   };
 
   if (loading) {
@@ -96,6 +103,8 @@ const AppContent: React.FC = () => {
         return <CommissionTracking />;
       case 'targets':
         return <TargetManagement />;
+      case 'settings':
+        return <Settings />;
       default:
         return <Dashboard />;
     }
