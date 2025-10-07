@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Shield, User, Phone, Mail, DollarSign, HardDrive, Smartphone } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { BASE_URL } from '../api/api';
 import SuccessModal from './SuccessModal';
 
 const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const { user } = useAuth();
   const [warrantyPeriod, setWarrantyPeriod] = useState('');
   const [phoneName, setPhoneName] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -16,6 +19,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submittedWarranty, setSubmittedWarranty] = useState<any>(null);
+  const [storeName, setStoreName] = useState('');
 
   const totalAmount = parseFloat(unitPriceInput) || 0;
   const costPrice = parseFloat(costPriceInput) || 0;
@@ -33,7 +37,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/sales', {
+      const response = await fetch(`${BASE_URL}/sales`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +52,9 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           cost_price: parseFloat(costPriceInput) || 0,
           sale_date: new Date().toISOString(),
           customer_name: customerName,
-          salesman_id: 1, // Mock user ID
+          customer_phone: customerPhone,
+          reference_store: storeName,
+          salesman_id: user?.id || 1, // Use authenticated user ID
           // phone-specific fields (required by validation)
           phone_name: phoneName,
           imei: imeiNumber,
@@ -125,6 +131,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       setCustomerName('');
       setCustomerEmail('');
       setCustomerPhone('');
+      setStoreName('');
       setColor('');
       setStorage('');
       setCostPriceInput('0');
@@ -172,8 +179,8 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
           {/* Main Form Grid */}
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Customer Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Customer Information - 2x2 Grid */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   <User className="inline h-3 w-3 mr-1" />
@@ -200,13 +207,10 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   required
                 />
               </div>
-            </div>
-{/* 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   <Phone className="inline h-3 w-3 mr-1" />
-                  Customer Phone
+                  Phone Number
                 </label>
                 <input
                   type="tel"
@@ -218,7 +222,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  🏪 Store Name
+                  🏪 Reference Store
                 </label>
                 <input
                   type="text"
@@ -229,7 +233,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   required
                 />
               </div>
-            </div> */}
+            </div>
 
             {/* Phone Details - Compact Grid */}
             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -380,7 +384,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !phoneName || !customerName || !customerEmail || !color || !storage || !costPriceInput || !unitPriceInput || !imeiNumber || !warrantyPeriod}
+                disabled={isSubmitting || !phoneName || !customerName || !customerEmail || !customerPhone || !storeName || !color || !storage || !costPriceInput || !unitPriceInput || !imeiNumber || !warrantyPeriod}
                 className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
               >
                 {isSubmitting ? (

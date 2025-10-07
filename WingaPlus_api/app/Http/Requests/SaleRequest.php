@@ -22,7 +22,7 @@ class SaleRequest extends FormRequest
             'customer_phone' => 'nullable|string|max:50',
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric|min:0',
-            'selling_price' => 'required|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
             'warranty_months' => 'nullable|integer|min:0',
             'has_warranty' => 'sometimes|boolean',

@@ -16,8 +16,15 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\Cors::class,
         ]);
 
+        $middleware->alias([
+            'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'api/warranties',
+            'api/login',
+            'api/logout',
+            'sanctum/csrf-cookie',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

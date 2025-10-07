@@ -28,7 +28,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl h-[95vh] sm:h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] sm:h-[70vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
@@ -48,7 +48,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
         {/* Content */}
         <div className="p-3 sm:p-6">
           {/* Sale ID and Date */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1 pb-1 border-b border-gray-200 dark:border-gray-700">
             {/* <div className="mb-2 sm:mb-0">
               <span className="text-sm text-gray-600 dark:text-gray-400">Sale ID:</span>
               <span className="ml-2 font-mono text-gray-900 dark:text-white">#{sale.id}</span>
@@ -65,7 +65,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
           </div>
 
           {/* Product and Customer Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
            
 
             <div>
@@ -80,36 +80,36 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
           </div>
 
           {/* Financial Information */}
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-1 mb-1">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 flex items-center">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg ">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white  flex items-center">
               <DollarSign className="h-4 w-4 mr-2 text-green-600 dark:text-green-400" />
               Financial Details
             </h3>
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 mt-2 p-2 sm:p-4">
               <div className="text-center">
-                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Cost Price</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Cost Price</div>
                 <div className="text-sm font-bold text-gray-900 dark:text-white">
                   TSh {formatCurrency(costPrice)}
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Selling Price</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 ">Selling Price</div>
                 <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
                   TSh {formatCurrency(sellingPrice)}
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Profit</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 ">Profit</div>
                 <div className="text-sm font-bold text-green-600 dark:text-green-400">
                   TSh {formatCurrency(profit)}
                 </div>
               </div>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+            <div className=" border-t border-gray-200 dark:border-gray-600">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Amount</span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
@@ -151,7 +151,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
                 )}
 
                 {sale.imei && (
-                  <div className="col-span-1 sm:col-span-2 flex justify-between items-center border-t border-gray-200 dark:border-gray-600 mt-2 pt-2">
+                  <div className="col-span-1 sm:col-span-1 flex justify-between items-center border-t border-gray-200 dark:border-gray-600 ">
                     <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">IMEI:</span>
                     <span className="text-sm text-gray-900 dark:text-white font-mono font-medium">{sale.imei}</span>
                   </div>

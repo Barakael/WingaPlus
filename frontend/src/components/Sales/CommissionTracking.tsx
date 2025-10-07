@@ -1,9 +1,9 @@
 ﻿import React, { useEffect, useState, useCallback } from 'react';
 import { TrendingUp, DollarSign, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, BarChart3 } from 'lucide-react';
-import { listSales } from '../../services/sales';
+import { listSales, listTargets, Target as TargetType } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
 import { Sale } from '../../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
@@ -22,9 +22,9 @@ interface PerformanceStats {
   totalTransactions: number;
   averageGanji: number;
   bestPeriod: string;
-  monthlyTarget: number;
   currentPeriodProgress: number;
   periodType: 'weekly' | 'monthly';
+  targetMetric: string;
 }
 
 const CommissionTracking: React.FC = () => {
@@ -37,6 +37,10 @@ const CommissionTracking: React.FC = () => {
   const [periodType, setPeriodType] = useState<'weekly' | 'monthly'>('monthly');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+  // Target selection
+  const [targets, setTargets] = useState<TargetType[]>([]);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>('');
+
   // Analytics data
   const [periodData, setPeriodData] = useState<PeriodData[]>([]);
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats>({
@@ -46,19 +50,35 @@ const CommissionTracking: React.FC = () => {
     totalTransactions: 0,
     averageGanji: 0,
     bestPeriod: '',
-    monthlyTarget: 200000, // Default target
     currentPeriodProgress: 0,
-    periodType: 'monthly'
+    periodType: 'monthly',
+    targetMetric: 'profit'
   });
 
-  // Helper function to format currency
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-TZ', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+  // Load targets data for current user
+  const loadTargetsData = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const data = await listTargets({ salesman_id: String(user.id) });
+      setTargets(data);
+      // Set default target if none selected
+      if (!selectedTargetId && data.length > 0) {
+        const savedTargetId = localStorage.getItem(`commission_selected_target_${user.id}`);
+        if (savedTargetId && data.find(t => String(t.id) === savedTargetId)) {
+          setSelectedTargetId(savedTargetId);
+        } else {
+          // Default to first active target
+          const defaultTarget = data.find(t => t.status === 'active');
+          if (defaultTarget) {
+            setSelectedTargetId(String(defaultTarget.id));
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load targets:', e);
+    }
+  }, [user, selectedTargetId]);
 
   // Load sales data for current user
   const loadSalesData = useCallback(async () => {
@@ -76,14 +96,46 @@ const CommissionTracking: React.FC = () => {
     }
   }, [user]);
 
+  // Helper function to format currency
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-TZ', {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
   // Calculate period data
   const calculatePeriodData = useCallback(() => {
     if (!sales.length) return;
 
+    const selectedTarget = targets.find(target => String(target.id) === selectedTargetId);
+    const targetValue = selectedTarget ? selectedTarget.target_value : 200000; // Default fallback
+    const targetMetric = selectedTarget?.metric || 'profit';
+
+    // For monthly chart, show all 12 months of the selected year
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
     const periods: Record<string, PeriodData> = {};
+
+    // Initialize all months with zero values
+    months.forEach(month => {
+      periods[`${month} ${selectedYear}`] = {
+        period: month,
+        ganji: 0,
+        sales: 0,
+        items: 0,
+        transactions: 0
+      };
+    });
 
     sales.forEach(sale => {
       const saleDate = new Date(sale.sale_date || '');
+      if (saleDate.getFullYear() !== selectedYear) return; // Only include sales from selected year
+
       let periodKey: string;
 
       if (periodType === 'weekly') {
@@ -114,16 +166,40 @@ const CommissionTracking: React.FC = () => {
       periods[periodKey].transactions += 1;
     });
 
-    // Convert to array and sort by period
-    const periodArray = Object.values(periods).sort((a, b) => {
-      // Simple string comparison for now - could be improved with proper date parsing
-      return a.period.localeCompare(b.period);
-    });
-
-    // Filter to show only the last 4 months for monthly view
-    let filteredPeriodArray = periodArray;
+    // Convert to array and sort by month order
+    let periodArray: PeriodData[];
     if (periodType === 'monthly') {
-      filteredPeriodArray = periodArray.slice(-4); // Get last 4 months
+      // For monthly view, show all 12 months in order
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth(); // 0-based
+      const currentYear = currentDate.getFullYear();
+      
+      periodArray = months.map((month, index) => {
+        const monthData = periods[`${month} ${selectedYear}`];
+        // Only show data for months that have passed or current month
+        // For past years, show all months
+        // For current year, only show up to current month
+        if (selectedYear < currentYear) {
+          return monthData;
+        } else if (selectedYear === currentYear) {
+          // For current year, only show months up to current month
+          return index <= currentMonth ? monthData : { ...monthData, ganji: 0, sales: 0, items: 0, transactions: 0 };
+        } else {
+          // Future years - show all as zero
+          return { ...monthData, ganji: 0, sales: 0, items: 0, transactions: 0 };
+        }
+      });
+    } else {
+      // For weekly view, sort by period
+      periodArray = Object.values(periods).sort((a, b) => {
+        return a.period.localeCompare(b.period);
+      });
+    }
+
+    // Filter to show only the last 4 months for weekly view
+    let filteredPeriodArray = periodArray;
+    if (periodType === 'weekly') {
+      filteredPeriodArray = periodArray.slice(-4); // Get last 4 weeks
     }
 
     setPeriodData(filteredPeriodArray);
@@ -138,24 +214,28 @@ const CommissionTracking: React.FC = () => {
       current.ganji > best.ganji ? current : best, filteredPeriodArray[0] || { period: '' }
     );
 
-    // Calculate current period progress
+    // Calculate current period progress based on target metric
     const currentDate = new Date();
-    let currentPeriodGanji = 0;
+    let currentPeriodValue = 0;
+    let currentPeriodKey = '';
 
     if (periodType === 'monthly') {
       const currentMonth = currentDate.toLocaleDateString('en-US', { month: 'long' });
-      const currentPeriodKey = `${currentMonth} ${currentDate.getFullYear()}`;
-      currentPeriodGanji = periods[currentPeriodKey]?.ganji || 0;
+      currentPeriodKey = `${currentMonth} ${currentDate.getFullYear()}`;
     } else {
       // Weekly calculation
       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
       const weekNumber = Math.ceil(((currentDate.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
-      const currentPeriodKey = `Week ${weekNumber}, ${currentDate.getFullYear()}`;
-      currentPeriodGanji = periods[currentPeriodKey]?.ganji || 0;
+      currentPeriodKey = `Week ${weekNumber}, ${currentDate.getFullYear()}`;
     }
 
-    const currentPeriodProgress = performanceStats.monthlyTarget > 0 ?
-      (currentPeriodGanji / performanceStats.monthlyTarget) * 100 : 0;
+    const currentPeriodData = periods[currentPeriodKey];
+    if (currentPeriodData) {
+      currentPeriodValue = targetMetric === 'profit' ? currentPeriodData.ganji : currentPeriodData.items;
+    }
+
+    const currentPeriodProgress = targetValue > 0 ?
+      (currentPeriodValue / targetValue) * 100 : 0;
 
     setPerformanceStats({
       totalGanji,
@@ -164,15 +244,19 @@ const CommissionTracking: React.FC = () => {
       totalTransactions,
       averageGanji: totalTransactions > 0 ? totalGanji / totalTransactions : 0,
       bestPeriod: bestPeriod?.period || '',
-      monthlyTarget: performanceStats.monthlyTarget,
       currentPeriodProgress,
-      periodType
+      periodType,
+      targetMetric
     });
-  }, [sales, periodType, performanceStats.monthlyTarget]);
+  }, [sales, periodType, targets, selectedTargetId, selectedYear]);
 
   useEffect(() => {
     loadSalesData();
   }, [loadSalesData]);
+
+  useEffect(() => {
+    loadTargetsData();
+  }, [loadTargetsData]);
 
   useEffect(() => {
     calculatePeriodData();
@@ -181,6 +265,7 @@ const CommissionTracking: React.FC = () => {
   // Export functions
   const exportToPDF = () => {
     try {
+      const selectedTarget = targets.find(target => String(target.id) === selectedTargetId);
       const doc = new jsPDF();
 
       // Title
@@ -215,7 +300,7 @@ const CommissionTracking: React.FC = () => {
       yPosition += 6;
       doc.text(`Best ${periodType === 'monthly' ? 'Month' : 'Week'}: ${performanceStats.bestPeriod}`, 25, yPosition);
       yPosition += 6;
-      doc.text(`Monthly Target: ${formatCurrency(performanceStats.monthlyTarget)}`, 25, yPosition);
+      doc.text(`Monthly Target: ${selectedTarget ? `${selectedTarget.name} - ${selectedTarget.metric === 'profit' ? 'TSh ' + formatCurrency(selectedTarget.target_value) : selectedTarget.target_value + ' items'} (${selectedTarget.period})` : 'No target selected'}`, 25, yPosition);
       yPosition += 15;
 
       // Table
@@ -273,6 +358,7 @@ const CommissionTracking: React.FC = () => {
   };
 
   const exportToExcel = () => {
+    const selectedTarget = targets.find(target => String(target.id) === selectedTargetId);
     const excelData = periodData.map(period => ({
       'Period': period.period,
       'Profit (Ganji)': period.ganji,
@@ -302,8 +388,8 @@ const CommissionTracking: React.FC = () => {
       'Metric': `Best ${periodType === 'monthly' ? 'Month' : 'Week'}`,
       'Value': performanceStats.bestPeriod
     }, {
-      'Metric': 'Monthly Target',
-      'Value': performanceStats.monthlyTarget
+      'Metric': 'Target',
+      'Value': selectedTarget ? `${selectedTarget.name} - ${selectedTarget.metric === 'profit' ? 'TSh ' + formatCurrency(selectedTarget.target_value) : selectedTarget.target_value + ' items'} (${selectedTarget.period})` : 'No target selected'
     }, {
       'Metric': 'Current Period Progress (%)',
       'Value': performanceStats.currentPeriodProgress.toFixed(1)
@@ -314,6 +400,8 @@ const CommissionTracking: React.FC = () => {
 
     XLSX.writeFile(wb, `commission-report-${user?.name || 'salesman'}-${new Date().toISOString().split('T')[0]}.xlsx`);
   };
+
+  const selectedTarget = targets.find(target => String(target.id) === selectedTargetId);
 
   return (
     <div className="space-y-6">
@@ -354,21 +442,21 @@ const CommissionTracking: React.FC = () => {
       </div>
 
       {/* Controls */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 flex items-center">
           <Calendar className="h-5 w-5 mr-2" />
           View Settings
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-1">
               Period Type
             </label>
             <select
               value={periodType}
               onChange={(e) => setPeriodType(e.target.value as 'weekly' | 'monthly')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
@@ -376,13 +464,13 @@ const CommissionTracking: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-1">
               Year
             </label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {Array.from({ length: 5 }, (_, i) => (
                 <option key={new Date().getFullYear() - i} value={new Date().getFullYear() - i}>
@@ -393,33 +481,43 @@ const CommissionTracking: React.FC = () => {
           </div>
 
           <div className="sm:col-span-2 lg:col-span-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Monthly Target (TSh)
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-1">
+              Target
             </label>
-            <input
-              type="number"
-              value={performanceStats.monthlyTarget}
-              onChange={(e) => setPerformanceStats(prev => ({
-                ...prev,
-                monthlyTarget: Number(e.target.value)
-              }))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Enter target amount"
-            />
+            <select
+              value={selectedTargetId}
+              onChange={(e) => {
+                setSelectedTargetId(e.target.value);
+                if (user?.id) {
+                  localStorage.setItem(`commission_selected_target_${user.id}`, e.target.value);
+                }
+              }}
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              {targets.length > 0 ? (
+                targets.map((target) => (
+                  <option key={target.id} value={String(target.id)}>
+                    {target.name} - {target.metric === 'profit' ? 'TSh' : ''} {target.metric === 'profit' ? formatCurrency(target.target_value) : target.target_value} {target.metric === 'items_sold' ? 'items' : ''} ({target.period})
+                  </option>
+                ))
+              ) : (
+                <option value="">No targets available</option>
+              )}
+            </select>
           </div>
         </div>
       </div>
 
       {/* Current Period Progress */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
         <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
             <Target className="h-5 w-5 mr-2" />
             Current {periodType === 'monthly' ? 'Month' : 'Week'} Progress
           </h2>
-          <div className="text-right sm:text-left">
+          <div className="text-center sm:text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Target: TSh {formatCurrency(performanceStats.monthlyTarget)}
+              Target: {selectedTarget?.metric === 'profit' ? 'TSh ' + formatCurrency(selectedTarget.target_value) : selectedTarget?.target_value + ' items'}
             </p>
           </div>
         </div>
@@ -445,14 +543,20 @@ const CommissionTracking: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row sm:justify-between text-xs sm:text-sm space-y-1 sm:space-y-0">
             <span className="text-gray-600 dark:text-gray-400">
-              Current: TSh {formatCurrency(performanceStats.currentPeriodProgress * performanceStats.monthlyTarget / 100)}
+              Current: {selectedTarget?.metric === 'profit' 
+                ? `TSh ${formatCurrency(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)}`
+                : `${Math.round(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)} items`
+              }
             </span>
             <span className={`font-medium ${
               performanceStats.currentPeriodProgress >= 100 ? 'text-green-600' :
               performanceStats.currentPeriodProgress >= 75 ? 'text-blue-600' :
               performanceStats.currentPeriodProgress >= 50 ? 'text-yellow-600' : 'text-red-600'
             }`}>
-              TSh {formatCurrency(Math.max(0, performanceStats.monthlyTarget - (performanceStats.currentPeriodProgress * performanceStats.monthlyTarget / 100)))} remaining
+              {selectedTarget?.metric === 'profit'
+                ? `TSh ${formatCurrency(Math.max(0, (selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)))} remaining`
+                : `${Math.max(0, Math.round((selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)))} items remaining`
+              }
             </span>
           </div>
         </div>
@@ -465,9 +569,9 @@ const CommissionTracking: React.FC = () => {
             <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
               <DollarSign className="h-4 w-4 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
             </div>
-            <div className="ml-2 sm:ml-4">
+            <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit</p>
-              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
                 TSh {formatCurrency(performanceStats.totalGanji)}
               </p>
             </div>
@@ -479,9 +583,9 @@ const CommissionTracking: React.FC = () => {
             <div className="p-2 sm:p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
               <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="ml-2 sm:ml-4">
+            <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Sales Revenue</p>
-              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
                 TSh {formatCurrency(performanceStats.totalSales)}
               </p>
             </div>
@@ -493,9 +597,9 @@ const CommissionTracking: React.FC = () => {
             <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
               <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <div className="ml-2 sm:ml-4">
+            <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
-              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
                 {performanceStats.totalItems}
               </p>
             </div>
@@ -507,9 +611,9 @@ const CommissionTracking: React.FC = () => {
             <div className="p-2 sm:p-3 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
               <Target className="h-4 w-4 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
             </div>
-            <div className="ml-2 sm:ml-4">
+            <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Avg Profit</p>
-              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
                 TSh {formatCurrency(performanceStats.averageGanji)}
               </p>
             </div>
@@ -519,30 +623,142 @@ const CommissionTracking: React.FC = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Profit Trend Bar Chart */}
+        {/* Monthly Profit Flow Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Last 4 Months Profit Comparison
-          </h2>
-          <div className="h-64 sm:h-80">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {selectedYear} Monthly Profit Flow
+            </h2>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 sm:mt-0">
+              Target Levels: 250K • 500K • 750K • 1M 
+            </div>
+          </div>
+          <div className="h-80 sm:h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={periodData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <AreaChart data={periodData} margin={{ top: 20, right: 20, left: 20, bottom: 60 }}>
+                <defs>
+                  <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#17946aff" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis
                   dataKey="period"
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
+                  interval={0}
                 />
-                <YAxis tickFormatter={(value: number) => `TSh ${(value / 1000).toFixed(0)}k`} />
+                <YAxis
+                  tickFormatter={(value: number) => {
+                    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                    return value.toString();
+                  }}
+                  ticks={[250000, 500000, 750000, 1000000, 1250000, 1500000]}
+                  domain={[0, 1500000]}
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                />
                 <Tooltip
-                  formatter={(value: number) => [`TSh ${formatCurrency(value)}`, 'Profit']}
-                  labelStyle={{ color: '#000' }}
+                  formatter={(value: number) => [`TSh ${formatCurrency(value)}`, 'Monthly Profit']}
+                  labelFormatter={(label) => `${label} ${selectedYear}`}
+                  contentStyle={{
+                    backgroundColor: '#1f2937',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#f9fafb'
+                  }}
                 />
-                <Bar dataKey="ganji" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="ganji"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  fill="url(#profitGradient)"
+                  dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
+                />
+                {/* Target reference lines */}
+                <Line
+                  type="monotone"
+                  dataKey={() => 250000}
+                  stroke="#ef4444"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  dot={false}
+                  legendType="none"
+                />
+                <Line
+                  type="monotone"
+                  dataKey={() => 500000}
+                  stroke="#f59e0b"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  dot={false}
+                  legendType="none"
+                />
+                <Line
+                  type="monotone"
+                  dataKey={() => 750000}
+                  stroke="#3b82f6"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  dot={false}
+                  legendType="none"
+                />
+                <Line
+                  type="monotone"
+                  dataKey={() => 1000000}
+                  stroke="#8b5cf6"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  dot={false}
+                  legendType="none"
+                />
+                <Line
+                  type="monotone"
+                  dataKey={() => 1250000}
+                  stroke="#ec4899"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  dot={false}
+                  legendType="none"
+                />
+                <Line
+                  type="monotone"
+                  dataKey={() => 1500000}
+                  stroke="#06b6d4"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  dot={false}
+                  legendType="none"
+                />
+              </AreaChart>
             </ResponsiveContainer>
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <span className="text-gray-600 dark:text-gray-400">Monthly Profit</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-red-500 mr-2"></div>
+              <span className="text-gray-600 dark:text-gray-400">250K Target</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-yellow-500 mr-2"></div>
+              <span className="text-gray-600 dark:text-gray-400">500K Target</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-blue-500 mr-2"></div>
+              <span className="text-gray-600 dark:text-gray-400">750K Target</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-purple-500 mr-2"></div>
+              <span className="text-gray-600 dark:text-gray-400">1M Target</span>
+            </div>
           </div>
         </div>
       </div>
@@ -572,7 +788,7 @@ const CommissionTracking: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {periodData.map((period, index) => (
+                {periodData.map((period) => (
                   <tr key={period.period} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-900 dark:text-white font-medium">
                       {period.period}

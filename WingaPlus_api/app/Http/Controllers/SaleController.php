@@ -27,8 +27,10 @@ class SaleController extends Controller
         }
 
         return response()->json([
-            'data' => $query->get(),
-            'total' => $query->count(),
+            'data' => [
+                'data' => $query->get(),
+                'total' => $query->count(),
+            ],
         ]);
     }
 
@@ -44,6 +46,7 @@ class SaleController extends Controller
             'salesman_id' => 'nullable|exists:users,id', // now nullable in DB
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:50',
+            'reference_store' => 'nullable|string|max:255',
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',

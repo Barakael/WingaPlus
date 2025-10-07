@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Shield, CheckCircle, AlertTriangle, Clock, Eye, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { BASE_URL } from '../api/api';
 import ViewWarrantyModal from './ViewWarrantyModal';
 
 interface WarrantyViewProps {
   onFileWarranty: () => void;
-  openSaleForm?: (prefill?: any) => void;
+  openSaleForm?: (prefill?: any, onComplete?: () => void) => void;
 }
 
 const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleForm }) => {
+  const { user } = useAuth();
   const [warranties, setWarranties] = useState<any[]>([]);
   const [loadingWarranties, setLoadingWarranties] = useState(true);
 
@@ -22,7 +25,12 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
   // Fetch sales that have warranties
   const fetchWarranties = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/sales');
+      const salesmanId = user?.id;
+      const url = salesmanId 
+        ? `${BASE_URL}/sales?salesman_id=${salesmanId}`
+        : `${BASE_URL}/sales`;
+      
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         // Our API wraps responses as { success, data: { data: [...], total: ... }, message }
@@ -38,12 +46,15 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
           color: s.warranty_details?.color ?? '',
           storage: s.warranty_details?.storage ?? '',
           store_name: s.warranty_details?.store_name ?? '',
+          reference_store: s.reference_store || (s.warranty_details?.reference_store ?? ''),
+          email: s.warranty_details?.customer_email ?? '',
           expiry_date: s.warranty_end ?? null,
           warranty_months: s.warranty_months ?? (s.warranty_details?.warranty_months ?? null),
           status: s.warranty_status ?? 'unknown',
           created_at: s.created_at,
         }));
 
+        console.log('Mapped warranties:', mapped);
         setWarranties(mapped);
       }
     } catch (error) {
@@ -153,16 +164,16 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white">
             Warranty Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
             View and track product warranties
           </p>
         </div>
         <button
           onClick={onFileWarranty}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
+          className="md:text-base text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
         >
          
           File New Warranty
@@ -171,7 +182,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
         <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+          <h2 className="md:text-lg font-bold text-gray-900 dark:text-white flex items-center">
             <Shield className="h-5 w-5 mr-2" />
             Warranty Records
           </h2>
@@ -207,10 +218,14 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
               </thead>
               <tbody>
                 {paginatedWarranties.map((warranty) => (
-                  <tr key={warranty.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <tr 
+                    key={warranty.id} 
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                    onClick={() => handleViewWarranty(warranty)}
+                  >
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white">
                       <div className="flex items-center space-x-2">
-                        {getStatusIcon(warranty.status || 'active')}
+                       
                         <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(warranty.status || 'active')}`}>
                           {warranty.status ? warranty.status.replace('_', ' ') : 'Active'}
                         </span>
@@ -248,7 +263,10 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <div className="flex items-center justify-center">
                         <button
-                          onClick={() => handleViewWarranty(warranty)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewWarranty(warranty);
+                          }}
                           className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                           title="View Warranty Details"
                         >

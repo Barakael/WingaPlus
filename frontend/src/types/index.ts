@@ -43,6 +43,7 @@ export interface Sale {
   customer_phone?: string;
   quantity: number;
   unit_price: number;
+  selling_price: number;
   cost_price?: number | null; // New: cost price per unit
   total_amount: number; // Server-calculated (quantity * unit_price)
   ganji?: number | null; // New: profit = (unit_price - cost_price) * quantity

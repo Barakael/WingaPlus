@@ -3,7 +3,7 @@ import { Plus, Edit, Trash2, Eye, FileText, Clock, CheckCircle, XCircle } from '
 import { salesOrders } from '../../database';
 
 interface SalesOrdersProps {
-  openSaleForm?: (prefill?: any) => void;
+  openSaleForm?: (prefill?: any, onComplete?: () => void) => void;
 }
 
 const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
@@ -49,7 +49,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
         </div>
         {openSaleForm && (
           <button
-            onClick={() => openSaleForm()}
+            onClick={() => openSaleForm && openSaleForm()}
             className="bg-gradient-to-r from-blue-600 to-purple-700 text-sm md:text-xl  text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
           >
             <Plus className="h-5 w-8 mr-2" />

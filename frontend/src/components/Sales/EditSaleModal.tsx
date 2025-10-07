@@ -16,7 +16,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
     customer_name: '',
     customer_phone: '',
     quantity: 1,
-    unit_price: 0,
+    selling_price: 0,
     cost_price: 0,
     warranty_months: 0,
     sale_date: '',
@@ -38,7 +38,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
         customer_name: sale.customer_name || '',
         customer_phone: sale.customer_phone || '',
         quantity: Number(sale.quantity) || 1,
-        unit_price: Number(sale.unit_price) || 0,
+        selling_price: Number(sale.selling_price) || Number(sale.unit_price) || 0,
         cost_price: Number(sale.cost_price) || 0,
         warranty_months: Number(sale.warranty_months) || 0,
         sale_date: sale.sale_date ? new Date(sale.sale_date).toISOString().split('T')[0] : '',
@@ -73,8 +73,8 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
         customer_name: formData.customer_name,
         customer_phone: formData.customer_phone,
         quantity: formData.quantity,
-        unit_price: formData.unit_price, // Backend expects unit_price
-        selling_price: formData.unit_price, // Backend also requires selling_price
+        unit_price: formData.selling_price, // Backend expects unit_price
+        selling_price: formData.selling_price, // Backend also requires selling_price
         cost_price: formData.cost_price,
         warranty_months: formData.has_warranty ? formData.warranty_months : 0,
         sale_date: formData.sale_date,
@@ -164,8 +164,8 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                     type="number"
                     min="0"
                     step="0.01"
-                    value={formData.unit_price}
-                    onChange={(e) => handleInputChange('unit_price', parseFloat(e.target.value) || 0)}
+                    value={formData.selling_price}
+                    onChange={(e) => handleInputChange('selling_price', parseFloat(e.target.value) || 0)}
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />

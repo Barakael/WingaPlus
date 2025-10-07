@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { TrendingUp, ShoppingCart, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, Eye, Edit, Trash2 } from 'lucide-react';
-import { listSales, deleteSale } from '../../services/sales';
+import { listSales, deleteSale, listTargets, Target as TargetType } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
 import { Sale } from '../../types';
 import jsPDF from 'jspdf';
@@ -9,7 +9,7 @@ import ViewSaleModal from './ViewSaleModal';
 import EditSaleModal from './EditSaleModal';
 
 interface SalesmanSalesProps {
-  openSaleForm?: (prefill?: Sale) => void;
+  openSaleForm?: (prefill?: Sale, onComplete?: () => void) => void;
 }
 
 const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
@@ -20,7 +20,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   const [error, setError] = useState<string | null>(null);
 
   // Target selection state
-  const [selectedTargetLevel, setSelectedTargetLevel] = useState<string>('');
+  const [targets, setTargets] = useState<TargetType[]>([]);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>('');
 
   // Filter states - Enhanced
   const [filterType, setFilterType] = useState<'daily' | 'monthly' | 'yearly' | 'range'>('daily');
@@ -41,32 +42,48 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
-  // Define target levels (same as in TargetManagement)
-  const targetLevels = [
-    { id: 'beginner', name: 'Beginner Level', target: 200000 },
-    { id: 'junior', name: 'Junior Level', target: 400000 },
-    { id: 'amateur', name: 'Amateur Level', target: 600000 },
-    { id: 'professional', name: 'Professional Level', target: 800000 },
-    { id: 'master', name: 'Master Level', target: 1200000 },
-    { id: 'pro', name: 'Pro Level', target: 2000000 }
-  ];
+  // Load targets
+  const loadTargets = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await listTargets({ salesman_id: String(user.id) });
+      setTargets(data);
+      // Set default target if none selected
+      if (!selectedTargetId && data.length > 0) {
+        const savedTargetId = localStorage.getItem(`salesman_selected_target_${user.id}`);
+        if (savedTargetId && data.find(t => String(t.id) === savedTargetId)) {
+          setSelectedTargetId(savedTargetId);
+        } else {
+          // Default to first active monthly target
+          const defaultTarget = data.find(t => t.type === 'monthly' && t.status === 'active');
+          if (defaultTarget) {
+            setSelectedTargetId(String(defaultTarget.id));
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load targets:', e);
+    }
+  }, [user, selectedTargetId]);
 
   // Load saved target level on component mount
   useEffect(() => {
-    const savedTarget = localStorage.getItem(`salesman_target_${user?.id}`);
-    if (savedTarget) {
-      setSelectedTargetLevel(savedTarget);
-    } else {
-      // Default to amateur level
-      setSelectedTargetLevel('amateur');
+    const savedTargetId = user?.id ? localStorage.getItem(`salesman_selected_target_${user.id}`) : null;
+    if (savedTargetId) {
+      setSelectedTargetId(savedTargetId);
     }
   }, [user]);
 
-  // Save target level when changed
+  // Load targets when component mounts
+  useEffect(() => {
+    loadTargets();
+  }, [loadTargets]);
+
+  // Save target selection when changed
   const handleTargetChange = (targetId: string) => {
-    setSelectedTargetLevel(targetId);
+    setSelectedTargetId(targetId);
     if (user?.id) {
-      localStorage.setItem(`salesman_target_${user.id}`, targetId);
+      localStorage.setItem(`salesman_selected_target_${user.id}`, targetId);
     }
   };
 
@@ -171,10 +188,13 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   }, 0);
   const averageSale = mySales.length > 0 ? totalSales / mySales.length : 0;
 
-  // Monthly target based on selected level
-  const selectedTarget = targetLevels.find(level => level.id === selectedTargetLevel);
-  const monthlyTarget = selectedTarget ? selectedTarget.target : 600000; // Default to amateur level
-  const monthlyProgress = (totalGanji / monthlyTarget) * 100;
+  // Monthly target based on selected target
+  const selectedTarget = targets.find(target => String(target.id) === selectedTargetId);
+  const currentValue = selectedTarget ? 
+    (selectedTarget.metric === 'profit' ? totalGanji : totalItems) : 
+    300000; // Default fallback
+  const targetValue = selectedTarget ? selectedTarget.target_value : 600000; // Default fallback
+  const monthlyProgress = (currentValue / targetValue) * 100;
 
   // Export functions - Enhanced with filter information
   const exportToPDF = () => {
@@ -453,7 +473,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         {openSaleForm && (
           <div className="flex justify-start sm:justify-end">
             <button
-              onClick={() => openSaleForm()}
+              onClick={() => openSaleForm && openSaleForm(undefined, loadSalesData)}
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm lg:text-base w-auto"
             >
               New Sale
@@ -462,7 +482,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         )}
       </div>
 
-      {/* Monthly Target Progress - Compact */}
+      {/* Monthly Target Progress - Compact
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 md:p-4 lg:p-6">
         <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
           <h2 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
@@ -472,15 +492,19 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           <div className="flex items-center gap-2">
             <label className="text-xs lg:text-sm text-gray-600 dark:text-gray-400">Target Level:</label>
             <select
-              value={selectedTargetLevel}
+              value={selectedTargetId}
               onChange={(e) => handleTargetChange(e.target.value)}
               className="px-2 py-1 lg:px-3 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              {targetLevels.map((level) => (
-                <option key={level.id} value={level.id}>
-                  {level.name}
-                </option>
-              ))}
+              {targets.length > 0 ? (
+                targets.map((target) => (
+                  <option key={target.id} value={String(target.id)}>
+                    {target.name} - {target.metric === 'profit' ? 'TSh' : ''} {formatCurrency(target.target_value)}{target.metric === 'items_sold' ? ' items' : ''}
+                  </option>
+                ))
+              ) : (
+                <option value="">No targets available</option>
+              )}
             </select>
           </div>
         </div>
@@ -489,7 +513,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">Progress</span>
             <span className="font-semibold text-sm lg:text-base text-gray-900 dark:text-white">
-              TSh {formatCurrency(totalGanji)} / TSh {formatCurrency(monthlyTarget)}
+              {selectedTarget?.metric === 'profit' ? 'TSh ' : ''}{formatCurrency(currentValue)} / {selectedTarget?.metric === 'profit' ? 'TSh ' : ''}{formatCurrency(targetValue)}{selectedTarget?.metric === 'items_sold' ? ' items' : ''}
             </span>
           </div>
 
@@ -505,11 +529,11 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
               {monthlyProgress.toFixed(1)}% Complete
             </span>
             <span className={`font-medium ${monthlyProgress >= 100 ? 'text-green-600' : 'text-orange-600'}`}>
-              TSh {formatCurrency(Math.max(0, monthlyTarget - totalGanji))} remaining
+              {selectedTarget?.metric === 'profit' ? 'TSh ' : ''}{formatCurrency(Math.max(0, targetValue - currentValue))}{selectedTarget?.metric === 'items_sold' ? ' items' : ''} remaining
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Sales Records - Full Width, Compact on Mobile */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 md:p-4 lg:p-6">
@@ -529,9 +553,9 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
             </button>
             <button
               onClick={exportToPDF}
-              className="flex items-center px-2 py-1 lg:px-3 text-xs lg:text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
             >
-              <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+              <FileText className="h-3 w-3 lg:h-5 lg:w-5 mr-1" />
               PDF
             </button>
             <button
@@ -548,8 +572,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         <div className="mb-3 lg:mb-4 space-y-3">
           {/* Filter Type Selector */}
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Filter by:</label>
-            <div className="flex flex-wrap gap-1">
+            <label className="text-xs md:text-md font-medium text-gray-700 dark:text-gray-300">Filter by:</label>
+            <div className="flex flex-wrap gap-1 ">
               {[
                 { value: 'daily', label: 'Daily' },
                 { value: 'monthly', label: 'Monthly' },
@@ -572,7 +596,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           </div>
 
           {/* Dynamic Filter Inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
             {filterType === 'daily' && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -720,16 +744,16 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           {loading ? (
             <div className="text-center py-4 lg:py-8 text-gray-500 dark:text-gray-400 text-xs lg:text-sm">Loading sales...</div>
           ) : error ? (
-            <div className="text-center py-4 lg:py-8 text-red-600 dark:text-red-400 text-xs lg:text-sm">{error}</div>
+            <div className="text-center py-4 lg:py-6 text-red-600 dark:text-red-400 text-xs lg:text-sm">{error}</div>
           ) : filteredSales.length > 0 ? (
             <table className="w-full text-xs md:text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[70px] lg:min-w-[80px]">Date</th>
                   <th className="text-left py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[100px] lg:min-w-[120px]">Product</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Zoezi</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Bei</th>
                   <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[60px] lg:min-w-[80px]">Ganji</th>
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Zoezi</th>
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Bei</th>                  
                   <th className="text-center py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[120px] lg:min-w-[140px]">Actions</th>
                 </tr>
               </thead>
@@ -741,7 +765,11 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   const profit = (sellingPrice - costPrice) * quantity;
 
                   return (
-                    <tr key={sale.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr 
+                      key={sale.id} 
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                      onClick={() => handleViewSale(sale)}
+                    >
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-gray-900 dark:text-white text-xs">
                         {new Date(sale.sale_date || '').toLocaleDateString('en-GB')}
                       </td>
@@ -753,33 +781,43 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                           </div>
                         )}
                       </td>
+                        <td className="py-2 px-1 lg:py-3 lg:px-2 text-right font-semibold text-green-600 dark:text-green-400 font-mono text-xs lg:text-sm">
+                        {formatCurrency(profit)}
+                      </td>
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-right text-gray-900 dark:text-white font-mono text-xs lg:text-sm">
                         {formatCurrency(costPrice)}
                       </td>
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-right text-gray-900 dark:text-white font-mono text-xs lg:text-sm">
                         {formatCurrency(sellingPrice)}
                       </td>
-                      <td className="py-2 px-1 lg:py-3 lg:px-2 text-right font-semibold text-green-600 dark:text-green-400 font-mono text-xs lg:text-sm">
-                        {formatCurrency(profit)}
-                      </td>
+                    
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-center">
                         <div className="flex items-center justify-center space-x-1">
                           <button
-                            onClick={() => handleViewSale(sale)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewSale(sale);
+                            }}
                             className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                             title="View Sale Details"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleEditSale(sale)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditSale(sale);
+                            }}
                             className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
                             title="Edit Sale"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteSale(sale)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSale(sale);
+                            }}
                             className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                             title="Delete Sale"
                           >

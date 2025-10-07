@@ -130,7 +130,9 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
         }),
         quantity: category === 'phones' ? 1 : parseInt(quantityInput),
         unit_price: unitPrice,
+        selling_price: unitPrice,
         cost_price: costPrice,
+        salesman_id: user?.id ? String(user.id) : undefined,
         sale_date: new Date().toISOString(),
       });
 

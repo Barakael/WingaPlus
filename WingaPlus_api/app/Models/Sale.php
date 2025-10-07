@@ -23,6 +23,7 @@ class Sale extends Model
         'customer_phone',
         'quantity',
         'unit_price',
+        'selling_price',
         'cost_price',
         'total_amount',
         'ganji',
@@ -39,6 +40,7 @@ class Sale extends Model
     protected $casts = [
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
     'cost_price' => 'decimal:2',
         'total_amount' => 'decimal:2',
     'ganji' => 'decimal:2',

@@ -11,23 +11,17 @@ class Target extends Model
         'salesman_id',
         'team_id',
         'shop_id',
-        'type',
+        'name',
         'period',
         'metric',
         'target_value',
-        'current_value',
-        'start_date',
-        'end_date',
         'status',
         'bonus_amount',
     ];
 
     protected $casts = [
         'target_value' => 'decimal:2',
-        'current_value' => 'decimal:2',
         'bonus_amount' => 'decimal:2',
-        'start_date' => 'date',
-        'end_date' => 'date',
     ];
 
     public function salesman(): BelongsTo
