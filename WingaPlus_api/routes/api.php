@@ -12,6 +12,11 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Sanctum authentication routes
+// Ensure preflight requests to /login are handled by the application to avoid 405s from the webserver.
+Route::options('/login', function (Request $request) {
+    return response()->noContent(204);
+});
+
 Route::post('/login', function (Request $request) {
     try {
         $request->validate([
