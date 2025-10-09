@@ -15,35 +15,47 @@ class Cors
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Allowed origins for reference; we'll echo the incoming Origin when present to
+        // support credentialed requests during development and remote hosting.
         $allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:5174',
             'http://127.0.0.1:5173',
             'http://127.0.0.1:5174',
+            // include the hosted API origin (with port) to be explicit
+            'http://95.111.247.129:8070',
             'http://95.111.247.129'
         ];
+
         $origin = $request->headers->get('Origin');
 
-        // Preflight handling
+        // Build typical CORS headers
+        $allowMethods = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+        $allowHeaders = 'Content-Type, Authorization, X-Requested-With, Accept, Origin';
+
+        // Preflight handling: always respond with CORS headers and echo Origin when present
         if ($request->getMethod() === 'OPTIONS') {
             $response = response()->noContent(204);
-            if (in_array($origin, $allowedOrigins)) {
+            if ($origin) {
+                // For credentialed requests you must echo the exact Origin
                 $response->headers->set('Access-Control-Allow-Origin', $origin);
             }
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+            $response->headers->set('Access-Control-Allow-Methods', $allowMethods);
+            $response->headers->set('Access-Control-Allow-Headers', $allowHeaders);
             $response->headers->set('Access-Control-Allow-Credentials', 'true');
             $response->headers->set('Vary', 'Origin');
             return $response;
         }
 
+        /** @var \Symfony\Component\HttpFoundation\Response $response */
         $response = $next($request);
 
-        if (in_array($origin, $allowedOrigins)) {
+        if ($origin) {
+            // Echo the incoming origin so browsers accept credentialed responses
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         }
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        $response->headers->set('Access-Control-Allow-Methods', $allowMethods);
+        $response->headers->set('Access-Control-Allow-Headers', $allowHeaders);
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Vary', 'Origin');
 
