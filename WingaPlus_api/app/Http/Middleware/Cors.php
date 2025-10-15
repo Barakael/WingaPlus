@@ -36,9 +36,13 @@ class Cors
         // Preflight handling: always respond with CORS headers and echo Origin when present
         if ($request->getMethod() === 'OPTIONS') {
             $response = response()->noContent(204);
-            $response->headers->set('Access-Control-Allow-Origin', '*');
+            if ($origin) {
+                // For credentialed requests you must echo the exact Origin
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+            }
             $response->headers->set('Access-Control-Allow-Methods', $allowMethods);
             $response->headers->set('Access-Control-Allow-Headers', $allowHeaders);
+            $response->headers->set('Access-Control-Allow-Credentials', 'true');
             $response->headers->set('Vary', 'Origin');
             return $response;
         }
@@ -46,9 +50,13 @@ class Cors
         /** @var \Symfony\Component\HttpFoundation\Response $response */
         $response = $next($request);
 
-        $response->headers->set('Access-Control-Allow-Origin', '*');
+        if ($origin) {
+            // Echo the incoming origin so browsers accept credentialed responses
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        }
         $response->headers->set('Access-Control-Allow-Methods', $allowMethods);
         $response->headers->set('Access-Control-Allow-Headers', $allowHeaders);
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Vary', 'Origin');
 
         return $response;
