@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { DollarSign, ShoppingCart, Target, TrendingUp, Clock } from 'lucide-react';
+import { DollarSign, ShoppingCart, Target, TrendingUp, Clock, Wrench } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { listSales } from '../../services/sales';
+import { BASE_URL } from '../../components/api/api';
 
 interface SalesmanDashboardProps {
   onTabChange?: (tab: string) => void;
@@ -10,6 +11,7 @@ interface SalesmanDashboardProps {
 const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) => {
   const { user } = useAuth();
   const [mySales, setMySales] = useState<any[]>([]);
+  const [myServices, setMyServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Helper function to format currency
@@ -26,10 +28,19 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
       if (!user) return;
       try {
         setLoading(true);
-        const data = await listSales({ salesman_id: String(user.id) });
-        setMySales(data);
+        const [salesData, servicesResponse] = await Promise.all([
+          listSales({ salesman_id: String(user.id) }),
+          fetch(`${BASE_URL}/services?salesman_id=${user.id}`)
+        ]);
+
+        setMySales(salesData);
+
+        if (servicesResponse.ok) {
+          const servicesData = await servicesResponse.json();
+          setMyServices(servicesData?.data?.data ?? []);
+        }
       } catch (e: any) {
-        console.error('Failed to load sales:', e);
+        console.error('Failed to load data:', e);
       } finally {
         setLoading(false);
       }
@@ -40,10 +51,12 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
   // Calculate stats
   const totalSales = mySales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
   const totalItems = mySales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
-  const totalGanji = mySales.reduce((sum, sale) => {
+  const salesGanji = mySales.reduce((sum, sale) => {
     const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
     return sum + ganji;
   }, 0);
+  const servicesGanji = myServices.reduce((sum, service) => sum + (parseFloat(service.ganji) || 0), 0);
+  const totalGanji = salesGanji + servicesGanji;
   const averageSale = mySales.length > 0 ? totalSales / mySales.length : 0;
 
   return (
@@ -61,7 +74,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
+        {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
               <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-green-600 dark:text-green-400" />
@@ -71,7 +84,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Tsh {formatCurrency(totalSales)}</p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
@@ -79,8 +92,8 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh <br></br> {formatCurrency(totalGanji)}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit<br />(Sales + Services)</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh<br />{formatCurrency(totalGanji)}</p>
             </div>
           </div>
         </div>
@@ -91,7 +104,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items <br /> Sold</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items<br />Sold</p>
               <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{totalItems}</p>
             </div>
           </div>
@@ -99,15 +112,27 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Wrench className="h-5 w-5 md:h-6 md:w-6 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div className="ml-3 md:ml-4 min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services<br />Done</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{myServices.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
+          <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center flex-shrink-0">
               <Target className="h-5 w-5 md:h-6 md:w-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Sale</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh <br></br> {formatCurrency(averageSale)}</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh<br />{formatCurrency(averageSale)}</p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
     

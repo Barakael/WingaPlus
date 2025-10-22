@@ -9,6 +9,8 @@ import SaleForm from './components/Sales/SaleForm';
 import SalesReport from './components/Sales/SalesReport';
 import WarrantyFiling from './components/Warranties/WarrantyFiling';
 import WarrantyView from './components/Warranties/WarrantyView';
+import ServiceFiling from './components/Services/ServiceFiling';
+import ServiceView from './components/Services/ServiceView';
 import Reports from './components/Reports/Reports';
 import SalesmanSales from './components/Sales/SalesmanSales';
 import ProductManagement from './components/Products/ProductManagement';
@@ -89,6 +91,10 @@ const AppContent: React.FC = () => {
         return <WarrantyView onFileWarranty={() => setActiveTab('file-warranty')} openSaleForm={openSaleForm} />;
       case 'file-warranty':
         return <WarrantyFiling onBack={() => setActiveTab('warranties')} />;
+      case 'services':
+        return <ServiceView onFileService={() => setActiveTab('file-service')} />;
+      case 'file-service':
+        return <ServiceFiling onBack={() => setActiveTab('services')} />;
       case 'reports':
         return <Reports />;
       case 'inventory':

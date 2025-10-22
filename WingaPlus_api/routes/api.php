@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\UserController;
 
@@ -77,6 +78,14 @@ Route::get('/sales/{sale}', [SalesController::class, 'show']);
 Route::put('/sales/{sale}', [SalesController::class, 'update']);
 Route::patch('/sales/{sale}', [SalesController::class, 'update']);
 Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
+
+// Service routes
+Route::get('/services', [ServiceController::class, 'index']);
+Route::post('/services', [ServiceController::class, 'store']);
+Route::get('/services/{service}', [ServiceController::class, 'show']);
+Route::put('/services/{service}', [ServiceController::class, 'update']);
+Route::patch('/services/{service}', [ServiceController::class, 'update']);
+Route::delete('/services/{service}', [ServiceController::class, 'destroy']);
 
 // Target routes
 Route::middleware('auth:sanctum')->group(function () {

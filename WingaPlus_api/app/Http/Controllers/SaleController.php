@@ -52,6 +52,10 @@ class SaleController extends Controller
             'cost_price' => 'nullable|numeric|min:0',
             'warranty_months' => 'nullable|integer|min:0',
             'sale_date' => 'nullable|date',
+            // service fields
+            'is_service' => 'nullable|boolean',
+            'service_status' => 'nullable|string|max:50',
+            'service_details' => 'nullable|array',
         ];
 
         $validator = \Validator::make($request->all(), $rules);

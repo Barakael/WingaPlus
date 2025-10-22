@@ -10,6 +10,7 @@ import {
   Warehouse,
   X,
   DollarSign,
+  Wrench,
   Target,
   Settings
 } from 'lucide-react';
@@ -54,9 +55,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
         return [
           ...baseItems,
           { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
-          // { id: 'sales-orders', label: 'Sales Orders', icon: FileText },
+           { id: 'services', label: 'Services', icon: Wrench },
           { id: 'commissions', label: 'Ganji', icon: DollarSign },
-          // { id: 'targets', label: 'Targets', icon: Target },
+          { id: 'targets', label: 'Targets', icon: Target },         
           { id: 'warranties', label: 'Warranties', icon: Shield },
           { id: 'settings', label: 'Settings', icon: Settings },
         ];

@@ -752,8 +752,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   <th className="text-left py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[70px] lg:min-w-[80px]">Date</th>
                   <th className="text-left py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[100px] lg:min-w-[120px]">Product</th>
                   <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[60px] lg:min-w-[80px]">Ganji</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Zoezi</th>
-                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px]">Bei</th>                  
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px] hidden md:table-cell">Zoezi</th>
+                  <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px] hidden md:table-cell">Bei</th>                  
                   <th className="text-center py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[120px] lg:min-w-[140px]">Actions</th>
                 </tr>
               </thead>
@@ -784,10 +784,10 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                         <td className="py-2 px-1 lg:py-3 lg:px-2 text-right font-semibold text-green-600 dark:text-green-400 font-mono text-xs lg:text-sm">
                         {formatCurrency(profit)}
                       </td>
-                      <td className="py-2 px-1 lg:py-3 lg:px-2 text-right text-gray-900 dark:text-white font-mono text-xs lg:text-sm">
+                      <td className="py-2 px-1 lg:py-3 lg:px-2 text-right text-gray-900 dark:text-white font-mono text-xs lg:text-sm hidden md:table-cell">
                         {formatCurrency(costPrice)}
                       </td>
-                      <td className="py-2 px-1 lg:py-3 lg:px-2 text-right text-gray-900 dark:text-white font-mono text-xs lg:text-sm">
+                      <td className="py-2 px-1 lg:py-3 lg:px-2 text-right text-gray-900 dark:text-white font-mono text-xs lg:text-sm hidden md:table-cell">
                         {formatCurrency(sellingPrice)}
                       </td>
                     
@@ -798,7 +798,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                               e.stopPropagation();
                               handleViewSale(sale);
                             }}
-                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors hidden md:inline"
                             title="View Sale Details"
                           >
                             <Eye className="h-4 w-4" />
@@ -891,41 +891,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
       {/* Performance Insights and Top Products - Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6">
-        {/* Performance Insights */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 md:p-4 lg:p-6">
-          <h2 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-3 lg:mb-4">
-            Performance Insights
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 lg:gap-4">
-            <div className="p-2 lg:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1 lg:mb-2 text-sm">
-                Sales Trend
-              </h3>
-              <p className="text-xs lg:text-sm text-blue-700 dark:text-blue-300">
-                {mySales.length > 5 ? 'You\'re on a good streak!' : 'Keep up the momentum!'}
-              </p>
-            </div>
-
-            <div className="p-2 lg:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <h3 className="font-semibold text-green-900 dark:text-green-100 mb-1 lg:mb-2 text-sm">
-                Customer Satisfaction
-              </h3>
-              <p className="text-xs lg:text-sm text-green-700 dark:text-green-300">
-                {mySales.filter(s => (s.warranty_months || 0) > 0).length} warranties provided
-              </p>
-            </div>
-
-            <div className="p-2 lg:p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <h3 className="font-semibold text-purple-900 dark:text-purple-100 mb-1 lg:mb-2 text-sm">
-                Product Knowledge
-              </h3>
-              <p className="text-xs lg:text-sm text-purple-700 dark:text-purple-300">
-                Selling {new Set(mySales.map(s => s.product_id)).size} different products
-              </p>
-            </div>
-          </div>
-        </div>
+      
+     
 
         {/* Top Products */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 md:p-4 lg:p-6">

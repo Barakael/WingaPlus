@@ -213,7 +213,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell min-w-[80px]">Color</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell min-w-[80px]">Storage</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[100px]">Expiry Date</th>
-                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[140px]">Actions</th>
+                  {/* <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[140px]">Actions</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -260,7 +260,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                         </div>
                       )}
                     </td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
+                    {/* <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <div className="flex items-center justify-center">
                         <button
                           onClick={(e) => {
@@ -273,7 +273,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                           <Eye className="h-4 w-4" />
                         </button>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

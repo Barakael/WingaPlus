@@ -45,10 +45,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Warranty Filed Successfully!
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Warranty #{warrantyData.id} has been created
-                </p>
+                </h2>               
               </div>
             </div>
             <button
@@ -97,10 +94,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Warranty ID:</span>
-                <span className="ml-2 font-medium text-gray-900 dark:text-white">{warrantyData.id}</span>
-              </div>
+             
               <div>
                 <span className="text-gray-600 dark:text-gray-400">Phone Name:</span>
                 <span className="ml-2 font-medium text-gray-900 dark:text-white">{warrantyData.phone_name}</span>
