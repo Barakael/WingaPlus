@@ -722,7 +722,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                 type="text"
                 value={productFilter}
                 onChange={(e) => setProductFilter(e.target.value)}
-                placeholder="Search product name..."
+                placeholder="Search .."
                 className="w-full px-1 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>

@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#800000] to-[#600000] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-2xl flex items-center justify-center mx-auto mb-4">
               <span className="text-white font-bold text-2xl">WP</span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -61,7 +61,7 @@ const LoginForm: React.FC = () => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Enter your full name"
                     required={!isLogin}
                   />
@@ -79,7 +79,7 @@ const LoginForm: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter your email"
                   required
                 />
@@ -96,7 +96,7 @@ const LoginForm: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter your password"
                   required
                 />
@@ -118,7 +118,7 @@ const LoginForm: React.FC = () => {
                 <select
                   value={formData.role}
                   onChange={(e) => handleInputChange('role', e.target.value)}
-                  className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="salesman">Salesman</option>
                   <option value="storekeeper">Storekeeper</option>
@@ -137,7 +137,7 @@ const LoginForm: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#800000] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#600000] focus:outline-none focus:ring-2 focus:ring-[#800000] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+              className="w-full bg-[#1973AE] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] focus:outline-none focus:ring-2 focus:ring-[#1973AE] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -153,7 +153,7 @@ const LoginForm: React.FC = () => {
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-[#800000] dark:text-[#A00000] hover:text-[#800000] dark:hover:text-[#C00000] text-sm font-medium"
+              className="text-[#1973AE] dark:text-[#1973AE] hover:text-[#0d5a8a] dark:hover:text-[#0d5a8a] text-sm font-medium"
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>

@@ -89,7 +89,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFF0F0] dark:bg-[#3b0f0f] rounded-lg flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-[#800000] dark:text-[#800000]" />
+              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit<br />(Sales + Services)</p>
@@ -101,7 +101,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFF0F0] dark:bg-[#3b0f0f] rounded-lg flex items-center justify-center flex-shrink-0">
-              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-[#800000] dark:text-[#800000]" />
+              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items<br />Sold</p>
@@ -113,7 +113,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFF0F0] dark:bg-[#3b0f0f] rounded-lg flex items-center justify-center flex-shrink-0">
-              <Wrench className="h-5 w-5 md:h-6 md:w-6 text-[#800000] dark:text-[#800000]" />
+              <Wrench className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services<br />Done</p>
@@ -125,7 +125,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <div className="flex items-center">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Target className="h-5 w-5 md:h-6 md:w-6 text-[#800000] dark:text-[#A00000]" />
+              <Target className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Sale</p>
@@ -140,7 +140,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200">
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-red-800 rounded-lg flex items-center justify-center mr-4">
+            <div className="w-12 h-12 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
               <DollarSign className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -150,7 +150,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           </div>
           <button 
             onClick={() => onTabChange?.('commissions')}
-            className="w-full bg-[#800000] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 text-sm"
+            className="w-full bg-[#1973AE] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 text-sm"
           >
             View Commissions(Ganji)
           </button>
@@ -158,7 +158,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200">
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-red-800 rounded-lg flex items-center justify-center mr-4">
+            <div className="w-12 h-12 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
               <Target className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -168,7 +168,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           </div>
           <button 
             onClick={() => onTabChange?.('targets')}
-            className="w-full bg-[#800000] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 text-sm"
+            className="w-full bg-[#1973AE] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 text-sm"
           >
             View Targets
           </button>
@@ -176,7 +176,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200">
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-red-800 rounded-lg flex items-center justify-center mr-4">
+            <div className="w-12 h-12 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
               <Clock className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -186,7 +186,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           </div>
           <button 
             onClick={() => onTabChange?.('sales')}
-            className="w-full bg-[#800000] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 text-sm"
+            className="w-full bg-[#1973AE] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 text-sm"
           >
             View Warranties
           </button>
@@ -204,7 +204,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           ) : mySales.slice(0, 2).map((sale: any) => (
             <div key={sale.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-[#800000] rounded-lg flex items-center justify-center mr-4">
+                <div className="w-10 h-10 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
                   <ShoppingCart className="h-5 w-6 text-white" />
                 </div>
                 <div>
