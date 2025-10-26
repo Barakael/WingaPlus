@@ -24,6 +24,7 @@ class SaleRequest extends FormRequest
             'unit_price' => 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
+            'offers' => 'nullable|numeric|min:0',
             'warranty_months' => 'nullable|integer|min:0',
             'has_warranty' => 'sometimes|boolean',
             'warranty_start' => 'nullable|date',

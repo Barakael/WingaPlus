@@ -17,7 +17,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'quoted': return 'bg-blue-100 text-blue-800';
+      case 'quoted': return 'bg-red-100 text-[#600000]';
       case 'confirmed': return 'bg-yellow-100 text-yellow-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
@@ -50,7 +50,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
         {openSaleForm && (
           <button
             onClick={() => openSaleForm && openSaleForm()}
-            className="bg-gradient-to-r from-blue-600 to-purple-700 text-sm md:text-xl  text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
+            className="bg-gradient-to-r from-[#800000] to-[#600000] text-sm md:text-xl  text-white px-3 py-2 rounded-lg font-medium hover:from-[#600000] hover:to-[#400000] transition-all duration-200 flex items-center"
           >
             <Plus className="h-5 w-8 mr-2" />
             New Sale
@@ -74,7 +74,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
               onClick={() => setFilterStatus(filter.key as any)}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 filterStatus === filter.key
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -152,7 +152,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => setSelectedOrder(order)}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        className="text-[#800000] hover:text-[#400000] dark:text-[#A00000] dark:hover:text-[#C00000]"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -285,13 +285,13 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   {(selectedOrder.status === 'draft' || selectedOrder.status === 'quoted') && (
                     <>
-                      <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                      <button className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors">
                         Edit Order
                       </button>
-                      <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                      <button className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors">
                         Convert to Sale
                       </button>
-                      <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                      <button className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors">
                         Cancel Order
                       </button>
                     </>

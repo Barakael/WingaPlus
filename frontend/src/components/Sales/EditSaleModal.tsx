@@ -18,6 +18,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
     quantity: 1,
     selling_price: 0,
     cost_price: 0,
+    offers: 0,
     warranty_months: 0,
     sale_date: '',
     color: '',
@@ -40,6 +41,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
         quantity: Number(sale.quantity) || 1,
         selling_price: Number(sale.selling_price) || Number(sale.unit_price) || 0,
         cost_price: Number(sale.cost_price) || 0,
+        offers: Number(sale.offers) || 0,
         warranty_months: Number(sale.warranty_months) || 0,
         sale_date: sale.sale_date ? new Date(sale.sale_date).toISOString().split('T')[0] : '',
         color: sale.color || '',
@@ -76,6 +78,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
         unit_price: formData.selling_price, // Backend expects unit_price
         selling_price: formData.selling_price, // Backend also requires selling_price
         cost_price: formData.cost_price,
+        offers: formData.offers,
         warranty_months: formData.has_warranty ? formData.warranty_months : 0,
         sale_date: formData.sale_date,
         color: formData.color,
@@ -133,7 +136,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   type="text"
                   value={formData.product_name}
                   onChange={(e) => handleInputChange('product_name', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -146,7 +149,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -154,7 +157,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
             </div>
 
             <div className="space-y-3">
-              {/* Selling Price and Cost Price side by side */}
+              {/* Pricing Information */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -166,7 +169,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                     step="0.01"
                     value={formData.selling_price}
                     onChange={(e) => handleInputChange('selling_price', parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -181,10 +184,41 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                     step="0.01"
                     value={formData.cost_price}
                     onChange={(e) => handleInputChange('cost_price', parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Offers/Discount (TSh)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.offers}
+                  onChange={(e) => handleInputChange('offers', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Amount to deduct from profit"
+                />
+              </div>
+
+              {/* Profit Calculation Display */}
+              {formData.selling_price > 0 && formData.cost_price > 0 && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Profit Calculation:</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Base Profit: TSh {((formData.selling_price - formData.cost_price) * formData.quantity).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Less Offers: TSh {formData.offers.toLocaleString()}
+                  </div>
+                  <div className="text-sm font-semibold text-green-600 dark:text-green-400">
+                    Final Profit: TSh {(((formData.selling_price - formData.cost_price) * formData.quantity) - formData.offers).toLocaleString()}
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center">
                 <input
@@ -192,7 +226,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   id="has_warranty"
                   checked={formData.has_warranty}
                   onChange={(e) => handleInputChange('has_warranty', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-[#800000] focus:ring-[#800000] border-gray-300 rounded"
                 />
                 <label htmlFor="has_warranty" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                   Warranty
@@ -213,7 +247,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                 max="24"
                 value={formData.warranty_months}
                 onChange={(e) => handleInputChange('warranty_months', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           )}

@@ -183,7 +183,9 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   const totalSales = mySales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
   const totalItems = mySales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
   const totalGanji = mySales.reduce((sum, sale) => {
-    const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+    const baseProfit = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+    const offers = Number(sale.offers) || 0;
+    const ganji = baseProfit - offers;
     return sum + ganji;
   }, 0);
   const averageSale = mySales.length > 0 ? totalSales / mySales.length : 0;
@@ -278,7 +280,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         const costPrice = Number(sale.cost_price) || 0;
         const sellingPrice = Number(sale.unit_price) || 0;
         const quantity = Number(sale.quantity) || 1;
-        const profit = (sellingPrice - costPrice) * quantity;
+        const offers = Number(sale.offers) || 0;
+        const profit = (sellingPrice - costPrice) * quantity - offers;
 
         const rowData = [
           new Date(sale.sale_date || '').toLocaleDateString('en-GB'),
@@ -315,7 +318,9 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       const filteredTotalSales = filteredSales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
       const filteredTotalItems = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
       const filteredTotalGanji = filteredSales.reduce((sum, sale) => {
-        const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+        const baseProfit = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+        const offers = Number(sale.offers) || 0;
+        const ganji = baseProfit - offers;
         return sum + ganji;
       }, 0);
 
@@ -348,7 +353,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       const costPrice = Number(sale.cost_price) || 0;
       const sellingPrice = Number(sale.unit_price) || 0;
       const quantity = Number(sale.quantity) || 1;
-      const profit = (sellingPrice - costPrice) * quantity;
+      const offers = Number(sale.offers) || 0;
+      const profit = (sellingPrice - costPrice) * quantity - offers;
 
       return {
         'Date': new Date(sale.sale_date || '').toLocaleDateString('en-GB'),
@@ -357,6 +363,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         'Quantity': quantity,
         'Cost Price': costPrice,
         'Selling Price': sellingPrice,
+        'Offers/Discount': offers,
         'Profit': profit,
         'Total Amount': Number(sale.total_amount) || 0,
         'Warranty Months': sale.warranty_months || 0,
@@ -373,7 +380,9 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
     const filteredTotalSales = filteredSales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
     const filteredTotalItems = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
     const filteredTotalGanji = filteredSales.reduce((sum, sale) => {
-      const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+      const baseProfit = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+      const offers = Number(sale.offers) || 0;
+      const ganji = baseProfit - offers;
       return sum + ganji;
     }, 0);
 
@@ -474,7 +483,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           <div className="flex justify-start sm:justify-end">
             <button
               onClick={() => openSaleForm && openSaleForm(undefined, loadSalesData)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm lg:text-base w-auto"
+              className="bg-gradient-to-r from-red-800 to-red-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm lg:text-base w-auto"
             >
               New Sale
             </button>
@@ -494,7 +503,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
             <select
               value={selectedTargetId}
               onChange={(e) => handleTargetChange(e.target.value)}
-              className="px-2 py-1 lg:px-3 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="px-2 py-1 lg:px-3 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {targets.length > 0 ? (
                 targets.map((target) => (
@@ -519,7 +528,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 lg:h-4">
             <div
-              className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 lg:h-4 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-[#800000] to-[#600000] h-3 lg:h-4 rounded-full transition-all duration-300"
               style={{ width: `${Math.min(monthlyProgress, 100)}%` }}
             ></div>
           </div>
@@ -546,21 +555,21 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
             <button
               onClick={loadSalesData}
               disabled={loading}
-              className="flex items-center px-2 py-1 lg:px-3 text-xs lg:text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center px-2 py-1 lg:px-3 text-xs lg:text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className={`h-3 w-3 lg:h-4 lg:w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
               onClick={exportToPDF}
-              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
             >
               <FileText className="h-3 w-3 lg:h-5 lg:w-5 mr-1" />
               PDF
             </button>
             <button
               onClick={exportToExcel}
-              className="flex items-center px-2 py-1 lg:px-3 text-xs lg:text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
             >
               <FileSpreadsheet className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
               Excel
@@ -585,7 +594,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   onClick={() => setFilterType(option.value as any)}
                   className={`px-3 py-1 text-xs rounded-lg transition-colors ${
                     filterType === option.value
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-red-500 text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -606,7 +615,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
             )}
@@ -620,7 +629,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   <select
                     value={monthFilter}
                     onChange={(e) => setMonthFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="">All Months</option>
                     {Array.from({ length: 12 }, (_, i) => {
@@ -641,7 +650,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   <select
                     value={yearFilter}
                     onChange={(e) => setYearFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {Array.from({ length: 5 }, (_, i) => {
                       const year = (new Date().getFullYear() - i).toString();
@@ -664,7 +673,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                 <select
                   value={yearFilter}
                   onChange={(e) => setYearFilter(e.target.value)}
-                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   {Array.from({ length: 10 }, (_, i) => {
                     const year = (new Date().getFullYear() - i).toString();
@@ -688,7 +697,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                     type="date"
                     value={startDateFilter}
                     onChange={(e) => setStartDateFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -699,7 +708,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                     type="date"
                     value={endDateFilter}
                     onChange={(e) => setEndDateFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-1 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </>
@@ -714,7 +723,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                 value={productFilter}
                 onChange={(e) => setProductFilter(e.target.value)}
                 placeholder="Search product name..."
-                className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-1 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           </div>
@@ -762,12 +771,13 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   const costPrice = Number(sale.cost_price) || 0;
                   const sellingPrice = Number(sale.unit_price) || 0;
                   const quantity = Number(sale.quantity) || 1;
-                  const profit = (sellingPrice - costPrice) * quantity;
+                  const offers = Number(sale.offers) || 0;
+                  const profit = (sellingPrice - costPrice) * quantity - offers;
 
                   return (
                     <tr 
                       key={sale.id} 
-                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors"
                       onClick={() => handleViewSale(sale)}
                     >
                       <td className="py-2 px-1 lg:py-3 lg:px-2 text-gray-900 dark:text-white text-xs">
@@ -798,7 +808,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                               e.stopPropagation();
                               handleViewSale(sale);
                             }}
-                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors hidden md:inline"
+                            className="p-1 text-[#800000] hover:text-[#600000] dark:text-[#A00000] dark:hover:text-[#C00000] transition-colors hidden md:inline"
                             title="View Sale Details"
                           >
                             <Eye className="h-4 w-4" />
@@ -867,7 +877,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                       onClick={() => goToPage(pageNum)}
                       className={`px-3 py-1 text-sm rounded-md ${
                         currentPage === pageNum
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-red-500 text-white'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >
@@ -905,7 +915,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
               topProducts.map(([productName, revenue], index) => (
                 <div key={productName} className="flex items-center justify-between p-2 lg:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs lg:text-sm mr-2 lg:mr-3">
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-[#800000] to-[#600000] rounded-full flex items-center justify-center text-white font-bold text-xs lg:text-sm mr-2 lg:mr-3">
                       {index + 1}
                     </div>
                     <div>

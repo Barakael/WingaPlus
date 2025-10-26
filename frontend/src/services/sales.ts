@@ -24,7 +24,7 @@ export interface Target {
   };
 }
 
-const API_BASE = BASE_URL;
+const API_BASE = `${BASE_URL}/api`;
 
 // Function to get auth headers
 function getAuthHeaders(): Record<string, string> {
@@ -62,6 +62,7 @@ export interface CreateSalePayload {
   unit_price: number;
   selling_price: number;
   cost_price?: number; // added for Ganji calculation
+  offers?: number; // discount/offers field for profit deduction
   warranty_months?: number;
   sale_date?: string; // ISO
   reference_store?: string;

@@ -22,9 +22,10 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
   const costPrice = Number(sale.cost_price) || 0;
   const sellingPrice = Number(sale.unit_price) || 0;
   const quantity = Number(sale.quantity) || 1;
+  const offers = Number(sale.offers) || 0;
   const totalAmount = Number(sale.total_amount) || 0;
-  // Use backend ganji if available, otherwise calculate
-  const profit = sale.ganji !== null && sale.ganji !== undefined ? Number(sale.ganji) : (sellingPrice - costPrice) * quantity;
+  // Use backend ganji if available, otherwise calculate with offers deduction
+  const profit = sale.ganji !== null && sale.ganji !== undefined ? Number(sale.ganji) : ((sellingPrice - costPrice) * quantity) - offers;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
@@ -32,7 +33,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400 mr-2 sm:mr-3" />
+            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000] mr-2 sm:mr-3" />
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               Sale Details
             </h2>
@@ -69,14 +70,22 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
            
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Reference Store
               </label>
               <p className="text-sm text-gray-900 dark:text-white">{sale.reference_store || 'N/A'}</p>
             </div>
-            <div>
 
-            </div>
+            {sale.warranty_months && sale.warranty_months > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Warranty
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {sale.warranty_months} month{sale.warranty_months > 1 ? 's' : ''}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Financial Information */}
@@ -86,37 +95,37 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
               Financial Details
             </h3>
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 mt-2 p-2 sm:p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-3 mt-2 p-2 sm:p-4">
               <div className="text-center">
-                <div className="text-xs text-gray-600 dark:text-gray-400">Cost Price</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Zoezi</div>
                 <div className="text-sm font-bold text-gray-900 dark:text-white">
                   TSh {formatCurrency(costPrice)}
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-xs text-gray-600 dark:text-gray-400 ">Selling Price</div>
-                <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-xs text-gray-600 dark:text-gray-400">Selling Price</div>
+                <div className="text-sm font-bold text-[#800000] dark:text-[#A00000]">
                   TSh {formatCurrency(sellingPrice)}
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-xs text-gray-600 dark:text-gray-400 ">Profit</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Offers</div>
+                <div className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                  TSh {formatCurrency(offers)}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-xs text-gray-600 dark:text-gray-400">Net Profit</div>
                 <div className="text-sm font-bold text-green-600 dark:text-green-400">
                   TSh {formatCurrency(profit)}
                 </div>
               </div>
             </div>
 
-            <div className=" border-t border-gray-200 dark:border-gray-600">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Amount</span>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  TSh {formatCurrency(totalAmount)}
-                </span>
-              </div>
-            </div>
+           
           </div>
 
 

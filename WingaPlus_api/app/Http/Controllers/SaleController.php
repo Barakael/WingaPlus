@@ -50,6 +50,7 @@ class SaleController extends Controller
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
+            'offers' => 'nullable|numeric|min:0',
             'warranty_months' => 'nullable|integer|min:0',
             'sale_date' => 'nullable|date',
             // service fields
@@ -77,8 +78,16 @@ class SaleController extends Controller
         // salesman_id now optional across the board; if you want to enforce in non-warranty context, re-enable check here
 
         $validated['total_amount'] = $validated['quantity'] * $validated['unit_price'];
-        if (array_key_exists('cost_price', $validated) && $validated['cost_price'] !== null) {
-            $validated['ganji'] = ($validated['unit_price'] - $validated['cost_price']) * $validated['quantity'];
+        
+        // Always calculate ganji when cost_price is provided
+        if (array_key_exists('cost_price', $validated)) {
+            $costPrice = $validated['cost_price'] ?? 0;
+            $unitPrice = $validated['unit_price'] ?? 0;
+            $quantity = $validated['quantity'] ?? 1;
+            $offers = $validated['offers'] ?? 0;
+            
+            $baseProfit = ($unitPrice - $costPrice) * $quantity;
+            $validated['ganji'] = $baseProfit - $offers; // Subtract offers from profit
         }
         $validated['sale_date'] = $validated['sale_date'] ?? now();
 

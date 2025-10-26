@@ -3,7 +3,7 @@ import { BASE_URL } from '../components/api/api';
 
 export const login = async (credentials: any) => {
   try {
-    const response = await fetch(`${BASE_URL}/login`, {
+    const response = await fetch(`${BASE_URL}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ export const login = async (credentials: any) => {
 
 export const register = async (userData: any) => {
   try {
-    const response = await fetch(`${BASE_URL}/register`, {
+    const response = await fetch(`${BASE_URL}/api/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export const getUser = async () => {
   }
 
   try {
-    const response = await fetch(`${BASE_URL}/user`, {
+    const response = await fetch(`${BASE_URL}/api/user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json',

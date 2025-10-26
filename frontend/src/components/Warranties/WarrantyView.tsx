@@ -27,8 +27,8 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
     try {
       const salesmanId = user?.id;
       const url = salesmanId 
-        ? `${BASE_URL}/sales?salesman_id=${salesmanId}`
-        : `${BASE_URL}/sales`;
+        ? `${BASE_URL}/api/sales?salesman_id=${salesmanId}`
+        : `${BASE_URL}/api/sales`;
       
       const response = await fetch(url);
       if (response.ok) {
@@ -109,7 +109,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
       case 'pending':
         return <Clock className="h-5 w-5 text-yellow-500" />;
       case 'in_progress':
-        return <AlertTriangle className="h-5 w-5 text-blue-500" />;
+        return <AlertTriangle className="h-5 w-5 text-[#800000]" />;
       case 'completed':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'rejected':
@@ -173,7 +173,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
         </div>
         <button
           onClick={onFileWarranty}
-          className="md:text-base text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
+          className="md:text-base text-sm bg-[#800000] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 flex items-center"
         >
          
           File New Warranty
@@ -190,7 +190,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
             <button
               onClick={fetchWarranties}
               disabled={loadingWarranties}
-              className="flex items-center px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className={`h-4 w-4 mr-1 ${loadingWarranties ? 'animate-spin' : ''}`} />
               Refresh
@@ -220,7 +220,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                 {paginatedWarranties.map((warranty) => (
                   <tr 
                     key={warranty.id} 
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors"
                     onClick={() => handleViewWarranty(warranty)}
                   >
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white">
@@ -267,7 +267,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                             e.stopPropagation();
                             handleViewWarranty(warranty);
                           }}
-                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          className="p-1 text-[#800000] hover:text-[#600000] dark:text-[#A00000] dark:hover:text-[#C00000] transition-colors"
                           title="View Warranty Details"
                         >
                           <Eye className="h-4 w-4" />
@@ -315,7 +315,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                       onClick={() => goToPage(pageNum)}
                       className={`px-3 py-1 text-sm rounded-md ${
                         currentPage === pageNum
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-red-500 text-white'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >

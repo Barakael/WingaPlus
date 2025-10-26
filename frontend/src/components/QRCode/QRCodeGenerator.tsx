@@ -86,7 +86,7 @@ const QRCodeGenerator: React.FC = () => {
                 type="text"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="e.g., Smartphones, Accessories"
               />
             </div>
@@ -98,7 +98,7 @@ const QRCodeGenerator: React.FC = () => {
               <textarea
                 value={newCategoryDescription}
                 onChange={(e) => setNewCategoryDescription(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Describe this category..."
                 rows={3}
               />
@@ -107,7 +107,7 @@ const QRCodeGenerator: React.FC = () => {
             <button
               onClick={handleCreateCategory}
               disabled={!newCategoryName.trim()}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+              className="w-full bg-[#800000] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#600000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
             >
               <QrCode className="h-5 w-5 mr-2" />
               Generate QR Code
@@ -183,7 +183,7 @@ const QRCodeGenerator: React.FC = () => {
                 </code>
                 <button
                   onClick={() => generateQRCode(category.qr_code)}
-                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                  className="text-[#800000] hover:text-[#600000] dark:text-[#A00000] dark:hover:text-[#C00000] text-sm font-medium"
                 >
                   View QR
                 </button>

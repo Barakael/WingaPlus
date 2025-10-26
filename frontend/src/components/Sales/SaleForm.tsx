@@ -40,6 +40,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
     prefill?.unit_price !== undefined ? String(prefill.unit_price) : '0'
   );
   const [costPriceInput, setCostPriceInput] = useState<string>('0');
+  const [offersInput, setOffersInput] = useState<string>('0');
   const [showReceipt, setShowReceipt] = useState(false);
   const [generatedReceipt, setGeneratedReceipt] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -48,8 +49,10 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
   const quantity = Number.parseInt(quantityInput, 10) > 0 ? Number.parseInt(quantityInput, 10) : 0;
   const unitPrice = Number.parseFloat(unitPriceInput) >= 0 ? Number.parseFloat(unitPriceInput) : 0;
   const costPrice = Number.parseFloat(costPriceInput) >= 0 ? Number.parseFloat(costPriceInput) : 0;
+  const offers = Number.parseFloat(offersInput) >= 0 ? Number.parseFloat(offersInput) : 0;
   const totalAmount = quantity * unitPrice;
-  const ganji = quantity > 0 ? (unitPrice - costPrice) * quantity : 0;
+  const baseGanji = quantity > 0 ? (unitPrice - costPrice) * quantity : 0;
+  const ganji = baseGanji - offers; // Deduct offers from profit
 
   // Helper function to format numbers with commas
   const formatNumberWithCommas = (value: string): string => {
@@ -114,7 +117,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
         }
       }
 
-      const created = await createSale({
+      const saleData = {
         product_id: prefill?.product_id ? String(prefill.product_id) : undefined,
         product_name: category === 'phones' ? phoneName.trim() : productName.trim(),
         reference_store: referenceStore.trim(),
@@ -132,9 +135,20 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
         unit_price: unitPrice,
         selling_price: unitPrice,
         cost_price: costPrice,
+        offers: offers, // Include offers in the sale data
         salesman_id: user?.id ? String(user.id) : undefined,
         sale_date: new Date().toISOString(),
-      });
+      };
+
+      // Debug log to check what data is being sent
+      console.log('Sale data being sent:', saleData);
+      console.log('Offers value:', offers, typeof offers);
+
+      const created = await createSale(saleData);
+
+      // Debug log to check what came back from the API
+      console.log('Created sale response:', created);
+      console.log('Returned ganji:', created.ganji);
 
       const receiptData = {
         sale_id: created.id,
@@ -158,8 +172,10 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
         }],
         subtotal,
         tax_amount: taxAmount,
-        discount_amount: 0,
+        discount_amount: offers, // Include offers as discount amount
         total_amount: totalAmount,
+        offers_given: offers, // Track offers separately for receipt display
+        net_profit: ganji, // Include net profit after offers
         qr_code: `RCP-QR-${Date.now()}`,
         issued_by: user.name,
         issued_at: new Date().toISOString()
@@ -182,7 +198,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
           {/* Header - Compact */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-3">
                 <ShoppingCart className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -216,7 +232,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as SaleCategory)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 >
                   <option value="phones">📱 Phones</option>
@@ -232,7 +248,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                   value={referenceStore}
                   onChange={(e) => setReferenceStore(e.target.value)}
                   placeholder="Store/location"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -250,7 +266,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                   value={category === 'phones' ? phoneName : productName}
                   onChange={(e) => category === 'phones' ? setPhoneName(e.target.value) : setProductName(e.target.value)}
                   placeholder={category === 'phones' ? 'iPhone 15 Pro, Samsung Galaxy S24' : 'Phone Case, Screen Protector'}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -258,8 +274,8 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
 
             {/* Phone Details - Compact Grid */}
             {category === 'phones' && (
-              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                {/* <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                {/* <h4 className="text-sm font-semibold text-[#400000] dark:text-red-100 mb-2 flex items-center">
                   <Phone className="h-4 w-4 mr-1" />
                   Phone Details
                 </h4> */}
@@ -273,7 +289,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       value={imei}
                       onChange={(e) => setImei(e.target.value)}
                       placeholder="IMEI"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
@@ -286,7 +302,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
                       placeholder="Space Black"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
@@ -297,7 +313,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                     <select
                       value={storage}
                       onChange={(e) => setStorage(e.target.value)}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     >
                       <option value="">Storage</option>
@@ -317,7 +333,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Customer name"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
@@ -325,8 +341,9 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
               </div>
             )}
 
-            {/* Sale Details - Compact */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Sale Details - Responsive Layout */}
+            <div className="space-y-3">
+              {/* Quantity (only for accessories) */}
               {category === 'accessories' && (
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -342,29 +359,52 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       if (/^\d+$/.test(v)) setQuantityInput(v);
                     }}
                     onBlur={() => { if (quantityInput === '' || quantity === 0) setQuantityInput('1'); }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold"
                     required
                   />
                 </div>
               )}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Zoezi
-                </label>
-                <input
-                  type="text"
-                  value={costPriceInput ? formatNumberWithCommas(costPriceInput) : ''}
-                  onChange={(e) => {
-                    const v = e.target.value.replace(/,/g, '');
-                    if (v === '') { setCostPriceInput(''); return; }
-                    if (/^\d*(?:\.\d{0,2})?$/.test(v)) setCostPriceInput(v);
-                  }}
-                  onBlur={() => { if (costPriceInput === '') setCostPriceInput('0'); }}
-                  placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                />
+              
+              {/* Cost and Offers in 2 columns */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Zoezi (Cost)
+                  </label>
+                  <input
+                    type="text"
+                    value={costPriceInput ? formatNumberWithCommas(costPriceInput) : ''}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/,/g, '');
+                      if (v === '') { setCostPriceInput(''); return; }
+                      if (/^\d*(?:\.\d{0,2})?$/.test(v)) setCostPriceInput(v);
+                    }}
+                    onBlur={() => { if (costPriceInput === '') setCostPriceInput('0'); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Offers/Discount
+                  </label>
+                  <input
+                    type="text"
+                    value={offersInput ? formatNumberWithCommas(offersInput) : ''}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/,/g, '');
+                      if (v === '') { setOffersInput(''); return; }
+                      if (/^\d*(?:\.\d{0,2})?$/.test(v)) setOffersInput(v);
+                    }}
+                    onBlur={() => { if (offersInput === '') setOffersInput('0'); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
+
+              {/* Selling Price in full width */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Selling Price
@@ -379,25 +419,31 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                   }}
                   onBlur={() => { if (unitPriceInput === '' ) setUnitPriceInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             {/* Total Summary - Compact */}
-            <div className="hidden md:grid gap-2 md:grid-cols-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
+            <div className="hidden md:grid gap-2 md:grid-cols-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
               <div className="text-center">
                 <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Amount</div>
-                <div className="text-lg font-bold text-blue-600 dark:text-blue-400">TSh {totalAmount.toFixed(2)}</div>
+                <div className="text-lg font-bold text-[#800000] dark:text-[#A00000]">TSh {totalAmount.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Ganji (Profit)</div>
-                <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">TSh {ganji.toFixed(2)}</div>
+                <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Base Profit</div>
+                <div className="text-lg font-bold text-orange-600 dark:text-orange-400">TSh {baseGanji.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Per Unit Margin</div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">TSh {(unitPrice - costPrice).toFixed(2)}</div>
+                <div className="text-xs font-medium text-red-600 dark:text-red-400">Offers Given</div>
+                <div className="text-lg font-bold text-red-600 dark:text-red-400">-TSh {offers.toFixed(2)}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Net Ganji</div>
+                <div className={`text-lg font-bold ${ganji >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  TSh {ganji.toFixed(2)}
+                </div>
               </div>
             </div>
 

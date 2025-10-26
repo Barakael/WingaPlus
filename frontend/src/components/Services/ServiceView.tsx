@@ -29,8 +29,8 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
     try {
       const salesmanId = user?.id;
       const url = salesmanId
-        ? `${BASE_URL}/services?salesman_id=${salesmanId}`
-        : `${BASE_URL}/services`;
+        ? `${BASE_URL}/api/services?salesman_id=${salesmanId}`
+        : `${BASE_URL}/api/services`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -89,7 +89,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/services/${service.id}`, {
+      const response = await fetch(`${BASE_URL}/api/services/${service.id}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',
@@ -136,7 +136,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
         </div>
         <button
           onClick={onFileService}
-          className="md:text-base text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center"
+          className="md:text-base text-sm bg-[#800000] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 flex items-center"
         >
           <Wrench className="h-4 w-4 mr-2" />
           File New Service
@@ -153,7 +153,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
             <button
               onClick={fetchServices}
               disabled={loadingServices}
-              className="flex items-center px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className={`h-4 w-4 mr-1 ${loadingServices ? 'animate-spin' : ''}`} />
               Refresh
@@ -181,7 +181,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
                 {paginatedServices.map((service) => (
                   <tr
                     key={service.id}
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors"
                     onClick={() => handleViewService(service)}
                   >
                     <td className="py-1 px-1 sm:py-2 sm:px-2 text-gray-900 dark:text-white">
@@ -276,7 +276,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
                       onClick={() => goToPage(pageNum)}
                       className={`px-3 py-1 text-sm rounded-md ${
                         currentPage === pageNum
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-red-500 text-white'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >

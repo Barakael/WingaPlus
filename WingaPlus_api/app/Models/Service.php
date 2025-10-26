@@ -15,6 +15,7 @@ class Service extends Model
         'issue_price',
         'service_price',
         'final_price',
+        'offers',
         'cost_price',
         'ganji',
         'salesman_id',
@@ -25,6 +26,7 @@ class Service extends Model
         'issue_price' => 'decimal:2',
         'service_price' => 'decimal:2',
         'final_price' => 'decimal:2',
+        'offers' => 'decimal:2',
         'cost_price' => 'decimal:2',
         'ganji' => 'decimal:2',
     ];

@@ -145,7 +145,7 @@ const SalesReport: React.FC = () => {
             Detailed analysis of all sales with profit calculations
           </p>
         </div>
-        <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors flex items-center">
+        <button className="bg-gradient-to-r from-[#800000] to-[#600000] text-white px-4 py-2 rounded-lg hover:from-[#600000] hover:to-[#400000] transition-colors flex items-center">
           <Download className="h-4 w-4 mr-2" />
           Export Report
         </button>
@@ -181,10 +181,10 @@ const SalesReport: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-blue-200 dark:border-blue-800">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-red-200 dark:border-red-800">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-              <Percent className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-red-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+              <Percent className="h-6 w-6 text-[#800000] dark:text-[#A00000]" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Offers</p>
@@ -200,8 +200,8 @@ const SalesReport: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-[#800000] dark:text-[#A00000]" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</p>
@@ -252,14 +252,14 @@ const SalesReport: React.FC = () => {
                 placeholder="Search by product or customer..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value as typeof filterBy)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">All Sales</option>
               <option value="profitable">Profitable Only</option>
@@ -272,19 +272,19 @@ const SalesReport: React.FC = () => {
             <span className="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
             <button
               onClick={() => handleSort('date')}
-              className={`px-3 py-1 rounded text-sm ${sortBy === 'date' ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}
+              className={`px-3 py-1 rounded text-sm ${sortBy === 'date' ? 'bg-red-100 dark:bg-blue-900 text-[#800000] dark:text-[#A00000]' : 'text-gray-600 dark:text-gray-400'}`}
             >
               Date {getSortIcon('date')}
             </button>
             <button
               onClick={() => handleSort('profit')}
-              className={`px-3 py-1 rounded text-sm ${sortBy === 'profit' ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}
+              className={`px-3 py-1 rounded text-sm ${sortBy === 'profit' ? 'bg-red-100 dark:bg-blue-900 text-[#800000] dark:text-[#A00000]' : 'text-gray-600 dark:text-gray-400'}`}
             >
               Profit {getSortIcon('profit')}
             </button>
             <button
               onClick={() => handleSort('amount')}
-              className={`px-3 py-1 rounded text-sm ${sortBy === 'amount' ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}
+              className={`px-3 py-1 rounded text-sm ${sortBy === 'amount' ? 'bg-red-100 dark:bg-blue-900 text-[#800000] dark:text-[#A00000]' : 'text-gray-600 dark:text-gray-400'}`}
             >
               Amount {getSortIcon('amount')}
             </button>
@@ -336,7 +336,7 @@ const SalesReport: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 w-10 h-10">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-full flex items-center justify-center">
                           <Package className="h-5 w-5 text-white" />
                         </div>
                       </div>
@@ -360,7 +360,7 @@ const SalesReport: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400">
                     TSh {sale.expenses.toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 dark:text-blue-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#800000] dark:text-[#A00000]">
                     TSh {sale.offers.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

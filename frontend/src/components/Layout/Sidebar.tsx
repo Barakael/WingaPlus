@@ -91,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
         role="navigation"
         aria-label="Sidebar"
         className={`
-          fixed top-16 bottom-0 left-0 z-50 w-64 bg-gray-200 dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col h-[calc(100vh-4rem)]
+          fixed top-16 bottom-0 left-0 z-50 w-64 bg-gray-100 dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col h-[calc(100vh-4rem)]
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
@@ -121,7 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
                     onClick={() => { onTabChange(item.id); onClose(); }}
                     className={`
                       w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200
-                      ${isActive ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}
+                      ${isActive ? 'bg-[#800000] text-white shadow-lg hover:bg-[#600000]' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}
                     `}
                   >
                     <Icon className="h-5 w-5 mr-3" />

@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-silver-300 dark:bg-gray-900">
       {/* Fixed Navbar */}
       <div className="fixed top-0 left-0 right-0 z-30">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />

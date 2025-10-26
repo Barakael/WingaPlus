@@ -53,28 +53,28 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, serviceDat
           </div>
 
           {/* Email Report
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
             <div className="flex items-center space-x-3 mb-3">
-              <Send className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+              <Send className="h-5 w-5 text-[#800000] dark:text-[#A00000]" />
+              <h3 className="font-semibold text-[#400000] dark:text-red-100">
                 Service Report
               </h3>
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-blue-700 dark:text-blue-300">Status:</span>
+                <span className="text-[#600000] dark:text-[#C00000]">Status:</span>
                 <span className="font-medium text-green-600 dark:text-green-400">✓ Service Recorded Successfully</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-blue-700 dark:text-blue-300">Customer:</span>
+                <span className="text-[#600000] dark:text-[#C00000]">Customer:</span>
                 <span className="font-medium">{serviceData.customer_email}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-blue-700 dark:text-blue-300">Device:</span>
+                <span className="text-[#600000] dark:text-[#C00000]">Device:</span>
                 <span className="font-medium">{serviceData.device_name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-blue-700 dark:text-blue-300">Filed At:</span>
+                <span className="text-[#600000] dark:text-[#C00000]">Filed At:</span>
                 <span className="font-medium">{new Date(serviceData.submitted_at).toLocaleString()}</span>
               </div>
             </div>
@@ -147,7 +147,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, serviceDat
                 // Could add print functionality here
                 window.print();
               }}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-colors"
+              className="flex-1 bg-[#800000] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#600000] transition-colors"
             >
               Print Report
             </button>

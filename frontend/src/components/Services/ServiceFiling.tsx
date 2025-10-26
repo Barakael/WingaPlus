@@ -12,6 +12,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [issuePriceInput, setIssuePriceInput] = useState<string>('0');
   const [servicePriceInput, setServicePriceInput] = useState<string>('0');
   const [finalPriceInput, setFinalPriceInput] = useState<string>('0');
+  const [offersInput, setOffersInput] = useState<string>('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submittedService, setSubmittedService] = useState<any>(null);
@@ -20,8 +21,10 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const issuePrice = parseFloat(issuePriceInput) || 0;
   const servicePrice = parseFloat(servicePriceInput) || 0;
   const finalPrice = parseFloat(finalPriceInput) || 0;
+  const offers = parseFloat(offersInput) || 0;
   const costPrice = issuePrice + servicePrice; // Zoezi
-  const ganji = finalPrice - costPrice;
+  const baseGanji = finalPrice - costPrice;
+  const ganji = baseGanji - offers;
 
   // Helper function to format numbers with commas
   const formatNumberWithCommas = (value: string): string => {
@@ -34,7 +37,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/services`, {
+      const response = await fetch(`${BASE_URL}/api/services`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,6 +51,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           issue_price: issuePrice,
           service_price: servicePrice,
           final_price: finalPrice,
+          offers: offers,
           service_date: new Date().toISOString().split('T')[0], // Today's date
           salesman_id: user?.id || 1,
         }),
@@ -114,7 +118,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {/* Header - Compact */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-3">
                 <Wrench className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -149,7 +153,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -162,7 +166,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="tel"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div> */}
@@ -176,14 +180,14 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
                   placeholder="Enter store name"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             {/* Device Details - Compact Grid */}
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -195,7 +199,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     value={deviceName}
                     onChange={(e) => setDeviceName(e.target.value)}
                     placeholder="iPhone 15 Pro.."
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -208,54 +212,78 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         value={issue}
                         onChange={(e) => setIssue(e.target.value)}
                         placeholder="battery, screen,"
-                        className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         required
                     />
                 </div>
               </div>
             </div>
 
-            {/* Pricing Details - Compact */}
-            <div className="grid grid-cols-1 gap-3">
+            {/* Pricing Details - Responsive Layout */}
+            <div className="space-y-3">
+              {/* Device and Service Cost */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Zoezi ya kifaa
+                  </label>
+                  <input
+                    type="text"
+                    value={issuePriceInput ? formatNumberWithCommas(issuePriceInput) : ''}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/,/g, '');
+                      if (v === '') { setIssuePriceInput(''); return; }
+                      if (/^\d*(?:\.\d{0,2})?$/.test(v)) setIssuePriceInput(v);
+                    }}
+                    onBlur={() => { if (issuePriceInput === '') setIssuePriceInput('0'); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Ufundi
+                  </label>
+                  <input
+                    type="text"
+                    value={servicePriceInput ? formatNumberWithCommas(servicePriceInput) : ''}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/,/g, '');
+                      if (v === '') { setServicePriceInput(''); return; }
+                      if (/^\d*(?:\.\d{0,2})?$/.test(v)) setServicePriceInput(v);
+                    }}
+                    onBlur={() => { if (servicePriceInput === '' ) setServicePriceInput('0'); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Offers field */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Zoezi ya kifaa
+                  Offers/Discount
                 </label>
                 <input
                   type="text"
-                  value={issuePriceInput ? formatNumberWithCommas(issuePriceInput) : ''}
+                  value={offersInput ? formatNumberWithCommas(offersInput) : ''}
                   onChange={(e) => {
                     const v = e.target.value.replace(/,/g, '');
-                    if (v === '') { setIssuePriceInput(''); return; }
-                    if (/^\d*(?:\.\d{0,2})?$/.test(v)) setIssuePriceInput(v);
+                    if (v === '') { setOffersInput(''); return; }
+                    if (/^\d*(?:\.\d{0,2})?$/.test(v)) setOffersInput(v);
                   }}
-                  onBlur={() => { if (issuePriceInput === '') setIssuePriceInput('0'); }}
+                  onBlur={() => { if (offersInput === '') setOffersInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
+
+              {/* Final Price in full width */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Ufundi
-                </label>
-                <input
-                  type="text"
-                  value={servicePriceInput ? formatNumberWithCommas(servicePriceInput) : ''}
-                  onChange={(e) => {
-                    const v = e.target.value.replace(/,/g, '');
-                    if (v === '') { setServicePriceInput(''); return; }
-                    if (/^\d*(?:\.\d{0,2})?$/.test(v)) setServicePriceInput(v);
-                  }}
-                  onBlur={() => { if (servicePriceInput === '' ) setServicePriceInput('0'); }}
-                  placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Selling Price
+                  Final Price
                 </label>
                 <input
                   type="text"
@@ -267,25 +295,31 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   }}
                   onBlur={() => { if (finalPriceInput === '' ) setFinalPriceInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             {/* Total Summary - Compact */}
-            <div className="hidden md:grid gap-2 md:grid-cols-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
+            <div className="hidden md:grid gap-2 md:grid-cols-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
               <div className="text-center">
-                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Zoezi (Cost)</div>
-                <div className="text-sm font-bold text-blue-600 dark:text-blue-400">TSh {costPrice.toFixed(2)}</div>
+                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Cost</div>
+                <div className="text-sm font-bold text-[#800000] dark:text-[#A00000]">TSh {costPrice.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Ganji</div>
-                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">TSh {ganji.toFixed(2)}</div>
+                <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Base Profit</div>
+                <div className="text-sm font-bold text-orange-600 dark:text-orange-400">TSh {baseGanji.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Margin</div>
-                <div className="text-sm font-bold text-gray-900 dark:text-white">{costPrice > 0 ? ((ganji / costPrice) * 100).toFixed(1) : '0'}%</div>
+                <div className="text-xs font-medium text-red-600 dark:text-red-400">Offers Given</div>
+                <div className="text-sm font-bold text-red-600 dark:text-red-400">-TSh {offers.toFixed(2)}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Net Ganji</div>
+                <div className={`text-sm font-bold ${ganji >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  TSh {ganji.toFixed(2)}
+                </div>
               </div>
             </div>
 
@@ -301,7 +335,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || !deviceName || !issue || !customerName || !storeName || !issuePriceInput || !servicePriceInput || !finalPriceInput}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
+                className="flex-1 bg-[#800000] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#600000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
               >
                 {isSubmitting ? (
                   <>

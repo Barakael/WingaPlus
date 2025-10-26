@@ -1,18 +1,22 @@
-﻿import React, { useEffect, useState, useCallback } from 'react';
-import { TrendingUp, DollarSign, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, BarChart3 } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { TrendingUp, DollarSign, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, BarChart3, Wrench } from 'lucide-react';
 import { listSales, listTargets, Target as TargetType } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
 import { Sale } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
+import { BASE_URL } from '../../components/api/api';
 
 interface PeriodData {
   period: string;
   ganji: number;
   sales: number;
+  services: number;
+  totalGanji: number;
   items: number;
   transactions: number;
+  totalTransactions: number;
 }
 
 interface PerformanceStats {
@@ -25,11 +29,13 @@ interface PerformanceStats {
   currentPeriodProgress: number;
   periodType: 'weekly' | 'monthly';
   targetMetric: string;
+  servicesGanji?: number;
 }
 
 const CommissionTracking: React.FC = () => {
   const { user } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +58,8 @@ const CommissionTracking: React.FC = () => {
     bestPeriod: '',
     currentPeriodProgress: 0,
     periodType: 'monthly',
-    targetMetric: 'profit'
+    targetMetric: 'profit',
+    servicesGanji: 0
   });
 
   // Load targets data for current user
@@ -87,8 +94,17 @@ const CommissionTracking: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listSales({ salesman_id: String(user.id) });
-      setSales(data);
+      const [salesData, servicesResponse] = await Promise.all([
+        listSales({ salesman_id: String(user.id) }),
+        fetch(`${BASE_URL}/api/services?salesman_id=${user.id}`)
+      ]);
+
+      setSales(salesData);
+
+      if (servicesResponse.ok) {
+        const servicesData = await servicesResponse.json();
+        setServices(servicesData?.data?.data ?? []);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load sales');
     } finally {
@@ -127,8 +143,11 @@ const CommissionTracking: React.FC = () => {
         period: month,
         ganji: 0,
         sales: 0,
+        services: 0,
+        totalGanji: 0,
         items: 0,
-        transactions: 0
+        transactions: 0,
+        totalTransactions: 0
       };
     });
 
@@ -166,6 +185,48 @@ const CommissionTracking: React.FC = () => {
       periods[periodKey].transactions += 1;
     });
 
+    // Process services data
+    services.forEach(service => {
+      const serviceDate = new Date(service.created_at || service.date || '');
+      if (serviceDate.getFullYear() !== selectedYear) return; // Only include services from selected year
+
+      let periodKey: string;
+
+      if (periodType === 'weekly') {
+        // Get week number and year
+        const startOfYear = new Date(serviceDate.getFullYear(), 0, 1);
+        const weekNumber = Math.ceil(((serviceDate.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
+        periodKey = `Week ${weekNumber}, ${serviceDate.getFullYear()}`;
+      } else {
+        // Monthly
+        const monthName = serviceDate.toLocaleDateString('en-US', { month: 'long' });
+        periodKey = `${monthName} ${serviceDate.getFullYear()}`;
+      }
+
+      if (!periods[periodKey]) {
+        periods[periodKey] = {
+          period: periodKey,
+          ganji: 0,
+          sales: 0,
+          services: 0,
+          totalGanji: 0,
+          items: 0,
+          transactions: 0,
+          totalTransactions: 0
+        };
+      }
+
+      const serviceGanji = parseFloat(service.ganji) || 0;
+      periods[periodKey].services += serviceGanji;
+      periods[periodKey].totalTransactions += 1;
+    });
+
+    // Calculate total ganji for each period
+    Object.keys(periods).forEach(periodKey => {
+      periods[periodKey].totalGanji = periods[periodKey].ganji + periods[periodKey].services;
+      periods[periodKey].totalTransactions = periods[periodKey].transactions + (periods[periodKey].totalTransactions - periods[periodKey].transactions);
+    });
+
     // Convert to array and sort by month order
     let periodArray: PeriodData[];
     if (periodType === 'monthly') {
@@ -183,10 +244,10 @@ const CommissionTracking: React.FC = () => {
           return monthData;
         } else if (selectedYear === currentYear) {
           // For current year, only show months up to current month
-          return index <= currentMonth ? monthData : { ...monthData, ganji: 0, sales: 0, items: 0, transactions: 0 };
+          return index <= currentMonth ? monthData : { ...monthData, ganji: 0, sales: 0, services: 0, totalGanji: 0, items: 0, transactions: 0, totalTransactions: 0 };
         } else {
           // Future years - show all as zero
-          return { ...monthData, ganji: 0, sales: 0, items: 0, transactions: 0 };
+          return { ...monthData, ganji: 0, sales: 0, services: 0, totalGanji: 0, items: 0, transactions: 0, totalTransactions: 0 };
         }
       });
     } else {
@@ -209,6 +270,11 @@ const CommissionTracking: React.FC = () => {
     const totalSales = filteredPeriodArray.reduce((sum, p) => sum + p.sales, 0);
     const totalItems = filteredPeriodArray.reduce((sum, p) => sum + p.items, 0);
     const totalTransactions = filteredPeriodArray.reduce((sum, p) => sum + p.transactions, 0);
+
+    // Calculate services ganji
+    const servicesGanji = services.reduce((sum, service) => sum + (parseFloat(service.ganji) || 0), 0);
+    const salesGanji = totalGanji; // Rename for clarity
+    const combinedGanji = salesGanji + servicesGanji;
 
     const bestPeriod = filteredPeriodArray.reduce((best, current) =>
       current.ganji > best.ganji ? current : best, filteredPeriodArray[0] || { period: '' }
@@ -238,17 +304,18 @@ const CommissionTracking: React.FC = () => {
       (currentPeriodValue / targetValue) * 100 : 0;
 
     setPerformanceStats({
-      totalGanji,
-      totalSales,
+      totalGanji: combinedGanji, // Now includes both sales and services
+      totalSales: salesGanji, // This is now sales ganji only
       totalItems,
       totalTransactions,
       averageGanji: totalTransactions > 0 ? totalGanji / totalTransactions : 0,
       bestPeriod: bestPeriod?.period || '',
       currentPeriodProgress,
       periodType,
-      targetMetric
+      targetMetric,
+      servicesGanji // Add services ganji to stats
     });
-  }, [sales, periodType, targets, selectedTargetId, selectedYear]);
+  }, [sales, periodType, targets, selectedTargetId, selectedYear, services]);
 
   useEffect(() => {
     loadSalesData();
@@ -290,9 +357,11 @@ const CommissionTracking: React.FC = () => {
 
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Total Profit (Ganji): ${formatCurrency(performanceStats.totalGanji)}`, 25, yPosition);
+      doc.text(`Total Profit (Sales + Services): ${formatCurrency(performanceStats.totalGanji)}`, 25, yPosition);
       yPosition += 6;
-      doc.text(`Total Sales Revenue: ${formatCurrency(performanceStats.totalSales)}`, 25, yPosition);
+      doc.text(`Sales Ganji: ${formatCurrency(performanceStats.totalSales)}`, 25, yPosition);
+      yPosition += 6;
+      doc.text(`Services Ganji: ${formatCurrency(performanceStats.servicesGanji || 0)}`, 25, yPosition);
       yPosition += 6;
       doc.text(`Total Items Sold: ${performanceStats.totalItems}`, 25, yPosition);
       yPosition += 6;
@@ -311,7 +380,7 @@ const CommissionTracking: React.FC = () => {
 
       // Headers
       doc.setFontSize(9);
-      const headers = ['Period', 'Profit (Ganji)', 'Sales Revenue', 'Items', 'Transactions'];
+      const headers = ['Period', 'Total Profit', 'Services', 'Items', 'Transactions'];
       const colWidths = [50, 35, 35, 25, 30];
       let xPos = 20;
 
@@ -337,10 +406,10 @@ const CommissionTracking: React.FC = () => {
         xPos = 20;
         const rowData = [
           period.period.substring(0, 15),
-          formatCurrency(period.ganji),
-          formatCurrency(period.sales),
+          formatCurrency(period.totalGanji),
+          formatCurrency(period.services),
           period.items.toString(),
-          period.transactions.toString()
+          period.totalTransactions.toString()
         ];
 
         rowData.forEach((cell, index) => {
@@ -361,10 +430,10 @@ const CommissionTracking: React.FC = () => {
     const selectedTarget = targets.find(target => String(target.id) === selectedTargetId);
     const excelData = periodData.map(period => ({
       'Period': period.period,
-      'Profit (Ganji)': period.ganji,
-      'Sales Revenue': period.sales,
+      'Total Profit': period.totalGanji,
+      'Services': period.services,
       'Items Sold': period.items,
-      'Transactions': period.transactions
+      'Transactions': period.totalTransactions
     }));
 
     const ws = XLSX.utils.json_to_sheet(excelData);
@@ -373,11 +442,14 @@ const CommissionTracking: React.FC = () => {
 
     // Summary sheet
     const summaryData = [{
-      'Metric': 'Total Profit (Ganji)',
+      'Metric': 'Total Profit (Sales + Services)',
       'Value': performanceStats.totalGanji
     }, {
-      'Metric': 'Total Sales Revenue',
+      'Metric': 'Sales Ganji',
       'Value': performanceStats.totalSales
+    }, {
+      'Metric': 'Services Ganji',
+      'Value': performanceStats.servicesGanji || 0
     }, {
       'Metric': 'Total Items Sold',
       'Value': performanceStats.totalItems
@@ -419,21 +491,21 @@ const CommissionTracking: React.FC = () => {
           <button
             onClick={loadSalesData}
             disabled={loading}
-            className="flex items-center px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
           <button
             onClick={exportToPDF}
-            className="flex items-center px-3 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
           >
             <FileText className="h-4 w-4 mr-1" />
             PDF
           </button>
           <button
             onClick={exportToExcel}
-            className="flex items-center px-3 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
           >
             <FileSpreadsheet className="h-4 w-4 mr-1" />
             Excel
@@ -456,7 +528,7 @@ const CommissionTracking: React.FC = () => {
             <select
               value={periodType}
               onChange={(e) => setPeriodType(e.target.value as 'weekly' | 'monthly')}
-              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
@@ -470,7 +542,7 @@ const CommissionTracking: React.FC = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {Array.from({ length: 5 }, (_, i) => (
                 <option key={new Date().getFullYear() - i} value={new Date().getFullYear() - i}>
@@ -492,7 +564,7 @@ const CommissionTracking: React.FC = () => {
                   localStorage.setItem(`commission_selected_target_${user.id}`, e.target.value);
                 }
               }}
-              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {targets.length > 0 ? (
                 targets.map((target) => (
@@ -534,7 +606,7 @@ const CommissionTracking: React.FC = () => {
             <div
               className={`h-3 sm:h-4 rounded-full transition-all duration-300 ${
                 performanceStats.currentPeriodProgress >= 100 ? 'bg-green-500' :
-                performanceStats.currentPeriodProgress >= 75 ? 'bg-blue-500' :
+                performanceStats.currentPeriodProgress >= 75 ? 'bg-red-500' :
                 performanceStats.currentPeriodProgress >= 50 ? 'bg-yellow-500' : 'bg-red-500'
               }`}
               style={{ width: `${Math.min(performanceStats.currentPeriodProgress, 100)}%` }}
@@ -550,7 +622,7 @@ const CommissionTracking: React.FC = () => {
             </span>
             <span className={`font-medium ${
               performanceStats.currentPeriodProgress >= 100 ? 'text-green-600' :
-              performanceStats.currentPeriodProgress >= 75 ? 'text-blue-600' :
+              performanceStats.currentPeriodProgress >= 75 ? 'text-[#800000]' :
               performanceStats.currentPeriodProgress >= 50 ? 'text-yellow-600' : 'text-red-600'
             }`}>
               {selectedTarget?.metric === 'profit'
@@ -580,11 +652,11 @@ const CommissionTracking: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
-            <div className="p-2 sm:p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 sm:p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
+              <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000]" />
             </div>
             <div className="ml-1 sm:ml-1">
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Sales Revenue</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Sales Ganji</p>
               <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
                 TSh {formatCurrency(performanceStats.totalSales)}
               </p>
@@ -594,8 +666,8 @@ const CommissionTracking: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
-            <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 sm:p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
+              <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000]" />
             </div>
             <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
@@ -609,12 +681,12 @@ const CommissionTracking: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
             <div className="p-2 sm:p-3 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-              <Target className="h-4 w-4 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
+              <Wrench className="h-4 w-4 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div className="ml-1 sm:ml-1">
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Avg Profit</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Services Ganji</p>
               <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
-                TSh {formatCurrency(performanceStats.averageGanji)}
+                TSh {formatCurrency(performanceStats.servicesGanji || 0)}
               </p>
             </div>
           </div>
@@ -630,7 +702,7 @@ const CommissionTracking: React.FC = () => {
               {selectedYear} Monthly Profit Flow
             </h2>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 sm:mt-0">
-              Target Levels: 250K • 500K • 750K • 1M 
+              Target Levels: 250K � 500K � 750K � 1M 
             </div>
           </div>
           <div className="h-80 sm:h-96">
@@ -662,7 +734,7 @@ const CommissionTracking: React.FC = () => {
                   tick={{ fontSize: 11, fill: '#6b7280' }}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`TSh ${formatCurrency(value)}`, 'Monthly Profit']}
+                  formatter={(value: number) => [`TSh ${formatCurrency(value)}`, 'Total Monthly Profit']}
                   labelFormatter={(label) => `${label} ${selectedYear}`}
                   contentStyle={{
                     backgroundColor: '#1f2937',
@@ -673,7 +745,7 @@ const CommissionTracking: React.FC = () => {
                 />
                 <Area
                   type="monotone"
-                  dataKey="ganji"
+                  dataKey="totalGanji"
                   stroke="#10b981"
                   strokeWidth={3}
                   fill="url(#profitGradient)"
@@ -752,11 +824,11 @@ const CommissionTracking: React.FC = () => {
               <span className="text-gray-600 dark:text-gray-400">500K Target</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-blue-500 mr-2"></div>
+              <div className="w-3 h-0.5 bg-red-500 mr-2"></div>
               <span className="text-gray-600 dark:text-gray-400">750K Target</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-purple-500 mr-2"></div>
+              <div className="w-3 h-0.5 bg-[#800000] mr-2"></div>
               <span className="text-gray-600 dark:text-gray-400">1M Target</span>
             </div>
           </div>
@@ -779,9 +851,8 @@ const CommissionTracking: React.FC = () => {
             <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Period</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Profit</th>
-                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell">Revenue</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell">Services</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell">Items</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell">Transactions</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell">Avg Profit</th>
@@ -790,23 +861,20 @@ const CommissionTracking: React.FC = () => {
               <tbody>
                 {periodData.map((period) => (
                   <tr key={period.period} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-900 dark:text-white font-medium">
-                      {period.period}
-                    </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-green-600 dark:text-green-400 font-semibold font-mono">
-                      TSh {formatCurrency(period.ganji)}
+                      TSh {formatCurrency(period.totalGanji)}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white font-mono hidden sm:table-cell">
-                      TSh {formatCurrency(period.sales)}
+                      TSh {formatCurrency(period.services)}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white hidden md:table-cell">
                       {period.items}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white hidden lg:table-cell">
-                      {period.transactions}
+                      {period.totalTransactions}
                     </td>
-                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-blue-600 dark:text-blue-400 font-mono hidden xl:table-cell">
-                      TSh {formatCurrency(period.transactions > 0 ? period.ganji / period.transactions : 0)}
+                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-[#800000] dark:text-[#A00000] font-mono hidden xl:table-cell">
+                      TSh {formatCurrency(period.totalTransactions > 0 ? period.totalGanji / period.totalTransactions : 0)}
                     </td>
                   </tr>
                 ))}

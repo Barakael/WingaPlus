@@ -130,17 +130,17 @@ const ShopOwnerDashboard: React.FC = () => {
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-            <Package className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <span className="text-sm font-medium text-blue-600">Add Product</span>
+          <button className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+            <Package className="h-8 w-8 text-[#800000] mx-auto mb-2" />
+            <span className="text-sm font-medium text-[#800000]">Add Product</span>
           </button>
           <button className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
             <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
             <span className="text-sm font-medium text-green-600">Manage Staff</span>
           </button>
-          <button className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
-            <TrendingUp className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-            <span className="text-sm font-medium text-purple-600">View Reports</span>
+          <button className="p-4 bg-purple-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+            <TrendingUp className="h-8 w-8 text-[#800000] mx-auto mb-2" />
+            <span className="text-sm font-medium text-[#800000]">View Reports</span>
           </button>
           <button className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
             <AlertTriangle className="h-8 w-8 text-orange-600 mx-auto mb-2" />

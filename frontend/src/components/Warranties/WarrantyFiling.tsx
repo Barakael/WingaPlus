@@ -15,6 +15,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [storage, setStorage] = useState('');
   const [costPriceInput, setCostPriceInput] = useState<string>('0');
   const [unitPriceInput, setUnitPriceInput] = useState<string>('0');
+  const [offersInput, setOffersInput] = useState<string>('0');
   const [imeiNumber, setImeiNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -23,7 +24,9 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   const totalAmount = parseFloat(unitPriceInput) || 0;
   const costPrice = parseFloat(costPriceInput) || 0;
-  const ganji = totalAmount - costPrice;
+  const offers = parseFloat(offersInput) || 0;
+  const baseGanji = totalAmount - costPrice;
+  const ganji = baseGanji - offers;
 
   // Helper function to format numbers with commas
   const formatNumberWithCommas = (value: string): string => {
@@ -37,7 +40,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/sales`, {
+      const response = await fetch(`${BASE_URL}/api/sales`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +53,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           unit_price: parseFloat(unitPriceInput) || 0,
           selling_price: parseFloat(unitPriceInput) || 0,
           cost_price: parseFloat(costPriceInput) || 0,
+          offers: parseFloat(offersInput) || 0,
           sale_date: new Date().toISOString(),
           customer_name: customerName,
           customer_phone: customerPhone,
@@ -154,7 +158,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {/* Header - Compact */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-3">
                 <Shield className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -190,7 +194,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -203,7 +207,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -216,7 +220,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="tel"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -229,14 +233,14 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
                   placeholder="Enter store name"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             {/* Phone Details - Compact Grid */}
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -248,7 +252,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     value={phoneName}
                     onChange={(e) => setPhoneName(e.target.value)}
                     placeholder="iPhone 15 Pro"
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -261,7 +265,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
                     placeholder="Space Black"
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -273,7 +277,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <select
                     value={storage}
                     onChange={(e) => setStorage(e.target.value)}
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   >
                     <option value="">Storage</option>
@@ -293,7 +297,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     value={imeiNumber}
                     onChange={(e) => setImeiNumber(e.target.value)}
                     placeholder="IMEI"
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -308,7 +312,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <select
                 value={warrantyPeriod}
                 onChange={(e) => setWarrantyPeriod(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               >
                 <option value="">Choose period...</option>
@@ -318,25 +322,48 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Zoezi
-                </label>
-                <input
-                  type="text"
-                  value={costPriceInput ? formatNumberWithCommas(costPriceInput) : ''}
-                  onChange={(e) => {
-                    const v = e.target.value.replace(/,/g, '');
-                    if (v === '') { setCostPriceInput(''); return; }
-                    if (/^\d*(?:\.\d{0,2})?$/.test(v)) setCostPriceInput(v);
-                  }}
-                  onBlur={() => { if (costPriceInput === '') setCostPriceInput('0'); }}
-                  placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                />
+            {/* Pricing Details - Responsive Layout */}
+            <div className="space-y-3">
+              {/* Cost and Offers in 2 columns */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Zoezi (Cost)
+                  </label>
+                  <input
+                    type="text"
+                    value={costPriceInput ? formatNumberWithCommas(costPriceInput) : ''}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/,/g, '');
+                      if (v === '') { setCostPriceInput(''); return; }
+                      if (/^\d*(?:\.\d{0,2})?$/.test(v)) setCostPriceInput(v);
+                    }}
+                    onBlur={() => { if (costPriceInput === '') setCostPriceInput('0'); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Offers/Discount
+                  </label>
+                  <input
+                    type="text"
+                    value={offersInput ? formatNumberWithCommas(offersInput) : ''}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/,/g, '');
+                      if (v === '') { setOffersInput(''); return; }
+                      if (/^\d*(?:\.\d{0,2})?$/.test(v)) setOffersInput(v);
+                    }}
+                    onBlur={() => { if (offersInput === '') setOffersInput('0'); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
+
+              {/* Selling Price in full width */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Selling Price
@@ -351,25 +378,31 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   }}
                   onBlur={() => { if (unitPriceInput === '' ) setUnitPriceInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             {/* Total Summary - Compact */}
-             <div className="hidden md:grid gap-2 md:grid-cols-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
+            <div className="hidden md:grid gap-2 md:grid-cols-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
               <div className="text-center">
                 <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Selling Price</div>
-                <div className="text-sm font-bold text-blue-600 dark:text-blue-400">TSh {totalAmount.toFixed(2)}</div>
+                <div className="text-sm font-bold text-[#800000] dark:text-[#A00000]">TSh {totalAmount.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Profit (Ganji)</div>
-                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">TSh {ganji.toFixed(2)}</div>
+                <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Base Profit</div>
+                <div className="text-sm font-bold text-orange-600 dark:text-orange-400">TSh {baseGanji.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Margin</div>
-                <div className="text-sm font-bold text-gray-900 dark:text-white">{totalAmount > 0 ? ((ganji / totalAmount) * 100).toFixed(1) : '0'}%</div>
+                <div className="text-xs font-medium text-red-600 dark:text-red-400">Offers Given</div>
+                <div className="text-sm font-bold text-red-600 dark:text-red-400">-TSh {offers.toFixed(2)}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Net Ganji</div>
+                <div className={`text-sm font-bold ${ganji >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  TSh {ganji.toFixed(2)}
+                </div>
               </div>
             </div>
 
@@ -385,7 +418,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || !phoneName || !customerName || !customerEmail || !customerPhone || !storeName || !color || !storage || !costPriceInput || !unitPriceInput || !imeiNumber || !warrantyPeriod}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
+                className="flex-1 bg-gradient-to-r from-[#800000] to-[#600000] text-white py-2 px-4 rounded-lg font-medium hover:from-[#600000] hover:to-[#400000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
               >
                 {isSubmitting ? (
                   <>

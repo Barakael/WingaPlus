@@ -16,8 +16,8 @@ const Reports: React.FC = () => {
     const fetchData = async () => {
       try {
         const [salesResponse, servicesResponse] = await Promise.all([
-          fetch(`${BASE_URL}/sales?salesman_id=${user?.id || 1}`),
-          fetch(`${BASE_URL}/services?salesman_id=${user?.id || 1}`)
+          fetch(`${BASE_URL}/api/sales?salesman_id=${user?.id || 1}`),
+          fetch(`${BASE_URL}/api/services?salesman_id=${user?.id || 1}`)
         ]);
 
         if (salesResponse.ok) {
@@ -157,7 +157,7 @@ const Reports: React.FC = () => {
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
@@ -173,7 +173,7 @@ const Reports: React.FC = () => {
             <select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="sales">Sales Report</option>
               <option value="services">Services Report</option>
@@ -224,8 +224,8 @@ const Reports: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-              <Wrench className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+              <Wrench className="h-6 w-6 text-[#800000] dark:text-[#A00000]" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Service Ganji</p>
@@ -244,7 +244,7 @@ const Reports: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <button
             onClick={downloadSalesReport}
-            className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center"
+            className="p-4 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-all duration-200 flex items-center justify-center"
           >
             <Download className="h-5 w-5 mr-2" />
             Sales Report
@@ -252,7 +252,7 @@ const Reports: React.FC = () => {
 
           <button
             onClick={downloadServicesReport}
-            className="p-4 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-200 flex items-center justify-center"
+            className="p-4 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-all duration-200 flex items-center justify-center"
           >
             <Download className="h-5 w-5 mr-2" />
             Services Report
@@ -260,7 +260,7 @@ const Reports: React.FC = () => {
 
           <button
             onClick={downloadInventoryReport}
-            className="p-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition-all duration-200 flex items-center justify-center"
+            className="p-4 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-all duration-200 flex items-center justify-center"
           >
             <Download className="h-5 w-5 mr-2" />
             Inventory Report
@@ -268,7 +268,7 @@ const Reports: React.FC = () => {
 
           <button
             onClick={downloadWarrantyReport}
-            className="p-4 bg-gradient-to-r from-yellow-500 to-orange-600 text-white rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-200 flex items-center justify-center"
+            className="p-4 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-all duration-200 flex items-center justify-center"
           >
             <Download className="h-5 w-5 mr-2" />
             Warranty Report

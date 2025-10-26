@@ -45,8 +45,9 @@ export interface Sale {
   unit_price: number;
   selling_price: number;
   cost_price?: number | null; // New: cost price per unit
+  offers?: number | null; // New: offers/discount amount to deduct from profit
   total_amount: number; // Server-calculated (quantity * unit_price)
-  ganji?: number | null; // New: profit = (unit_price - cost_price) * quantity
+  ganji?: number | null; // New: profit = (unit_price - cost_price) * quantity - offers
   warranty_id?: string | null; // Links back to warranty if auto-created
   warranty_months?: number; // Might be present for historical data
   warranty_details?: any; // Warranty details object

@@ -60,8 +60,15 @@ class SalesController extends BaseController
     $validated['selling_price'] = $validated['selling_price'] ?? $validated['unit_price'] ?? 0;
     // ensure required product_id exists (fallback to product_name or a manual placeholder)
     $validated['product_id'] = $validated['product_id'] ?? ($validated['product_name'] ?? 'manual');
-        if (array_key_exists('cost_price', $validated) && $validated['cost_price'] !== null) {
-            $validated['ganji'] = (($validated['selling_price'] - $validated['cost_price']) * ($validated['quantity'] ?? 1));
+        // Always calculate ganji when cost_price is provided
+        if (array_key_exists('cost_price', $validated)) {
+            $costPrice = $validated['cost_price'] ?? 0;
+            $sellingPrice = $validated['selling_price'] ?? 0;
+            $quantity = $validated['quantity'] ?? 1;
+            $offers = $validated['offers'] ?? 0;
+            
+            $baseProfit = ($sellingPrice - $costPrice) * $quantity;
+            $validated['ganji'] = $baseProfit - $offers; // Subtract offers from profit
         }
         $validated['sale_date'] = $validated['sale_date'] ?? now();
 
@@ -128,11 +135,17 @@ class SalesController extends BaseController
                 $validated['total_amount'] = $quantity * $sellingPrice;
             }
 
-            if (array_key_exists('cost_price', $validated)) {
-                $cost = $validated['cost_price'] ?? $sale->cost_price;
-                $sellingPrice = $validated['selling_price'] ?? $sale->selling_price;
-                $quantity = $validated['quantity'] ?? $sale->quantity;
-                $validated['ganji'] = ($sellingPrice - $cost) * $quantity;
+            // Always recalculate ganji when any relevant field is updated
+            if (array_key_exists('cost_price', $validated) || array_key_exists('selling_price', $validated) || 
+                array_key_exists('quantity', $validated) || array_key_exists('offers', $validated)) {
+                
+                $cost = $validated['cost_price'] ?? $sale->cost_price ?? 0;
+                $sellingPrice = $validated['selling_price'] ?? $sale->selling_price ?? 0;
+                $quantity = $validated['quantity'] ?? $sale->quantity ?? 1;
+                $offers = $validated['offers'] ?? $sale->offers ?? 0;
+                
+                $baseProfit = ($sellingPrice - $cost) * $quantity;
+                $validated['ganji'] = $baseProfit - $offers; // Subtract offers from profit
             }
 
             // Warranty sync

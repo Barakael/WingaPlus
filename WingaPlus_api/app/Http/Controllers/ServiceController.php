@@ -46,6 +46,7 @@ class ServiceController extends Controller
             'issue_price' => 'required|numeric|min:0',
             'service_price' => 'required|numeric|min:0',
             'final_price' => 'required|numeric|min:0',
+            'offers' => 'nullable|numeric|min:0',
             'service_date' => 'nullable|date',
             'salesman_id' => 'required|exists:users,id',
         ];
@@ -61,7 +62,9 @@ class ServiceController extends Controller
 
         // Calculate cost_price and ganji
         $validated['cost_price'] = $validated['issue_price'] + $validated['service_price'];
-        $validated['ganji'] = $validated['final_price'] - $validated['cost_price'];
+        $baseProfit = $validated['final_price'] - $validated['cost_price'];
+        $offers = $validated['offers'] ?? 0;
+        $validated['ganji'] = $baseProfit - $offers; // Subtract offers from profit
         $validated['service_date'] = $validated['service_date'] ?? now()->toDateString();
 
         $service = Service::create($validated);
@@ -93,6 +96,7 @@ class ServiceController extends Controller
             'issue_price' => 'required|numeric|min:0',
             'service_price' => 'required|numeric|min:0',
             'final_price' => 'required|numeric|min:0',
+            'offers' => 'nullable|numeric|min:0',
             'service_date' => 'nullable|date',
             'salesman_id' => 'required|exists:users,id',
         ];
@@ -108,7 +112,9 @@ class ServiceController extends Controller
 
         // Calculate cost_price and ganji
         $validated['cost_price'] = $validated['issue_price'] + $validated['service_price'];
-        $validated['ganji'] = $validated['final_price'] - $validated['cost_price'];
+        $baseProfit = $validated['final_price'] - $validated['cost_price'];
+        $offers = $validated['offers'] ?? 0;
+        $validated['ganji'] = $baseProfit - $offers; // Subtract offers from profit
 
         $service->update($validated);
 
