@@ -81,7 +81,7 @@
     </div>
     <div class="content">
         <p>Dear <?php echo e($sale->customer_name); ?>,</p>
-        <p>Thank you for purchasing a <strong><?php echo e($sale->product_name); ?></strong>. Your warranty is now active.</p>
+        <p>Thank you for purchasing a <strong><?php echo e($sale->product_name); ?></strong>. We appreciate you buying from <strong><?php echo e($userName); ?></strong>. Your warranty is now active.</p>
 
         <div class="meta">
             <div class="meta-item"><strong>Phone Type:</strong> <?php echo e($sale->product_name); ?></div>

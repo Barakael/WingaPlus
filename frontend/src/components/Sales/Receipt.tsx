@@ -28,7 +28,7 @@ const Receipt: React.FC<ReceiptProps> = ({ receipt, onClose }) => {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <ReceiptIcon className="h-8 w-8 text-[#800000] mr-3" />
+              <ReceiptIcon className="h-8 w-8 text-[#1973AE] mr-3" />
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Receipt
@@ -117,7 +117,7 @@ const Receipt: React.FC<ReceiptProps> = ({ receipt, onClose }) => {
                           Qty: {item.quantity} × TSh {item.unit_price.toLocaleString()}
                         </p>
                         {item.phone_name && (
-                          <p className="text-sm text-[#800000] dark:text-[#A00000]">
+                          <p className="text-sm text-[#1973AE] dark:text-[#5da3d5]">
                             📱 {item.phone_name}
                           </p>
                         )}

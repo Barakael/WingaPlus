@@ -136,7 +136,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   type="text"
                   value={formData.product_name}
                   onChange={(e) => handleInputChange('product_name', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -149,7 +149,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -169,7 +169,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                     step="0.01"
                     value={formData.selling_price}
                     onChange={(e) => handleInputChange('selling_price', parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -184,7 +184,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                     step="0.01"
                     value={formData.cost_price}
                     onChange={(e) => handleInputChange('cost_price', parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -199,7 +199,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   step="0.01"
                   value={formData.offers}
                   onChange={(e) => handleInputChange('offers', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Amount to deduct from profit"
                 />
               </div>
@@ -226,7 +226,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                   id="has_warranty"
                   checked={formData.has_warranty}
                   onChange={(e) => handleInputChange('has_warranty', e.target.checked)}
-                  className="h-4 w-4 text-[#800000] focus:ring-[#800000] border-gray-300 rounded"
+                  className="h-4 w-4 text-[#1973AE] focus:ring-[#1973AE] border-gray-300 rounded"
                 />
                 <label htmlFor="has_warranty" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                   Warranty
@@ -247,7 +247,7 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
                 max="24"
                 value={formData.warranty_months}
                 onChange={(e) => handleInputChange('warranty_months', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           )}

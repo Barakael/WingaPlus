@@ -118,7 +118,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {/* Header - Compact */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-lg flex items-center justify-center mr-3">
                 <Wrench className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -153,7 +153,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -166,7 +166,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   type="tel"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div> */}
@@ -180,7 +180,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
                   placeholder="Enter store name"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -199,7 +199,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     value={deviceName}
                     onChange={(e) => setDeviceName(e.target.value)}
                     placeholder="iPhone 15 Pro.."
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -212,7 +212,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         value={issue}
                         onChange={(e) => setIssue(e.target.value)}
                         placeholder="battery, screen,"
-                        className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         required
                     />
                 </div>
@@ -237,7 +237,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     }}
                     onBlur={() => { if (issuePriceInput === '') setIssuePriceInput('0'); }}
                     placeholder="0"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -255,7 +255,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     }}
                     onBlur={() => { if (servicePriceInput === '' ) setServicePriceInput('0'); }}
                     placeholder="0"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -276,7 +276,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   }}
                   onBlur={() => { if (offersInput === '') setOffersInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -295,7 +295,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   }}
                   onBlur={() => { if (finalPriceInput === '' ) setFinalPriceInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -305,7 +305,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="hidden md:grid gap-2 md:grid-cols-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
               <div className="text-center">
                 <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Cost</div>
-                <div className="text-sm font-bold text-[#800000] dark:text-[#A00000]">TSh {costPrice.toFixed(2)}</div>
+                <div className="text-sm font-bold text-[#1973AE] dark:text-[#5da3d5]">TSh {costPrice.toFixed(2)}</div>
               </div>
               <div className="text-center">
                 <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Base Profit</div>
@@ -335,7 +335,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || !deviceName || !issue || !customerName || !storeName || !issuePriceInput || !servicePriceInput || !finalPriceInput}
-                className="flex-1 bg-[#800000] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#600000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
+                className="flex-1 bg-[#1973AE] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
               >
                 {isSubmitting ? (
                   <>

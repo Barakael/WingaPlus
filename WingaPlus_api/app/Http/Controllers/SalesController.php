@@ -47,6 +47,11 @@ class SalesController extends BaseController
             return $this->sendError('Validation failed', ['product' => ['Either product_id or product_name is required']], 422);
         }
 
+        // Normalize product_name to lowercase to avoid duplicates
+        if (!empty($validated['product_name'])) {
+            $validated['product_name'] = strtolower(trim($validated['product_name']));
+        }
+
         // Set salesman_id from request or default to 1 for mock auth
         if (empty($validated['salesman_id'])) {
             $validated['salesman_id'] = 1; // Mock user ID
@@ -103,7 +108,8 @@ class SalesController extends BaseController
                         'price' => $validated['selling_price'] ?? $validated['unit_price'] ?? 0,
                     ];
                     
-                    Mail::to($validated['warranty_details']['customer_email'])->send(new WarrantySaleFiled($sale, $mockWarranty));
+                    $userName = auth()->user() ? auth()->user()->name : 'WingaPlus Store';
+                    Mail::to($validated['warranty_details']['customer_email'])->send(new WarrantySaleFiled($sale, $mockWarranty, $userName));
                 } catch (\Exception $e) {
                     // Log email error but don't fail the sale
                     \Log::error('Failed to send warranty email: ' . $e->getMessage());
@@ -125,6 +131,11 @@ class SalesController extends BaseController
     public function update(SaleRequest $request, Sale $sale)
     {
         $validated = $request->validated();
+
+        // Normalize product_name to lowercase to avoid duplicates
+        if (!empty($validated['product_name'])) {
+            $validated['product_name'] = strtolower(trim($validated['product_name']));
+        }
 
         DB::beginTransaction();
         try {

@@ -60,6 +60,11 @@ class ServiceController extends Controller
         }
         $validated = $validator->validated();
 
+        // Normalize device_name to lowercase to avoid duplicates
+        if (!empty($validated['device_name'])) {
+            $validated['device_name'] = strtolower(trim($validated['device_name']));
+        }
+
         // Calculate cost_price and ganji
         $validated['cost_price'] = $validated['issue_price'] + $validated['service_price'];
         $baseProfit = $validated['final_price'] - $validated['cost_price'];
@@ -109,6 +114,11 @@ class ServiceController extends Controller
             ], 422);
         }
         $validated = $validator->validated();
+
+        // Normalize device_name to lowercase to avoid duplicates
+        if (!empty($validated['device_name'])) {
+            $validated['device_name'] = strtolower(trim($validated['device_name']));
+        }
 
         // Calculate cost_price and ganji
         $validated['cost_price'] = $validated['issue_price'] + $validated['service_price'];

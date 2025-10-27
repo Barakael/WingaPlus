@@ -119,7 +119,7 @@ const TargetManagement: React.FC = () => {
   // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-red-100 text-[#600000]';
+      case 'active': return 'bg-red-100 text-[#0d5a8a]';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'failed': return 'bg-red-100 text-red-800';
       case 'cancelled': return 'bg-gray-100 text-gray-800';
@@ -143,7 +143,7 @@ const TargetManagement: React.FC = () => {
           <button
             onClick={loadTargets}
             disabled={loading}
-            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -154,7 +154,7 @@ const TargetManagement: React.FC = () => {
               resetForm();
               setShowCreateModal(true);
             }}
-            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
           >
             <Plus className="h-4 w-4 mr-1" />
             New Target
@@ -214,7 +214,7 @@ const TargetManagement: React.FC = () => {
                       <div className="flex items-center justify-center space-x-1">
                         <button
                           onClick={() => handleEdit(target)}
-                          className="p-1 text-[#800000] hover:text-[#600000] dark:text-[#A00000] dark:hover:text-[#C00000] transition-colors"
+                          className="p-1 text-[#1973AE] hover:text-[#0d5a8a] dark:text-[#5da3d5] dark:hover:text-[#7db3d9] transition-colors"
                           title="Edit Target"
                         >
                           <Edit className="h-4 w-4" />
@@ -275,7 +275,7 @@ const TargetManagement: React.FC = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter target name"
                   required
                 />
@@ -289,7 +289,7 @@ const TargetManagement: React.FC = () => {
                   <select
                     value={formData.period}
                     onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value as 'monthly' | 'yearly' }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   >
                     <option value="monthly">Monthly</option>
@@ -304,7 +304,7 @@ const TargetManagement: React.FC = () => {
                   <select
                     value={formData.metric}
                     onChange={(e) => setFormData(prev => ({ ...prev, metric: e.target.value as 'profit' | 'items_sold' }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   >
                     <option value="profit">Profit (Ganji)</option>
@@ -321,7 +321,7 @@ const TargetManagement: React.FC = () => {
                   type="number"
                   value={formData.target_value}
                   onChange={(e) => setFormData(prev => ({ ...prev, target_value: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder={`Enter target ${formData.metric === 'profit' ? 'amount' : 'quantity'}`}
                   required
                   min="0"
@@ -337,7 +337,7 @@ const TargetManagement: React.FC = () => {
                   type="number"
                   value={formData.bonus_amount}
                   onChange={(e) => setFormData(prev => ({ ...prev, bonus_amount: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter bonus amount"
                   min="0"
                   step="0.01"
@@ -358,7 +358,7 @@ const TargetManagement: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
+                  className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
                 >
                   {editingTarget ? 'Update Target' : 'Create Target'}
                 </button>

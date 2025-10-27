@@ -59,26 +59,26 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
           {/* Email Report */}
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
             <div className="flex items-center space-x-3 mb-3">
-              <Send className="h-5 w-5 text-[#800000] dark:text-[#A00000]" />
-              <h3 className="font-semibold text-[#400000] dark:text-red-100">
+              <Send className="h-5 w-5 text-[#1973AE] dark:text-[#5da3d5]" />
+              <h3 className="font-semibold text-[#094a73] dark:text-red-100">
                 Email Report
               </h3>
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-[#600000] dark:text-[#C00000]">Status:</span>
+                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Status:</span>
                 <span className="font-medium text-green-600 dark:text-green-400">✓ Email Sent Successfully</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#600000] dark:text-[#C00000]">Recipient:</span>
+                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Recipient:</span>
                 <span className="font-medium">{warrantyData.customer_email}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#600000] dark:text-[#C00000]">Subject:</span>
+                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Subject:</span>
                 <span className="font-medium">Warranty Confirmation - {warrantyData.phone_name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#600000] dark:text-[#C00000]">Sent At:</span>
+                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Sent At:</span>
                 <span className="font-medium">{new Date(warrantyData.submitted_at).toLocaleString()}</span>
               </div>
             </div>
@@ -191,7 +191,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
                 // Could add print functionality here
                 window.print();
               }}
-              className="flex-1 bg-gradient-to-r from-[#800000] to-[#600000] text-white py-3 px-4 rounded-lg font-medium hover:from-[#600000] hover:to-[#400000] transition-colors"
+              className="flex-1 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] text-white py-3 px-4 rounded-lg font-medium hover:from-[#0d5a8a] hover:to-[#094a73] transition-colors"
             >
               Print Report
             </button>

@@ -86,10 +86,10 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           </div>
         </div> */}
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFF0F0] dark:bg-[#3b0f0f] rounded-lg flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 dark:bg-gray-900 rounded-lg shadow-xl flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit<br />(Sales + Services)</p>
@@ -98,10 +98,10 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFF0F0] dark:bg-[#3b0f0f] rounded-lg flex items-center justify-center flex-shrink-0">
-              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 dark:bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items<br />Sold</p>
@@ -110,10 +110,10 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFF0F0] dark:bg-[#3b0f0f] rounded-lg flex items-center justify-center flex-shrink-0">
-              <Wrench className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#1973AE]" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 dark:bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Wrench className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services<br />Done</p>
@@ -162,33 +162,33 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <Target className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">Target Management</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Track goals & achievements</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Sales Records</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Track sales & achievements</p>
             </div>
           </div>
           <button 
-            onClick={() => onTabChange?.('targets')}
+            onClick={() => onTabChange?.('my-sales')}
             className="w-full bg-[#1973AE] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 text-sm"
           >
-            View Targets
+            View Sales
           </button>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
-              <Clock className="h-6 w-6 text-white" />
+              <Wrench className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">Recent Activities</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">View recent updates</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Repair Service(Ufundi)</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">View Repair Service(Ufundi)</p>
             </div>
           </div>
           <button 
-            onClick={() => onTabChange?.('sales')}
+            onClick={() => onTabChange?.('services')}
             className="w-full bg-[#1973AE] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 text-sm"
           >
-            View Warranties
+            View Repair Service(Ufundi)
           </button>
         </div>
       </div>
@@ -201,32 +201,41 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         <div className="space-y-4">
           {loading ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading sales...</div>
-          ) : mySales.slice(0, 2).map((sale: any) => (
-            <div key={sale.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
-                  <ShoppingCart className="h-5 w-6 text-white" />
+          ) : mySales.slice(0, 2).map((sale: any) => {
+            const costPrice = Number(sale.cost_price) || 0;
+            const sellingPrice = Number(sale.unit_price) || 0;
+            const quantity = Number(sale.quantity) || 1;
+            const offers = Number(sale.offers) || 0;
+            const profit = (sellingPrice - costPrice) * quantity - offers;
+            
+            return (
+              <div key={sale.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-2xl">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
+                    <ShoppingCart className="h-5 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {sale.product_name || sale.product_id}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {sale.customer_name || 'Customer'} • Qty: {sale.quantity}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {sale.product_name || sale.product_id}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {sale.customer_name || 'Customer'} • Qty: {sale.quantity}
+                <div className="text-right">
+                  <p className="font-semibold text-green-600">
+                    TSh {formatCurrency(profit)}
+                  </p>
+                  <p className="text-xs text-gray-500">Profit (Ganji)</p>
+                  <p className="text-xs text-gray-500 flex items-center justify-end mt-1">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {new Date(sale.sale_date).toLocaleDateString()}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-green-600">
-                  TSh {formatCurrency(sale.total_amount)}
-                </p>
-                <p className="text-xs text-gray-500 flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {new Date(sale.sale_date).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

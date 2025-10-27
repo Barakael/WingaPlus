@@ -35,7 +35,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
       case 'pending':
         return <Clock className="h-5 w-5 text-yellow-500" />;
       case 'in_progress':
-        return <AlertTriangle className="h-5 w-5 text-[#800000]" />;
+        return <AlertTriangle className="h-5 w-5 text-[#1973AE]" />;
       case 'completed':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'rejected':
@@ -92,7 +92,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000] mr-2 sm:mr-3" />
+            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-[#1973AE] dark:text-[#5da3d5] mr-2 sm:mr-3" />
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               Warranty Details
             </h2>

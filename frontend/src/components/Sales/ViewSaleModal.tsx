@@ -33,7 +33,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000] mr-2 sm:mr-3" />
+            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-[#1973AE] dark:text-[#5da3d5] mr-2 sm:mr-3" />
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               Sale Details
             </h2>
@@ -105,7 +105,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
 
               <div className="text-center">
                 <div className="text-xs text-gray-600 dark:text-gray-400">Selling Price</div>
-                <div className="text-sm font-bold text-[#800000] dark:text-[#A00000]">
+                <div className="text-sm font-bold text-[#1973AE] dark:text-[#5da3d5]">
                   TSh {formatCurrency(sellingPrice)}
                 </div>
               </div>

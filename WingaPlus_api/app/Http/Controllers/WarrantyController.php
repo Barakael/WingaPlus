@@ -68,7 +68,8 @@ class WarrantyController extends Controller
 
         // Send email after transaction succeeds
         try {
-            Mail::to($warranty->customer_email)->send(new WarrantySaleFiled($sale, $warranty));
+            $userName = auth()->user() ? auth()->user()->name : 'WingaPlus Store';
+            Mail::to($warranty->customer_email)->send(new WarrantySaleFiled($sale, $warranty, $userName));
         } catch (\Exception $e) {
             // Log email error but don't fail the warranty creation
             \Log::error('Failed to send warranty email: ' . $e->getMessage());

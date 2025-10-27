@@ -120,10 +120,10 @@ const LoginForm: React.FC = () => {
                   onChange={(e) => handleInputChange('role', e.target.value)}
                   className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  <option value="salesman">Salesman</option>
-                  <option value="storekeeper">Storekeeper</option>
+                  <option value="Winga">Salesman</option>
+                  {/* <option value="storekeeper">Storekeeper</option> */}
                   <option value="shop_owner">Shop Owner</option>
-                  <option value="super_admin">Super Admin</option>
+                  {/* <option value="super_admin">Super Admin</option> */}
                 </select>
               </div>
             )}

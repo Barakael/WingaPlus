@@ -198,7 +198,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
           {/* Header - Compact */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-lg flex items-center justify-center mr-3">
                 <ShoppingCart className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -223,35 +223,20 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
 
           {/* Main Form Grid */}
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Row 1: Category and Reference Store */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Category
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as SaleCategory)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                >
-                  <option value="phones">📱 Phones</option>
-                  <option value="accessories">🔧 Accessories</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Reference Store
-                </label>
-                <input
-                  type="text"
-                  value={referenceStore}
-                  onChange={(e) => setReferenceStore(e.target.value)}
-                  placeholder="Store/location"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
+            {/* Row 1: Category */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value as SaleCategory)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                required
+              >
+                <option value="phones">📱 Phones</option>
+                <option value="accessories">🔧 Accessories</option>
+              </select>
             </div>
 
             {/* Row 2: Product Name (Accessories) or Phone Name (Phones) */}
@@ -266,16 +251,31 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                   value={category === 'phones' ? phoneName : productName}
                   onChange={(e) => category === 'phones' ? setPhoneName(e.target.value) : setProductName(e.target.value)}
                   placeholder={category === 'phones' ? 'iPhone 15 Pro, Samsung Galaxy S24' : 'Phone Case, Screen Protector'}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             )}
 
+            {/* Row 3: Reference Store */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Reference Store
+              </label>
+              <input
+                type="text"
+                value={referenceStore}
+                onChange={(e) => setReferenceStore(e.target.value)}
+                placeholder="Store/location"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                required
+              />
+            </div>
+
             {/* Phone Details - Compact Grid */}
             {category === 'phones' && (
-              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                {/* <h4 className="text-sm font-semibold text-[#400000] dark:text-red-100 mb-2 flex items-center">
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-red-200 dark:border-blue-700/50">
+                {/* <h4 className="text-sm font-semibold text-[#094a73] dark:text-red-100 mb-2 flex items-center">
                   <Phone className="h-4 w-4 mr-1" />
                   Phone Details
                 </h4> */}
@@ -289,7 +289,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       value={imei}
                       onChange={(e) => setImei(e.target.value)}
                       placeholder="IMEI"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
@@ -302,7 +302,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
                       placeholder="Space Black"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
@@ -313,7 +313,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                     <select
                       value={storage}
                       onChange={(e) => setStorage(e.target.value)}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     >
                       <option value="">Storage</option>
@@ -333,7 +333,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Customer name"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
@@ -359,14 +359,14 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       if (/^\d+$/.test(v)) setQuantityInput(v);
                     }}
                     onBlur={() => { if (quantityInput === '' || quantity === 0) setQuantityInput('1'); }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold"
                     required
                   />
                 </div>
               )}
               
               {/* Cost and Offers in 2 columns */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Zoezi (Cost)
@@ -381,7 +381,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                     }}
                     onBlur={() => { if (costPriceInput === '') setCostPriceInput('0'); }}
                     placeholder="0"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
@@ -399,7 +399,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                     }}
                     onBlur={() => { if (offersInput === '') setOffersInput('0'); }}
                     placeholder="0"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -419,7 +419,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                   }}
                   onBlur={() => { if (unitPriceInput === '' ) setUnitPriceInput('0'); }}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -429,7 +429,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
             <div className="hidden md:grid gap-2 md:grid-cols-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
               <div className="text-center">
                 <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Amount</div>
-                <div className="text-lg font-bold text-[#800000] dark:text-[#A00000]">TSh {totalAmount.toFixed(2)}</div>
+                <div className="text-lg font-bold text-[#1973AE] dark:text-[#5da3d5]">TSh {totalAmount.toFixed(2)}</div>
               </div>
               <div className="text-center">
                 <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Base Profit</div>

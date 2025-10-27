@@ -81,7 +81,7 @@
     </div>
     <div class="content">
         <p>Dear {{ $sale->customer_name }},</p>
-        <p>Thank you for purchasing a <strong>{{ $sale->product_name }}</strong>. Your warranty is now active.</p>
+        <p>Thank you for purchasing a <strong>{{ $sale->product_name }}</strong>. We appreciate you buying from <strong>{{ $userName }}</strong>. Your warranty is now active.</p>
 
         <div class="meta">
             <div class="meta-item"><strong>Phone Type:</strong> {{ $sale->product_name }}</div>

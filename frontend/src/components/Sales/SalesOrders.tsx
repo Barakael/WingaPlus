@@ -17,7 +17,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'quoted': return 'bg-red-100 text-[#600000]';
+      case 'quoted': return 'bg-red-100 text-[#0d5a8a]';
       case 'confirmed': return 'bg-yellow-100 text-yellow-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
@@ -50,7 +50,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
         {openSaleForm && (
           <button
             onClick={() => openSaleForm && openSaleForm()}
-            className="bg-gradient-to-r from-[#800000] to-[#600000] text-sm md:text-xl  text-white px-3 py-2 rounded-lg font-medium hover:from-[#600000] hover:to-[#400000] transition-all duration-200 flex items-center"
+            className="bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] text-sm md:text-xl  text-white px-3 py-2 rounded-lg font-medium hover:from-[#0d5a8a] hover:to-[#094a73] transition-all duration-200 flex items-center"
           >
             <Plus className="h-5 w-8 mr-2" />
             New Sale
@@ -152,7 +152,7 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => setSelectedOrder(order)}
-                        className="text-[#800000] hover:text-[#400000] dark:text-[#A00000] dark:hover:text-[#C00000]"
+                        className="text-[#1973AE] hover:text-[#094a73] dark:text-[#5da3d5] dark:hover:text-[#7db3d9]"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -285,13 +285,13 @@ const SalesOrders: React.FC<SalesOrdersProps> = ({ openSaleForm }) => {
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   {(selectedOrder.status === 'draft' || selectedOrder.status === 'quoted') && (
                     <>
-                      <button className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors">
+                      <button className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors">
                         Edit Order
                       </button>
-                      <button className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors">
+                      <button className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors">
                         Convert to Sale
                       </button>
-                      <button className="px-4 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors">
+                      <button className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors">
                         Cancel Order
                       </button>
                     </>

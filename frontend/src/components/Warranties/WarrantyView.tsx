@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, CheckCircle, AlertTriangle, Clock, Eye, RefreshCw } from 'lucide-react';
+import { Shield, CheckCircle, AlertTriangle, Clock, Eye, RefreshCw, Search } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import ViewWarrantyModal from './ViewWarrantyModal';
@@ -13,6 +13,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
   const { user } = useAuth();
   const [warranties, setWarranties] = useState<any[]>([]);
   const [loadingWarranties, setLoadingWarranties] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,11 +70,22 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
     fetchWarranties();
   }, []);
 
-  // Pagination logic
-  const totalPages = Math.ceil(warranties.length / itemsPerPage);
+  // Filter warranties based on search query
+  const filteredWarranties = warranties.filter(warranty => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      warranty.customer_name?.toLowerCase().includes(query) ||
+      warranty.phone_name?.toLowerCase().includes(query) ||
+      warranty.customer_phone?.toLowerCase().includes(query)
+    );
+  });
+
+  // Pagination logic - use filtered warranties
+  const totalPages = Math.ceil(filteredWarranties.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedWarranties = warranties.slice(startIndex, endIndex);
+  const paginatedWarranties = filteredWarranties.slice(startIndex, endIndex);
 
   // Pagination handlers
   const goToPage = (page: number) => {
@@ -87,6 +99,11 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
   const goToNext = () => {
     setCurrentPage(prev => Math.min(totalPages, prev + 1));
   };
+
+  // Reset to first page when search query changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // Action handlers
   const handleViewWarranty = (warranty: any) => {
@@ -109,7 +126,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
       case 'pending':
         return <Clock className="h-5 w-5 text-yellow-500" />;
       case 'in_progress':
-        return <AlertTriangle className="h-5 w-5 text-[#800000]" />;
+        return <AlertTriangle className="h-5 w-5 text-[#1973AE]" />;
       case 'completed':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'rejected':
@@ -173,7 +190,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
         </div>
         <button
           onClick={onFileWarranty}
-          className="md:text-base text-sm bg-[#800000] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 flex items-center"
+          className="md:text-base text-sm bg-[#1973AE] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
         >
          
           File New Warranty
@@ -181,18 +198,33 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
+        <div className="flex flex-col space-y-3 mb-4">
           <h2 className="md:text-lg font-bold text-gray-900 dark:text-white flex items-center">
             <Shield className="h-5 w-5 mr-2" />
             Warranty Records
           </h2>
-          <div className="flex space-x-2">
+          
+          {/* Search and Refresh Row */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search Bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by customer name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+            
+            {/* Refresh Button */}
             <button
               onClick={fetchWarranties}
               disabled={loadingWarranties}
-              className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center px-4 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
-              <RefreshCw className={`h-4 w-4 mr-1 ${loadingWarranties ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${loadingWarranties ? 'animate-spin' : ''}`} />
               Refresh
             </button>
           </div>
@@ -267,7 +299,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                             e.stopPropagation();
                             handleViewWarranty(warranty);
                           }}
-                          className="p-1 text-[#800000] hover:text-[#600000] dark:text-[#A00000] dark:hover:text-[#C00000] transition-colors"
+                          className="p-1 text-[#1973AE] hover:text-[#0d5a8a] dark:text-[#5da3d5] dark:hover:text-[#7db3d9] transition-colors"
                           title="View Warranty Details"
                         >
                           <Eye className="h-4 w-4" />
@@ -282,19 +314,20 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
             <div className="text-center py-8">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400">
-                No warranties filed yet
+                {searchQuery ? 'No warranties found matching your search' : 'No warranties filed yet'}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                Start by filing your first warranty claim
+                {searchQuery ? 'Try adjusting your search terms' : 'Start by filing your first warranty claim'}
               </p>
             </div>
           )}
 
           {/* Pagination Controls */}
-          {warranties.length > 0 && totalPages > 1 && (
+          {filteredWarranties.length > 0 && totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 px-2">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Showing {startIndex + 1} to {Math.min(endIndex, warranties.length)} of {warranties.length} warranties
+                Showing {startIndex + 1} to {Math.min(endIndex, filteredWarranties.length)} of {filteredWarranties.length} warranties
+                {searchQuery && ` (filtered from ${warranties.length} total)`}
               </div>
               <div className="flex items-center space-x-1">
                 <button

@@ -491,21 +491,21 @@ const CommissionTracking: React.FC = () => {
           <button
             onClick={loadSalesData}
             disabled={loading}
-            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
           <button
             onClick={exportToPDF}
-            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
           >
             <FileText className="h-4 w-4 mr-1" />
             PDF
           </button>
           <button
             onClick={exportToExcel}
-            className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
+            className="flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
           >
             <FileSpreadsheet className="h-4 w-4 mr-1" />
             Excel
@@ -528,7 +528,7 @@ const CommissionTracking: React.FC = () => {
             <select
               value={periodType}
               onChange={(e) => setPeriodType(e.target.value as 'weekly' | 'monthly')}
-              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
@@ -542,7 +542,7 @@ const CommissionTracking: React.FC = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {Array.from({ length: 5 }, (_, i) => (
                 <option key={new Date().getFullYear() - i} value={new Date().getFullYear() - i}>
@@ -564,7 +564,7 @@ const CommissionTracking: React.FC = () => {
                   localStorage.setItem(`commission_selected_target_${user.id}`, e.target.value);
                 }
               }}
-              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-1 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {targets.length > 0 ? (
                 targets.map((target) => (
@@ -622,7 +622,7 @@ const CommissionTracking: React.FC = () => {
             </span>
             <span className={`font-medium ${
               performanceStats.currentPeriodProgress >= 100 ? 'text-green-600' :
-              performanceStats.currentPeriodProgress >= 75 ? 'text-[#800000]' :
+              performanceStats.currentPeriodProgress >= 75 ? 'text-[#1973AE]' :
               performanceStats.currentPeriodProgress >= 50 ? 'text-yellow-600' : 'text-red-600'
             }`}>
               {selectedTarget?.metric === 'profit'
@@ -653,7 +653,7 @@ const CommissionTracking: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
             <div className="p-2 sm:p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
-              <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000]" />
+              <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#1973AE] dark:text-[#5da3d5]" />
             </div>
             <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Sales Ganji</p>
@@ -667,7 +667,7 @@ const CommissionTracking: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
             <div className="p-2 sm:p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
-              <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-[#800000] dark:text-[#A00000]" />
+              <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-[#1973AE] dark:text-[#5da3d5]" />
             </div>
             <div className="ml-1 sm:ml-1">
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
@@ -828,7 +828,7 @@ const CommissionTracking: React.FC = () => {
               <span className="text-gray-600 dark:text-gray-400">750K Target</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-[#800000] mr-2"></div>
+              <div className="w-3 h-0.5 bg-[#1973AE] mr-2"></div>
               <span className="text-gray-600 dark:text-gray-400">1M Target</span>
             </div>
           </div>
@@ -873,7 +873,7 @@ const CommissionTracking: React.FC = () => {
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white hidden lg:table-cell">
                       {period.totalTransactions}
                     </td>
-                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-[#800000] dark:text-[#A00000] font-mono hidden xl:table-cell">
+                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-[#1973AE] dark:text-[#5da3d5] font-mono hidden xl:table-cell">
                       TSh {formatCurrency(period.totalTransactions > 0 ? period.totalGanji / period.totalTransactions : 0)}
                     </td>
                   </tr>

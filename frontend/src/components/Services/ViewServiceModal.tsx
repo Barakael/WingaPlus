@@ -22,7 +22,7 @@ const ViewServiceModal: React.FC<ViewServiceModalProps> = ({ service, isOpen, on
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-lg flex items-center justify-center mr-3">
                 <Wrench className="h-5 w-5 text-white" />
               </div>
               <div>

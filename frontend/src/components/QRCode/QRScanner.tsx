@@ -29,7 +29,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-gradient-to-r from-[#800000] to-[#600000] rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-full flex items-center justify-center mx-auto mb-4">
           <QrCode className="h-8 w-8 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -45,7 +45,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
         <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8">
           {isScanning ? (
             <div className="text-center">
-              <div className="w-32 h-32 border-4 border-[#800000] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="w-32 h-32 border-4 border-[#1973AE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600 dark:text-gray-400">Scanning QR code...</p>
             </div>
           ) : (
@@ -53,7 +53,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <button
                 onClick={handleStartScan}
-                className="bg-[#800000] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 flex items-center mx-auto"
+                className="bg-[#1973AE] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center mx-auto"
               >
                 <Scan className="h-5 w-5 mr-2" />
                 Start Scanning
@@ -76,12 +76,12 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
               placeholder="Enter QR code (e.g., QR001)"
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
             <button
               onClick={handleManualEntry}
               disabled={!manualCode.trim()}
-              className="bg-[#800000] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#600000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="bg-[#1973AE] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#0d5a8a] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               Submit
             </button>
@@ -147,7 +147,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-gradient-to-r from-[#800000] to-[#600000] rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-full flex items-center justify-center mx-auto mb-4">
           <QrCode className="h-8 w-8 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -163,7 +163,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
         <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8">
           {isScanning ? (
             <div className="text-center">
-              <div className="w-32 h-32 border-4 border-[#800000] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="w-32 h-32 border-4 border-[#1973AE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600 dark:text-gray-400">Scanning QR code...</p>
             </div>
           ) : (
@@ -171,7 +171,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <button
                 onClick={handleStartScan}
-                className="bg-gradient-to-r from-[#800000] to-[#600000] text-white px-6 py-3 rounded-lg font-medium hover:from-[#600000] hover:to-[#400000] transition-all duration-200 flex items-center mx-auto"
+                className="bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] text-white px-6 py-3 rounded-lg font-medium hover:from-[#0d5a8a] hover:to-[#094a73] transition-all duration-200 flex items-center mx-auto"
               >
                 <Scan className="h-5 w-5 mr-2" />
                 Start Scanning
@@ -194,7 +194,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan }) => {
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
               placeholder="Enter QR code (e.g., QR001)"
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
             <button
               onClick={handleManualEntry}

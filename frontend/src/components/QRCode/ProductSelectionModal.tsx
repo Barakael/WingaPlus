@@ -69,7 +69,7 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-[#800000] to-[#600000] rounded-lg flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-lg flex items-center justify-center mr-4">
                 <ShoppingCart className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -130,7 +130,7 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
                       onClick={() => handleProductSelect(product)}
                       className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
                         isSelected
-                          ? 'border-[#800000] bg-red-50 dark:bg-red-900/20'
+                          ? 'border-[#1973AE] bg-red-50 dark:bg-red-900/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
                     >
@@ -165,7 +165,7 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
                       </div>
 
                       {isSelected && (
-                        <div className="mt-3 flex items-center text-[#800000] dark:text-[#A00000]">
+                        <div className="mt-3 flex items-center text-[#1973AE] dark:text-[#5da3d5]">
                           <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center mr-2">
                             <div className="w-2 h-2 bg-white rounded-full"></div>
                           </div>

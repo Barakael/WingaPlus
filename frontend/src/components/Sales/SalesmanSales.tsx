@@ -456,10 +456,19 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
     setFilteredSales(prev => prev.map(s => s.id === updatedSale.id ? updatedSale : s));
   };
 
-  // Sales by product
+  // Sales by product - Track by profit (ganji) instead of revenue
   const salesByProduct = mySales.reduce((acc, sale) => {
-    const key = sale.product_name || sale.product_id || 'Unknown';
-    acc[key] = (acc[key] || 0) + Number(sale.total_amount);
+    // Normalize product name to lowercase to avoid duplicates
+    const productName = (sale.product_name || sale.product_id || 'Unknown').toLowerCase();
+    
+    // Calculate profit for this sale
+    const costPrice = Number(sale.cost_price) || 0;
+    const sellingPrice = Number(sale.unit_price) || 0;
+    const quantity = Number(sale.quantity) || 1;
+    const offers = Number(sale.offers) || 0;
+    const profit = (sellingPrice - costPrice) * quantity - offers;
+    
+    acc[productName] = (acc[productName] || 0) + profit;
     return acc;
   }, {} as Record<string, number>);
 
@@ -483,7 +492,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           <div className="flex justify-start sm:justify-end">
             <button
               onClick={() => openSaleForm && openSaleForm(undefined, loadSalesData)}
-              className="bg-gradient-to-r from-red-800 to-red-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm lg:text-base w-auto"
+              className="bg-[#04BCF2] text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm lg:text-base w-auto"
             >
               New Sale
             </button>
@@ -503,7 +512,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
             <select
               value={selectedTargetId}
               onChange={(e) => handleTargetChange(e.target.value)}
-              className="px-2 py-1 lg:px-3 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="px-2 py-1 lg:px-3 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {targets.length > 0 ? (
                 targets.map((target) => (
@@ -528,7 +537,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 lg:h-4">
             <div
-              className="bg-gradient-to-r from-[#800000] to-[#600000] h-3 lg:h-4 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] h-3 lg:h-4 rounded-full transition-all duration-300"
               style={{ width: `${Math.min(monthlyProgress, 100)}%` }}
             ></div>
           </div>
@@ -555,21 +564,21 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
             <button
               onClick={loadSalesData}
               disabled={loading}
-              className="flex items-center px-2 py-1 lg:px-3 text-xs lg:text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center px-2 py-1 lg:px-3 text-xs lg:text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className={`h-3 w-3 lg:h-4 lg:w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
               onClick={exportToPDF}
-              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
+              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
             >
               <FileText className="h-3 w-3 lg:h-5 lg:w-5 mr-1" />
               PDF
             </button>
             <button
               onClick={exportToExcel}
-              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] transition-colors"
+              className="flex items-center px-2 py-1 md:py-2 md:px-3 lg:px-3 text-xs lg:text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
             >
               <FileSpreadsheet className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
               Excel
@@ -594,7 +603,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   onClick={() => setFilterType(option.value as any)}
                   className={`px-3 py-1 text-xs rounded-lg transition-colors ${
                     filterType === option.value
-                      ? 'bg-red-500 text-white'
+                      ? 'bg-[#1973AE] text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -605,19 +614,33 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           </div>
 
           {/* Dynamic Filter Inputs */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {filterType === 'daily' && (
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Select Date
-                </label>
-                <input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Select Date
+                  </label>
+                  <input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Filter by Product
+                  </label>
+                  <input
+                    type="text"
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                    placeholder="Search product..."
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </>
             )}
 
             {filterType === 'monthly' && (
@@ -629,7 +652,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   <select
                     value={monthFilter}
                     onChange={(e) => setMonthFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="">All Months</option>
                     {Array.from({ length: 12 }, (_, i) => {
@@ -650,7 +673,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   <select
                     value={yearFilter}
                     onChange={(e) => setYearFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {Array.from({ length: 5 }, (_, i) => {
                       const year = (new Date().getFullYear() - i).toString();
@@ -662,29 +685,55 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                     })}
                   </select>
                 </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Filter by Product
+                  </label>
+                  <input
+                    type="text"
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                    placeholder="Search product..."
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
               </>
             )}
 
             {filterType === 'yearly' && (
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Select Year
-                </label>
-                <select
-                  value={yearFilter}
-                  onChange={(e) => setYearFilter(e.target.value)}
-                  className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {Array.from({ length: 10 }, (_, i) => {
-                    const year = (new Date().getFullYear() - i).toString();
-                    return (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Select Year
+                  </label>
+                  <select
+                    value={yearFilter}
+                    onChange={(e) => setYearFilter(e.target.value)}
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => {
+                      const year = (new Date().getFullYear() - i).toString();
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Filter by Product
+                  </label>
+                  <input
+                    type="text"
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                    placeholder="Search product..."
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </>
             )}
 
             {filterType === 'range' && (
@@ -697,7 +746,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                     type="date"
                     value={startDateFilter}
                     onChange={(e) => setStartDateFilter(e.target.value)}
-                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -708,24 +757,23 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                     type="date"
                     value={endDateFilter}
                     onChange={(e) => setEndDateFilter(e.target.value)}
-                    className="w-full px-1 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Filter by Product
+                  </label>
+                  <input
+                    type="text"
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                    placeholder="Search product..."
+                    className="w-full px-2 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </>
             )}
-
-            <div className={filterType === 'daily' ? 'md:col-span-1' : ''}>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Filter by Product
-              </label>
-              <input
-                type="text"
-                value={productFilter}
-                onChange={(e) => setProductFilter(e.target.value)}
-                placeholder="Search .."
-                className="w-full px-1 py-1 lg:px-3 lg:py-2 text-xs lg:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
           </div>
 
           {/* Clear Filters Button */}
@@ -808,7 +856,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                               e.stopPropagation();
                               handleViewSale(sale);
                             }}
-                            className="p-1 text-[#800000] hover:text-[#600000] dark:text-[#A00000] dark:hover:text-[#C00000] transition-colors hidden md:inline"
+                            className="p-1 text-[#1973AE] hover:text-[#0d5a8a] dark:text-[#5da3d5] dark:hover:text-[#7db3d9] transition-colors hidden md:inline"
                             title="View Sale Details"
                           >
                             <Eye className="h-4 w-4" />
@@ -912,24 +960,24 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
           <div className="space-y-2 lg:space-y-4">
             {topProducts.length > 0 ? (
-              topProducts.map(([productName, revenue], index) => (
+              topProducts.map(([productName, profit], index) => (
                 <div key={productName} className="flex items-center justify-between p-2 lg:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-[#800000] to-[#600000] rounded-full flex items-center justify-center text-white font-bold text-xs lg:text-sm mr-2 lg:mr-3">
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-full flex items-center justify-center text-white font-bold text-xs lg:text-sm mr-2 lg:mr-3">
                       {index + 1}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm capitalize">
                         {productName}
                       </h3>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Revenue generated
+                        Profit generated
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-green-600 text-sm">
-                      TSh {formatCurrency(revenue)}
+                      TSh {formatCurrency(profit)}
                     </p>
                   </div>
                 </div>

@@ -9,7 +9,6 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Sale;
-use Illuminate\Support\Facades\Auth;
 
 class WarrantySaleFiled extends Mailable
 {
@@ -17,16 +16,16 @@ class WarrantySaleFiled extends Mailable
 
     public $sale;
     public $warranty;
-    public $user;
+    public $userName;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Sale $sale, $warranty = null)
+    public function __construct(Sale $sale, $warranty = null, $userName = null)
     {
         $this->sale = $sale;
         $this->warranty = $warranty;
-        $this->user = Auth::user();
+        $this->userName = $userName ?: 'WingaPlus';
     }
 
     /**
@@ -34,15 +33,14 @@ class WarrantySaleFiled extends Mailable
      */
     public function build()
     {
-        $userName = $this->user ? $this->user->name : 'The Connect Store';
         $productName = $this->warranty ? $this->warranty->phone_name : $this->sale->product_name;
         
-        return $this->subject("Warranty Filed by {$userName} - {$productName}")
+        return $this->subject("Warranty Filed by {$this->userName} - {$productName}")
                     ->view('emails.warranty_filed')
                     ->with('sale', $this->sale)
                     ->with('warranty', $this->warranty)
                     ->with('warrantyDetails', $this->sale->warranty_details ?? [])
-                    ->with('userName', $userName);
+                    ->with('userName', $this->userName);
     }
 
     /**

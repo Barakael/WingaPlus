@@ -136,7 +136,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
         </div>
         <button
           onClick={onFileService}
-          className="md:text-base text-sm bg-[#800000] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#600000] transition-all duration-200 flex items-center"
+          className="md:text-base text-sm bg-[#1973AE] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
         >
           <Wrench className="h-4 w-4 mr-2" />
           File New Service
@@ -153,7 +153,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
             <button
               onClick={fetchServices}
               disabled={loadingServices}
-              className="flex items-center px-3 py-2 text-sm bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className={`h-4 w-4 mr-1 ${loadingServices ? 'animate-spin' : ''}`} />
               Refresh

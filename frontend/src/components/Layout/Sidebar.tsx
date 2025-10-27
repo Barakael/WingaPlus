@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
         return [
           ...baseItems,
           { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
-           { id: 'services', label: 'Services', icon: Wrench },
+           { id: 'services', label: 'Ufundi', icon: Wrench },
           { id: 'commissions', label: 'Ganji', icon: DollarSign },
           { id: 'targets', label: 'Targets', icon: Target },         
           { id: 'warranties', label: 'Warranties', icon: Shield },
@@ -121,7 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
                     onClick={() => { onTabChange(item.id); onClose(); }}
                     className={`
                       w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200
-                      ${isActive ? 'bg-[#800000] text-white shadow-lg hover:bg-[#600000]' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}
+                      ${isActive ? 'bg-[#1973AE] text-white shadow-lg hover:bg-[#0d5a8a]' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}
                     `}
                   >
                     <Icon className="h-5 w-5 mr-3" />

@@ -24,12 +24,12 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             </button>
             <div className="flex items-center ml-4 lg:ml-0">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 dark:bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center bg-[#1973AE]">
+                <div className="w-8 h-8 backdrop-blur-sm rounded-lg flex items-center justify-center bg-[#1973AE]">
                   <span className="text-white dark:text-white font-bold text-sm lg:text-white">WP</span>
                 </div>
               </div>
               <div className="ml-1">
-                <h1 className="text-xl font-bold text-gray-600 dark:text-white lg:text-gray-900 lg:dark:text-white">
+                <h1 className="text-xl font-bold text-[#1973AE] dark:text-[#1973AE] lg:text-gray-900 lg:dark:text-white">
                   WingaPlus
                 </h1>
               </div>

@@ -75,6 +75,11 @@ class SaleController extends Controller
             ], 422);
         }
 
+        // Normalize product_name to lowercase to avoid duplicates
+        if (!empty($validated['product_name'])) {
+            $validated['product_name'] = strtolower(trim($validated['product_name']));
+        }
+
         // salesman_id now optional across the board; if you want to enforce in non-warranty context, re-enable check here
 
         $validated['total_amount'] = $validated['quantity'] * $validated['unit_price'];

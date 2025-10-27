@@ -228,7 +228,7 @@ const Settings: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center px-6 py-2 md:py-4 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-[#800000] text-[#800000] dark:text-[#A00000]'
+                    ? 'border-[#1973AE] text-[#1973AE] dark:text-[#5da3d5]'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
@@ -254,7 +254,7 @@ const Settings: React.FC = () => {
                       type="text"
                       value={profileForm.name}
                       onChange={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Enter your full name"
                       required
                     />
@@ -289,7 +289,7 @@ const Settings: React.FC = () => {
                       type="tel"
                       value={profileForm.phone}
                       onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Enter your phone number"
                     />
                   </div>
@@ -315,7 +315,7 @@ const Settings: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center px-6 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center px-6 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {loading ? 'Saving...' : 'Save Changes'}
@@ -337,7 +337,7 @@ const Settings: React.FC = () => {
                     type={showPasswords.current ? 'text' : 'password'}
                     value={passwordForm.current_password}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
-                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Enter current password"
                     required
                   />
@@ -361,7 +361,7 @@ const Settings: React.FC = () => {
                     type={showPasswords.new ? 'text' : 'password'}
                     value={passwordForm.new_password}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
-                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Enter new password"
                     required
                     minLength={8}
@@ -389,7 +389,7 @@ const Settings: React.FC = () => {
                     type={showPasswords.confirm ? 'text' : 'password'}
                     value={passwordForm.confirm_password}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm_password: e.target.value }))}
-                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Confirm new password"
                     required
                   />
@@ -407,7 +407,7 @@ const Settings: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center px-6 py-2 bg-[#800000] text-white rounded-lg hover:bg-[#600000] disabled:bg-[#800000]/50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center px-6 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:bg-[#1973AE]/50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Lock className="h-4 w-4 mr-2" />
                   {loading ? 'Changing...' : 'Change Password'}
