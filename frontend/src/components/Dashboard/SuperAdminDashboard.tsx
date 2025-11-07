@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Store, Users, Package, UserCheck } from 'lucide-react';
-import StatCard from '../Common/StatCard';
 import { getDashboardStats } from '../../services/superAdmin';
 import { showErrorToast } from '../../lib/toast';
 
@@ -72,67 +71,82 @@ const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             Super Admin Dashboard
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs sm:text-sm md:text-base">
             Overview of all shops and system performance
           </p>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard
-          title="Total Shops"
-          value={stats.total_shops}
-          icon={Store}
-          color="blue"
-        />
-        <StatCard
-          title="Total Salesmen (Mawinga)"
-          value={stats.total_salesmen}
-          icon={Users}
-          color="green"
-        />
-        <StatCard
-          title="Shop Keepers"
-          value={stats.total_storekeepers}
-          icon={UserCheck}
-          color="purple"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
+          <div className="flex items-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Store className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
+            </div>
+            <div className="ml-3 md:ml-4 min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Shops</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.total_shops}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
+          <div className="flex items-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Users className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
+            </div>
+            <div className="ml-3 md:ml-4 min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Salesmen (Mawinga)</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.total_salesmen}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
+          <div className="flex items-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UserCheck className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
+            </div>
+            <div className="ml-3 md:ml-4 min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Shop Keepers</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.total_storekeepers}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
             Recent Shops
           </h2>
           {recentShops.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">No shops yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8 text-xs sm:text-sm">No shops yet</p>
           ) : (
-            <div className="space-y-4">
-              {recentShops.map((shop) => (
-                <div key={shop.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+            <div className="space-y-3 md:space-y-4">
+              {recentShops.slice(0, 2).map((shop) => (
+                <div key={shop.id} className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="min-w-0 flex-1 mr-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
                       {shop.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
                       {shop.location} {shop.address ? `• ${shop.address}` : ''}
                     </p>
                     {shop.owner && (
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate">
                         Owner: {shop.owner.name}
                       </p>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       {shop.phone}
                     </p>
                     <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
@@ -149,31 +163,31 @@ const SuperAdminDashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
             Top Performing Products
           </h2>
           {topProducts.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">No sales data yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8 text-xs sm:text-sm">No sales data yet</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {topProducts.map((product, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-[#1973AE] rounded-lg flex items-center justify-center mr-3">
-                      <Package className="h-5 w-5 text-white" />
+                <div key={index} className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center min-w-0 flex-1">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mr-2 md:mr-3 flex-shrink-0">
+                      <Package className="h-4 w-4 md:h-5 md:w-5 text-[#1973AE] dark:text-[#04BCF2]" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <div className="min-w-0 mr-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
                         {product.product_name}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
                         {product.total_quantity} units sold
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-[#1973AE]">
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-[#1973AE] dark:text-[#04BCF2] text-sm sm:text-base">
                       {product.sales_count} sales
                     </p>
                   </div>
