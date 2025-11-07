@@ -25,7 +25,11 @@ const ShopsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingShop, setViewingShop] = useState<Shop | null>(null);
   const [editingShop, setEditingShop] = useState<Shop | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -166,14 +170,24 @@ const ShopsManagement: React.FC = () => {
     }
   };
 
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentShops = shops.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(shops.length / itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
             Shops Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm lg:text-base">
             Manage all shops in the system
           </p>
         </div>
@@ -182,30 +196,30 @@ const ShopsManagement: React.FC = () => {
             resetForm();
             setShowModal(true);
           }}
-          className="bg-[#1973AE] text-white px-4 py-2 rounded-lg flex items-center hover:bg-[#0d5a8a] transition-colors"
+          className="bg-[#1973AE] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg flex items-center hover:bg-[#0d5a8a] transition-colors text-xs sm:text-sm"
         >
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
           Add Shop
         </button>
       </div>
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search shops..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -229,63 +243,45 @@ const ShopsManagement: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Desktop table */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Shop</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Owner</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {shops.map(shop => (
-                    <tr key={shop.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs font-semibold text-gray-900 dark:text-white flex items-center"><Store className="h-4 w-4 text-[#1973AE] mr-1" /> {shop.name}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400">{shop.location}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs text-gray-900 dark:text-white">{shop.address}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs text-gray-900 dark:text-white">{shop.phone}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{shop.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900 dark:text-white">{shop.owner?.name || 'No owner'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap"><StatusToggle value={shop.status} onChange={(ns) => handleStatusChange(shop, ns)} /></td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs"><ActionsMenu onEdit={() => handleEdit(shop)} onDelete={() => handleDelete(shop.id, shop.name)} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {/* Mobile cards */}
-            <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
-              {shops.map(shop => (
-                <div key={shop.id} className="p-4 flex flex-col space-y-2 text-xs">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-semibold text-gray-900 dark:text-white flex items-center"><Store className="h-4 w-4 text-[#1973AE] mr-1" /> {shop.name}</div>
-                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{shop.location}</div>
+            {/* Shops List - All Screens */}
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {currentShops.map(shop => (
+                <div 
+                  key={shop.id} 
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  onClick={() => {
+                    setViewingShop(shop);
+                    setShowViewModal(true);
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    {/* Name/Location */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{shop.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{shop.location}</div>
                     </div>
-                    <ActionsMenu onEdit={() => handleEdit(shop)} onDelete={() => handleDelete(shop.id, shop.name)} />
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700 dark:text-gray-300">Owner:</span>
-                    <span className="text-gray-900 dark:text-white">{shop.owner?.name || '—'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700 dark:text-gray-300">Phone:</span>
-                    <span className="text-gray-900 dark:text-white">{shop.phone || '—'}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-1">
-                    <span className="text-gray-700 dark:text-gray-300">Status:</span>
-                    <StatusToggle value={shop.status} onChange={(ns) => handleStatusChange(shop, ns)} />
+                    
+                    {/* Owner/Phone */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-gray-900 dark:text-white truncate">{shop.owner?.name || 'No owner'}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{shop.phone}</div>
+                    </div>
+                    
+                    {/* Status Toggle */}
+                    <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <StatusToggle 
+                        value={shop.status} 
+                        onChange={(ns) => handleStatusChange(shop, ns)} 
+                      />
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <ActionsMenu 
+                        onEdit={() => handleEdit(shop)} 
+                        onDelete={() => handleDelete(shop.id, shop.name)} 
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -293,6 +289,67 @@ const ShopsManagement: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && shops.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+              <span>Show</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+              <span>entries</span>
+            </div>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1))
+                .map((page, idx, arr) => (
+                  <React.Fragment key={page}>
+                    {idx > 0 && arr[idx - 1] !== page - 1 && <span className="px-1 text-gray-400">...</span>}
+                    <button
+                      onClick={() => handlePageChange(page)}
+                      className={`px-2 sm:px-3 py-1 border rounded text-xs sm:text-sm ${
+                        currentPage === page
+                          ? 'bg-[#1973AE] text-white border-[#1973AE]'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Next
+              </button>
+            </div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, shops.length)} of {shops.length}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -424,6 +481,111 @@ const ShopsManagement: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && viewingShop && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Shop Details</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewingShop(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shop Name</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingShop.name}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingShop.location}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingShop.address || 'N/A'}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                      {viewingShop.phone}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm">
+                      {viewingShop.email}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Owner</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingShop.owner?.name || 'No owner assigned'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      viewingShop.status === 'active' 
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : viewingShop.status === 'inactive'
+                        ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    }`}>
+                      {viewingShop.status}
+                    </span>
+                  </div>
+                </div>
+
+                {viewingShop.description && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                      {viewingShop.description}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowViewModal(false);
+                      setViewingShop(null);
+                    }}
+                    className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
