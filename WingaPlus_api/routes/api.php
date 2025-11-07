@@ -8,6 +8,8 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\MyShopController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -50,14 +52,17 @@ Route::post('/register', function (Request $request) {
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => 'nullable|string|in:super_admin,shop_owner,salesman,storekeeper',
+            // role removed from public signup; accept account_type instead
+            'account_type' => 'nullable|string|in:winga,shop_owner',
         ]);
 
         $user = \App\Models\User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => $request->role ?? 'salesman',
+            // Map account_type to role; default non-specified to salesman
+            'role' => $request->account_type === 'shop_owner' ? 'shop_owner' : 'salesman',
+            'status' => 'active',
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
@@ -65,11 +70,16 @@ Route::post('/register', function (Request $request) {
         return response()->json([
             'user' => $user,
             'token' => $token,
+            'needs_shop_setup' => $user->role === 'shop_owner' && $user->ownedShops()->count() === 0,
         ], 201);
     } catch (\Exception $e) {
         return response()->json(['message' => 'Registration failed: ' . $e->getMessage()], 500);
     }
 });
+
+// Password reset routes
+Route::post('/password/forgot', [PasswordResetController::class, 'requestReset']);
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 
 Route::get('/warranties', [WarrantyController::class, 'index']);
 Route::post('/warranties', [WarrantyController::class, 'store']);
@@ -98,6 +108,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::put('/user/profile', [UserController::class, 'profile']);
     Route::put('/user/change-password', [UserController::class, 'changePassword']);
+    // Authenticated shop owner shop setup & retrieval
+    Route::get('/my/shop', [MyShopController::class, 'show']);
+    Route::post('/my/shop', [MyShopController::class, 'store']);
 });
 
 // Super Admin routes (protected by auth)
