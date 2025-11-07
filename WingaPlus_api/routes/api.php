@@ -7,6 +7,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SuperAdminController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -97,4 +98,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::put('/user/profile', [UserController::class, 'profile']);
     Route::put('/user/change-password', [UserController::class, 'changePassword']);
+});
+
+// Super Admin routes (protected by auth)
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    // Dashboard stats
+    Route::get('/dashboard/stats', [SuperAdminController::class, 'getDashboardStats']);
+    
+    // Shops management
+    Route::get('/shops', [SuperAdminController::class, 'getShops']);
+    Route::post('/shops', [SuperAdminController::class, 'createShop']);
+    Route::put('/shops/{id}', [SuperAdminController::class, 'updateShop']);
+    Route::delete('/shops/{id}', [SuperAdminController::class, 'deleteShop']);
+    
+    // Users management
+    Route::get('/users', [SuperAdminController::class, 'getUsers']);
+    Route::put('/users/{id}', [SuperAdminController::class, 'updateUser']);
+    Route::delete('/users/{id}', [SuperAdminController::class, 'deleteUser']);
+    
+    // Reports
+    Route::get('/reports', [SuperAdminController::class, 'getReports']);
 });
