@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import LoginForm from './components/Auth/LoginForm';
+import ShopSetup from './components/Shop/ShopSetup';
 import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
 // QR-related components removed (scanner, generator, product selection) as sales no longer depend on QR codes
@@ -142,10 +143,19 @@ const AppContent: React.FC = () => {
     return <LoginForm />;
   }
 
+  // Redirect shop owners without a shop to setup
+  const needsShopSetup = user?.role === 'shop_owner' && localStorage.getItem('needs_shop_setup') === 'true';
+  if (needsShopSetup && activeTab !== 'shop-setup') {
+    // Force wizard page
+    return <ShopSetup />;
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard onTabChange={navigateToPage} />;
+      case 'shop-setup':
+        return <ShopSetup />;
       // 'qr-scanner' route removed
       case 'shops':
         return <ShopsManagement />;
