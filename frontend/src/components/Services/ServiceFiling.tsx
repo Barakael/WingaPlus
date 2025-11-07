@@ -3,6 +3,7 @@ import { Wrench, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import SuccessModal from './SuccessModal';
+import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
 const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { user } = useAuth();
@@ -93,6 +94,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       setSubmittedService(serviceData);
       setShowSuccessModal(true);
+      showSuccessToast('🔧 Service filed successfully!');
 
       // Reset form
       setDeviceName('');
@@ -102,10 +104,19 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       setIssuePriceInput('0');
       setServicePriceInput('0');
       setFinalPriceInput('0');
+      setOffersInput('0');
     } catch (error) {
       console.error('Error filing service:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      alert(`Failed to file service: ${errorMessage}`);
+      const technicalError = error instanceof Error ? error.message : '';
+      let userMessage = '❌ Could not save service record. Please try again.';
+      
+      if (technicalError.includes('network') || technicalError.includes('fetch')) {
+        userMessage = '📡 Connection problem. Check your internet and try again.';
+      } else if (technicalError.includes('validation') || technicalError.includes('required')) {
+        userMessage = '⚠️ Please fill in all required fields correctly.';
+      }
+      
+      showErrorToast(userMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -187,7 +198,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             {/* Device Details - Compact Grid */}
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">

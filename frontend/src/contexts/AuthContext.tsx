@@ -24,19 +24,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (credentials: any) => {
-    const user = await authService.login(credentials);
-    if (user) {
+    try {
+      const user = await authService.login(credentials);
       setUser(user);
+      return user;
+    } catch (error) {
+      // Re-throw the error so it can be caught in the component
+      throw error;
     }
-    return user;
   };
 
   const register = async (userData: any) => {
-    const user = await authService.register(userData);
-    if (user) {
+    try {
+      const user = await authService.register(userData);
       setUser(user);
+      return user;
+    } catch (error) {
+      // Re-throw the error so it can be caught in the component
+      throw error;
     }
-    return user;
   };
 
   const logout = () => {

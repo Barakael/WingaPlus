@@ -12,7 +12,17 @@ export const login = async (credentials: any) => {
     });
 
     if (!response.ok) {
-      throw new Error('Login failed');
+      // Try to get error message from response
+      let errorMessage = 'Invalid email or password';
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (e) {
+        // If we can't parse the error, use default message
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -21,7 +31,7 @@ export const login = async (credentials: any) => {
     return data.user;
   } catch (error) {
     console.error(error);
-    return null;
+    throw error; // Re-throw the error instead of returning null
   }
 };
 
@@ -36,7 +46,21 @@ export const register = async (userData: any) => {
     });
 
     if (!response.ok) {
-      throw new Error('Registration failed');
+      // Try to get error message from response
+      let errorMessage = 'Registration failed. Please try again';
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors) {
+          // Handle validation errors
+          const errors = Object.values(errorData.errors).flat();
+          errorMessage = errors[0] as string || errorMessage;
+        }
+      } catch (e) {
+        // If we can't parse the error, use default message
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -45,7 +69,7 @@ export const register = async (userData: any) => {
     return data.user;
   } catch (error) {
     console.error(error);
-    return null;
+    throw error; // Re-throw the error instead of returning null
   }
 };
 

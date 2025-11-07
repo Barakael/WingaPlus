@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import ViewSaleModal from './ViewSaleModal';
 import EditSaleModal from './EditSaleModal';
+import { showSuccessToast, showErrorToast, showWarningToast } from '../../lib/toast';
 
 interface SalesmanSalesProps {
   openSaleForm?: (prefill?: Sale, onComplete?: () => void) => void;
@@ -180,12 +181,16 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   };
 
   // Calculate stats
-  const totalSales = mySales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
+  const totalSales = mySales.reduce((sum, sale) => {
+    const saleAmount = Number(sale.total_amount);
+    const offers = Number(sale.offers) || 0;
+    return sum + (saleAmount - offers); // Subtract offers from total sales
+  }, 0);
   const totalItems = mySales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
   const totalGanji = mySales.reduce((sum, sale) => {
     const baseProfit = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
     const offers = Number(sale.offers) || 0;
-    const ganji = baseProfit - offers;
+    const ganji = baseProfit - offers; // Already subtracting offers from profit
     return sum + ganji;
   }, 0);
   const averageSale = mySales.length > 0 ? totalSales / mySales.length : 0;
@@ -315,12 +320,16 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       yPosition += 8;
 
       // Calculate filtered stats
-      const filteredTotalSales = filteredSales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
+      const filteredTotalSales = filteredSales.reduce((sum, sale) => {
+        const saleAmount = Number(sale.total_amount);
+        const offers = Number(sale.offers) || 0;
+        return sum + (saleAmount - offers); // Subtract offers from total sales
+      }, 0);
       const filteredTotalItems = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
       const filteredTotalGanji = filteredSales.reduce((sum, sale) => {
         const baseProfit = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
         const offers = Number(sale.offers) || 0;
-        const ganji = baseProfit - offers;
+        const ganji = baseProfit - offers; // Already subtracting offers from profit
         return sum + ganji;
       }, 0);
 
@@ -377,12 +386,16 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
     XLSX.utils.book_append_sheet(wb, ws, 'Sales Data');
 
     // Add summary sheet with filtered data
-    const filteredTotalSales = filteredSales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
+    const filteredTotalSales = filteredSales.reduce((sum, sale) => {
+      const saleAmount = Number(sale.total_amount);
+      const offers = Number(sale.offers) || 0;
+      return sum + (saleAmount - offers); // Subtract offers from total sales
+    }, 0);
     const filteredTotalItems = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
     const filteredTotalGanji = filteredSales.reduce((sum, sale) => {
       const baseProfit = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
       const offers = Number(sale.offers) || 0;
-      const ganji = baseProfit - offers;
+      const ganji = baseProfit - offers; // Already subtracting offers from profit
       return sum + ganji;
     }, 0);
 
@@ -429,10 +442,19 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
         setMySales(prev => prev.filter(s => s.id !== sale.id));
         setFilteredSales(prev => prev.filter(s => s.id !== sale.id));
         
-        alert('Sale deleted successfully!');
+        showSuccessToast('✅ Sale deleted successfully!');
       } catch (error) {
         console.error('Error deleting sale:', error);
-        alert(`Failed to delete sale: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const technicalError = error instanceof Error ? error.message : '';
+        let userMessage = '❌ Could not delete sale. Please try again.';
+        
+        if (technicalError.includes('network') || technicalError.includes('fetch')) {
+          userMessage = '📡 Connection problem. Check your internet and try again.';
+        } else if (technicalError.includes('not found') || technicalError.includes('404')) {
+          userMessage = '⚠️ Sale already deleted or not found.';
+        }
+        
+        showErrorToast(userMessage);
       } finally {
         setLoading(false);
       }
@@ -478,27 +500,6 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
   return (
     <div className="space-y-4 lg:space-y-6">
-      {/* Header - Compact on all screens */}
-      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <div className="flex-1">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-            My Sales Dashboard
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 ">
-            Track your sales performance and achievements
-          </p>
-        </div>
-        {openSaleForm && (
-          <div className="flex justify-start sm:justify-end">
-            <button
-              onClick={() => openSaleForm && openSaleForm(undefined, loadSalesData)}
-              className="bg-[#04BCF2] text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm lg:text-base w-auto"
-            >
-              New Sale
-            </button>
-          </div>
-        )}
-      </div>
 
       {/* Monthly Target Progress - Compact
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 md:p-4 lg:p-6">
@@ -555,12 +556,25 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
 
       {/* Sales Records - Full Width, Compact on Mobile */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 md:p-4 lg:p-6">
-        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-3 lg:mb-4">
-          <h2 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
-            <Calendar className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
-            Sales Records
-          </h2>
-          <div className="flex space-x-1 lg:space-x-2">
+        <div className="flex flex-col space-y-3 mb-3 lg:mb-4">
+          {/* Title and New Sale Button Row */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
+              <Calendar className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
+              Sales Records
+            </h2>
+            {openSaleForm && (
+              <button
+                onClick={() => openSaleForm && openSaleForm(undefined, loadSalesData)}
+                className="bg-[#04BCF2] text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-medium hover:bg-[#03a8d8] transition-all duration-200 text-sm lg:text-base"
+              >
+                New Sale
+              </button>
+            )}
+          </div>
+          
+          {/* Action Buttons Row */}
+          <div className="flex space-x-1 lg:space-x-2 ">
             <button
               onClick={loadSalesData}
               disabled={loading}

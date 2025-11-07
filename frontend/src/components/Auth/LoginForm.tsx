@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff, UserPlus, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
 const LoginForm: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,18 +26,51 @@ const LoginForm: React.FC = () => {
     try {
       if (isLogin) {
         await login({ email: formData.email, password: formData.password });
+        showSuccessToast('✅ Welcome back! You are now logged in.');
       } else {
         await register(formData);
+        showSuccessToast('🎉 Account created! Welcome to WingaPlus.');
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      // Convert technical errors to user-friendly messages
+      let userMessage = '';
+      const technicalError = err.message || '';
+      
+      if (isLogin) {
+        // Login error messages
+        if (technicalError.includes('Invalid') || technicalError.includes('password') || technicalError.includes('401')) {
+          userMessage = '❌ Incorrect email or password. Please try again.';
+        } else if (technicalError.includes('network') || technicalError.includes('fetch')) {
+          userMessage = '📡 Connection problem. Please check your internet.';
+        } else if (technicalError.includes('not found') || technicalError.includes('404')) {
+          userMessage = '❌ Account not found. Please sign up first.';
+        } else {
+          userMessage = '❌ Login failed. Please check your credentials.';
+        }
+      } else {
+        // Registration error messages
+        if (technicalError.includes('exists') || technicalError.includes('already')) {
+          userMessage = '⚠️ This email is already registered. Try logging in.';
+        } else if (technicalError.includes('email')) {
+          userMessage = '❌ Please enter a valid email address.';
+        } else if (technicalError.includes('password')) {
+          userMessage = '❌ Password must be at least 6 characters.';
+        } else if (technicalError.includes('network') || technicalError.includes('fetch')) {
+          userMessage = '📡 Connection problem. Please check your internet.';
+        } else {
+          userMessage = '❌ Registration failed. Please try again.';
+        }
+      }
+      
+      setError(userMessage);
+      showErrorToast(userMessage);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#1973AE] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
+        <div className="bg-white   dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-2xl flex items-center justify-center mx-auto mb-4">
               <span className="text-white font-bold text-2xl">WP</span>

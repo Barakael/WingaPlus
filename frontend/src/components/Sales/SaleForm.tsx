@@ -3,6 +3,7 @@ import { ShoppingCart, User, Phone, Type } from 'lucide-react';
 import Receipt from './Receipt';
 import { createSale } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
+import { showSuccessToast, showErrorToast, showWarningToast } from '../../lib/toast';
 // Free-text product entry; no product list import
 
 interface SalePrefill {
@@ -72,46 +73,62 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
       const totalAmount = subtotal + taxAmount; // server will store quantity*unit_price only currently
 
       if (!productName.trim() && !prefill?.product_id && category === 'accessories') {
-        setError('Product name is required');
+        const errorMsg = 'Product name is required';
+        setError(errorMsg);
+        showErrorToast(errorMsg);
         setSubmitting(false);
         return;
       }
 
       if (!referenceStore.trim()) {
-        setError('Reference store is required');
+        const errorMsg = 'Reference store is required';
+        setError(errorMsg);
+        showErrorToast(errorMsg);
         setSubmitting(false);
         return;
       }
 
       if (category === 'phones') {
         if (!customerName.trim()) {
-          setError('Customer name is required for phone sales');
+          const errorMsg = 'Customer name is required for phone sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
           setSubmitting(false);
           return;
         }
         if (!phoneName.trim()) {
-          setError('Phone name is required for phone sales');
+          const errorMsg = 'Phone name is required for phone sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
           setSubmitting(false);
           return;
         }
         if (!imei.trim()) {
-          setError('IMEI is required for phone sales');
+          const errorMsg = 'IMEI is required for phone sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
           setSubmitting(false);
           return;
         }
         if (!color.trim()) {
-          setError('Color is required for phone sales');
+          const errorMsg = 'Color is required for phone sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
           setSubmitting(false);
           return;
         }
         if (!storage) {
-          setError('Storage is required for phone sales');
+          const errorMsg = 'Storage is required for phone sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
           setSubmitting(false);
           return;
         }
       } else if (category === 'accessories') {
         if (!productName.trim()) {
-          setError('Product name is required for accessory sales');
+          const errorMsg = 'Product name is required for accessory sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
           setSubmitting(false);
           return;
         }
@@ -183,9 +200,20 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
 
       setGeneratedReceipt(receiptData);
       setShowReceipt(true);
+      showSuccessToast('🎉 Sale recorded successfully!');
       onSale(created);
     } catch (err: any) {
-      setError(err.message || 'Failed to create sale');
+      const technicalError = err.message || '';
+      let userMessage = '❌ Could not save sale. Please try again.';
+      
+      if (technicalError.includes('network') || technicalError.includes('fetch')) {
+        userMessage = '📡 Connection problem. Check your internet and try again.';
+      } else if (technicalError.includes('validation') || technicalError.includes('required')) {
+        userMessage = '⚠️ Please fill in all required fields correctly.';
+      }
+      
+      setError(userMessage);
+      showErrorToast(userMessage);
     } finally {
       setSubmitting(false);
     }

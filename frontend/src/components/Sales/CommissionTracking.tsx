@@ -179,8 +179,9 @@ const CommissionTracking: React.FC = () => {
       }
 
       const ganji = (Number(sale.unit_price) - Number(sale.cost_price || 0)) * Number(sale.quantity);
-      periods[periodKey].ganji += ganji;
-      periods[periodKey].sales += Number(sale.total_amount);
+      const offers = Number(sale.offers) || 0;
+      periods[periodKey].ganji += (ganji - offers); // Subtract offers from ganji
+      periods[periodKey].sales += (Number(sale.total_amount) - offers); // Subtract offers from sales
       periods[periodKey].items += Number(sale.quantity);
       periods[periodKey].transactions += 1;
     });
@@ -481,10 +482,10 @@ const CommissionTracking: React.FC = () => {
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-            My Commission Dashboard
+            Ganji Dashboard
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
-            Track your profit performance over time
+            Track your profit "ganji" performance over time
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -520,8 +521,8 @@ const CommissionTracking: React.FC = () => {
           View Settings
         </h2>
 
-        <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-1">
               Period Type
             </label>
@@ -533,7 +534,7 @@ const CommissionTracking: React.FC = () => {
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
             </select>
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-1">
@@ -569,7 +570,7 @@ const CommissionTracking: React.FC = () => {
               {targets.length > 0 ? (
                 targets.map((target) => (
                   <option key={target.id} value={String(target.id)}>
-                    {target.name} - {target.metric === 'profit' ? 'TSh' : ''} {target.metric === 'profit' ? formatCurrency(target.target_value) : target.target_value} {target.metric === 'items_sold' ? 'items' : ''} ({target.period})
+                    {target.name}  ({target.period})
                   </option>
                 ))
               ) : (

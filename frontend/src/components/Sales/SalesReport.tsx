@@ -101,10 +101,19 @@ const SalesReport: React.FC = () => {
 
   // Calculate summary statistics
   const summary = useMemo(() => {
-    const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.selling_price, 0);
+    const totalRevenue = filteredSales.reduce((sum, sale) => {
+      const revenue = sale.selling_price;
+      const offers = sale.offers || 0;
+      return sum + (revenue - offers); // Subtract offers from revenue
+    }, 0);
     const totalExpenses = filteredSales.reduce((sum, sale) => sum + sale.expenses, 0);
     const totalOffers = filteredSales.reduce((sum, sale) => sum + sale.offers, 0);
-    const totalProfit = filteredSales.reduce((sum, sale) => sum + sale.profit, 0);
+    const totalProfit = filteredSales.reduce((sum, sale) => {
+      const profit = sale.profit;
+      // Note: profit is already calculated as (selling_price - expenses) in the data
+      // We don't need to subtract offers again here since it should already be in the calculation
+      return sum + profit;
+    }, 0);
     const averageProfitMargin = filteredSales.length > 0
       ? filteredSales.reduce((sum, sale) => sum + sale.profit_margin, 0) / filteredSales.length
       : 0;

@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Make status bar/notch area blue */
+html, body {
+  background-color: #1973AE;
+  padding: 0;
+  margin: 0;
+}

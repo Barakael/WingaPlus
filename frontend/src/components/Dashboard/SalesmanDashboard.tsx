@@ -49,11 +49,16 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
   }, [user]);
 
   // Calculate stats
-  const totalSales = mySales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
+  const totalSales = mySales.reduce((sum, sale) => {
+    const saleAmount = Number(sale.total_amount);
+    const offers = Number(sale.offers) || 0;
+    return sum + (saleAmount - offers); // Subtract offers from total sales
+  }, 0);
   const totalItems = mySales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
   const salesGanji = mySales.reduce((sum, sale) => {
-    const ganji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
-    return sum + ganji;
+    const baseGanji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
+    const offers = Number(sale.offers) || 0;
+    return sum + (baseGanji - offers); // Subtract offers from ganji
   }, 0);
   const servicesGanji = myServices.reduce((sum, service) => sum + (parseFloat(service.ganji) || 0), 0);
   const totalGanji = salesGanji + servicesGanji;
@@ -88,7 +93,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 dark:bg-gray-900 rounded-lg shadow-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 shadow-xl dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
               <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
@@ -100,7 +105,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 dark:bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
               <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
@@ -112,7 +117,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 md:p-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 dark:bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
               <Wrench className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">

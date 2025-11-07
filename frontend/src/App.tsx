@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import LoginForm from './components/Auth/LoginForm';
@@ -19,6 +20,29 @@ import CommissionTracking from './components/Sales/CommissionTracking';
 import TargetManagement from './components/Sales/TargetManagement';
 import Settings from './components/Common/Settings';
 
+// Page labels for breadcrumbs
+const pageLabels: Record<string, string> = {
+  'dashboard': 'Dashboard',
+  'shops': 'Shops',
+  'users': 'Users',
+  'products': 'Products',
+  'categories': 'Categories',
+  'sales': 'Sales Report',
+  'staff': 'Staff',
+  'warranties': 'Warranties',
+  'file-warranty': 'File Warranty',
+  'services': 'Services',
+  'file-service': 'File Service',
+  'reports': 'Reports',
+  'inventory': 'Inventory',
+  'stock-movements': 'Stock Movements',
+  'my-sales': 'My Sales',
+  'sales-orders': 'Sales Orders',
+  'commissions': 'Commissions',
+  'targets': 'Targets',
+  'settings': 'Settings',
+};
+
 // Placeholder components for missing pages
 const ShopsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Shops Management</h1><p>Coming soon...</p></div>;
 const UsersPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Users Management</h1><p>Coming soon...</p></div>;
@@ -29,9 +53,56 @@ const StockMovementsPage = () => <div className="p-6"><h1 className="text-2xl fo
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  
   // Generic Sale Form control (decoupled from QR scanning)
   const [showSaleForm, setShowSaleForm] = useState(false);
   const [salePrefill, setSalePrefill] = useState<any>(null);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.page) {
+        setActiveTab(event.state.page);
+      }
+    };
+
+    // Initialize history state
+    if (!window.history.state) {
+      window.history.replaceState({ page: 'dashboard' }, '', '');
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Navigate to a new page
+  const navigateToPage = (page: string) => {
+    // Don't add to history if it's the same page
+    if (page === activeTab) return;
+
+    setActiveTab(page);
+    
+    // Push to browser history
+    window.history.pushState({ page }, '', '');
+  };
+
+  // Generate breadcrumbs from current page
+  const getBreadcrumbs = () => {
+    const breadcrumbs: Array<{ label: string; path: string }> = [];
+    
+    // Don't show breadcrumb on dashboard
+    if (activeTab === 'dashboard') {
+      return [];
+    }
+
+    // Add current page
+    breadcrumbs.push({
+      label: pageLabels[activeTab] || activeTab,
+      path: activeTab
+    });
+
+    return breadcrumbs;
+  };
 
   // Removed QR-specific state & handlers
 
@@ -73,7 +144,7 @@ const AppContent: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard onTabChange={setActiveTab} />;
+        return <Dashboard onTabChange={navigateToPage} />;
       // 'qr-scanner' route removed
       case 'shops':
         return <ShopsPage />;
@@ -88,13 +159,13 @@ const AppContent: React.FC = () => {
       case 'staff':
         return <StaffPage />;
       case 'warranties':
-        return <WarrantyView onFileWarranty={() => setActiveTab('file-warranty')} openSaleForm={openSaleForm} />;
+        return <WarrantyView onFileWarranty={() => navigateToPage('file-warranty')} openSaleForm={openSaleForm} />;
       case 'file-warranty':
-        return <WarrantyFiling onBack={() => setActiveTab('warranties')} />;
+        return <WarrantyFiling onBack={() => window.history.back()} />;
       case 'services':
-        return <ServiceView onFileService={() => setActiveTab('file-service')} />;
+        return <ServiceView onFileService={() => navigateToPage('file-service')} />;
       case 'file-service':
-        return <ServiceFiling onBack={() => setActiveTab('services')} />;
+        return <ServiceFiling onBack={() => window.history.back()} />;
       case 'reports':
         return <Reports />;
       case 'inventory':
@@ -117,7 +188,11 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+    <Layout 
+      activeTab={activeTab} 
+      onTabChange={navigateToPage}
+      breadcrumbs={getBreadcrumbs()}
+    >
       {renderContent()}
       
       {showSaleForm && (
@@ -140,6 +215,28 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <Toaster 
+          position="top-center"
+          reverseOrder={false}
+          gutter={8}
+          containerStyle={{
+            top: 20,
+          }}
+          toastOptions={{
+            // Default options for all toasts
+            duration: 4000,
+            style: {
+              background: '#1973AE',
+              color: '#fff',
+              padding: '16px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '500',
+              boxShadow: '0 10px 25px rgba(25, 115, 174, 0.3)',
+              maxWidth: '90vw',
+            },
+          }}
+        />
         <AppContent />
       </AuthProvider>
     </ThemeProvider>

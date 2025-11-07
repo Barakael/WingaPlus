@@ -3,6 +3,7 @@ import { Shield, User, Phone, Mail, DollarSign, HardDrive, Smartphone } from 'lu
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import SuccessModal from './SuccessModal';
+import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
 const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { user } = useAuth();
@@ -128,6 +129,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       setSubmittedWarranty(warrantyData);
       setShowSuccessModal(true);
+      showSuccessToast('🛡️ Warranty filed successfully!');
 
       // Reset form
       setWarrantyPeriod('');
@@ -140,12 +142,22 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       setStorage('');
       setCostPriceInput('0');
       setUnitPriceInput('0');
+      setOffersInput('0');
       setImeiNumber('');
     } catch (error) {
       console.error('Error filing warranty:', error);
-      // Show detailed error message
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      alert(`Failed to file warranty: ${errorMessage}`);
+      const technicalError = error instanceof Error ? error.message : '';
+      let userMessage = '❌ Could not save warranty. Please try again.';
+      
+      if (technicalError.includes('network') || technicalError.includes('fetch')) {
+        userMessage = '📡 Connection problem. Check your internet and try again.';
+      } else if (technicalError.includes('validation') || technicalError.includes('required')) {
+        userMessage = '⚠️ Please fill in all required fields correctly.';
+      } else if (technicalError.includes('email')) {
+        userMessage = '⚠️ Please enter a valid email address.';
+      }
+      
+      showErrorToast(userMessage);
     } finally {
       setIsSubmitting(false);
     }

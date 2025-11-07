@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Edit, Save } from 'lucide-react';
 import { Sale } from '../../types';
 import { updateSale } from '../../services/sales';
+import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
 interface EditSaleModalProps {
   sale: Sale | null;
@@ -90,9 +91,20 @@ const EditSaleModal: React.FC<EditSaleModalProps> = ({ sale, isOpen, onClose, on
 
       const updatedSale = await updateSale(sale.id, updatePayload);
       onSaleUpdated(updatedSale);
+      showSuccessToast('✏️ Sale updated successfully!');
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update sale');
+      const technicalError = err instanceof Error ? err.message : '';
+      let userMessage = '❌ Could not update sale. Please try again.';
+      
+      if (technicalError.includes('network') || technicalError.includes('fetch')) {
+        userMessage = '📡 Connection problem. Check your internet and try again.';
+      } else if (technicalError.includes('not found') || technicalError.includes('404')) {
+        userMessage = '⚠️ Sale not found. It may have been deleted.';
+      }
+      
+      setError(userMessage);
+      showErrorToast(userMessage);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Package, AlertTriangle, Search } from 'lucide-react';
 import { products, categories } from '../../database';
+import { showSuccessToast, showErrorToast, showInfoToast } from '../../lib/toast';
 
 const ProductManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,9 +27,11 @@ const ProductManagement: React.FC = () => {
     if (editingProduct) {
       // Update existing product
       console.log('Updating product:', { ...editingProduct, ...formData });
+      showSuccessToast('📦 Product updated successfully!');
     } else {
       // Add new product
       console.log('Adding new product:', formData);
+      showSuccessToast('📦 Product added successfully!');
     }
 
     // Reset form
@@ -58,6 +61,7 @@ const ProductManagement: React.FC = () => {
   const handleDelete = (productId: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       console.log('Deleting product:', productId);
+      showSuccessToast('🗑️ Product deleted successfully!');
     }
   };
 
