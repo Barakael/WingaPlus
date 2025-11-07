@@ -218,6 +218,7 @@ class SuperAdminController extends Controller
             'email' => 'sometimes|email|unique:users,email,' . $id,
             'phone' => 'nullable|string|max:50',
             'role' => 'sometimes|in:super_admin,shop_owner,salesman,storekeeper',
+            'status' => 'sometimes|in:active,inactive',
             'shop_id' => 'nullable|exists:shops,id',
         ]);
 

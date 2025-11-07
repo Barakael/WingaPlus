@@ -25,6 +25,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'role',
+        'status',
         'shop_id',
     ];
 
