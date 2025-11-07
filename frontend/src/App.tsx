@@ -19,6 +19,9 @@ import SalesOrders from './components/Sales/SalesOrders';
 import CommissionTracking from './components/Sales/CommissionTracking';
 import TargetManagement from './components/Sales/TargetManagement';
 import Settings from './components/Common/Settings';
+import ShopsManagement from './components/SuperAdmin/ShopsManagement';
+import UsersManagement from './components/SuperAdmin/UsersManagement';
+import SystemReports from './components/SuperAdmin/SystemReports';
 
 // Page labels for breadcrumbs
 const pageLabels: Record<string, string> = {
@@ -44,8 +47,6 @@ const pageLabels: Record<string, string> = {
 };
 
 // Placeholder components for missing pages
-const ShopsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Shops Management</h1><p>Coming soon...</p></div>;
-const UsersPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Users Management</h1><p>Coming soon...</p></div>;
 const StaffPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Staff Management</h1><p>Coming soon...</p></div>;
 const InventoryPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Inventory Management</h1><p>Coming soon...</p></div>;
 const StockMovementsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Stock Movements</h1><p>Coming soon...</p></div>;
@@ -147,9 +148,9 @@ const AppContent: React.FC = () => {
         return <Dashboard onTabChange={navigateToPage} />;
       // 'qr-scanner' route removed
       case 'shops':
-        return <ShopsPage />;
+        return <ShopsManagement />;
       case 'users':
-        return <UsersPage />;
+        return <UsersManagement />;
       case 'products':
         return <ProductManagement />;
       case 'categories':
@@ -167,7 +168,8 @@ const AppContent: React.FC = () => {
       case 'file-service':
         return <ServiceFiling onBack={() => window.history.back()} />;
       case 'reports':
-        return <Reports />;
+        // Use SystemReports for super_admin, Reports for others
+        return user?.role === 'super_admin' ? <SystemReports /> : <Reports />;
       case 'inventory':
         return <InventoryPage />;
       case 'stock-movements':
