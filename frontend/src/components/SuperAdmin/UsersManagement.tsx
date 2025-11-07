@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Edit, Trash2, Search, X } from 'lucide-react';
+import { Users, Search, X } from 'lucide-react';
 import { getUsers, updateUser, deleteUser } from '../../services/superAdmin';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
@@ -9,10 +9,12 @@ interface User {
   email: string;
   phone: string;
   role: string;
+  status?: string;
   shop_id?: number;
   shop?: {
     id: number;
     name: string;
+    location?: string;
   };
 }
 
@@ -49,6 +51,16 @@ const UsersManagement: React.FC = () => {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUserStatusChange = async (user: User, nextStatus: string) => {
+    try {
+      await updateUser(user.id, { status: nextStatus });
+      showSuccessToast(`Status updated to ${nextStatus}`);
+      fetchUsers();
+    } catch (e: any) {
+      showErrorToast(e.message || 'Failed to update status');
     }
   };
 
@@ -183,73 +195,76 @@ const UsersManagement: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">No users found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Shop
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{user.email}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{user.phone}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
-                        {user.role.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {user.shop?.name || 'No shop'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="text-[#1973AE] hover:text-[#0d5a8a] mr-3"
-                      >
-                        <Edit className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id, user.name)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Shop</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {users.map(u => (
+                    <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs font-semibold text-gray-900 dark:text-white">{u.name}</div>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[160px]">{u.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs text-gray-900 dark:text-white">{u.shop?.name || '—'}</div>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400">{u.shop?.location || '—'}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full ${getRoleBadgeColor(u.role)}`}>{u.role.replace('_', ' ')}</span></td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <StatusToggle value={u.status === 'inactive' ? 'inactive' : 'active'} onChange={(ns) => handleUserStatusChange(u, ns)} />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs">
+                        <ActionsMenu onEdit={() => handleEdit(u)} onDelete={() => handleDelete(u.id, u.name)} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+              {users.map(u => (
+                <div key={u.id} className="p-4 flex flex-col space-y-2 text-xs">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-semibold text-gray-900 dark:text-white">{u.name}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{u.email}</div>
+                    </div>
+                    <ActionsMenu onEdit={() => handleEdit(u)} onDelete={() => handleDelete(u.id, u.name)} />
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700 dark:text-gray-300">Shop:</span>
+                    <span className="text-gray-900 dark:text-white">{u.shop?.name || '—'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700 dark:text-gray-300">Location:</span>
+                    <span className="text-gray-900 dark:text-white">{u.shop?.location || '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1">
+                    <span className="text-gray-700 dark:text-gray-300">Status:</span>
+                    <StatusToggle value={u.status === 'inactive' ? 'inactive' : 'active'} onChange={(ns) => handleUserStatusChange(u, ns)} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
       {/* Edit Modal */}
       {showModal && editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -323,7 +338,7 @@ const UsersManagement: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -349,5 +364,39 @@ const UsersManagement: React.FC = () => {
     </div>
   );
 };
+
+// Local UI helpers: Status toggle and actions menu
+const StatusToggle: React.FC<{ value: string; onChange: (next: string) => void }> = ({ value, onChange }) => {
+  const active = value === 'active';
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(active ? 'inactive' : 'active')}
+      className={`relative inline-flex h-6 w-12 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1973AE] ${active ? 'bg-white border border-green-500 shadow-inner' : 'bg-gray-300 border border-gray-500'}`}
+      aria-label={active ? 'Set inactive' : 'Set active'}
+    >
+      <span className={`inline-block h-5 w-5 rounded-full transform transition-transform ${active ? 'translate-x-6 bg-green-500' : 'translate-x-1 bg-gray-700'}`} />
+    </button>
+  );
+};
+
+const ActionsMenu: React.FC<{ onEdit: () => void; onDelete: () => void }> = ({ onEdit, onDelete }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button type="button" onClick={() => setOpen(o => !o)} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Actions">
+        <span className="text-xl leading-none text-gray-600 dark:text-gray-300">•••</span>
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 text-xs">
+          <button onClick={() => { setOpen(false); onEdit(); }} className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">Edit</button>
+          <button onClick={() => { setOpen(false); onDelete(); }} className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30">Delete</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// (no exports)
 
 export default UsersManagement;
