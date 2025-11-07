@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, Mail, Lock, Eye, EyeOff, UserPlus, User } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, UserPlus, User, HelpCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
@@ -10,8 +10,11 @@ const LoginForm: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'salesman'
+    account_type: 'winga'
   });
+  const [showForgot, setShowForgot] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetRequested, setResetRequested] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
@@ -38,7 +41,9 @@ const LoginForm: React.FC = () => {
         await login({ email: formData.email, password: formData.password });
         showSuccessToast('✅ Welcome back! You are now logged in.');
       } else {
-        await register(formData);
+        const payload = { ...formData };
+        delete (payload as any).confirmPassword;
+        await register(payload);
         showSuccessToast('🎉 Account created! Welcome to WingaPlus.');
       }
     } catch (err: any) {
@@ -94,7 +99,7 @@ const LoginForm: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            {!isLogin && (
+            {!isLogin && !showForgot && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Full Name
@@ -113,7 +118,7 @@ const LoginForm: React.FC = () => {
               </div>
             )}
 
-            <div>
+            {!showForgot && <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email Address
               </label>
@@ -128,9 +133,9 @@ const LoginForm: React.FC = () => {
                   required
                 />
               </div>
-            </div>
+            </div>}
 
-            <div>
+            {!showForgot && <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
@@ -152,9 +157,9 @@ const LoginForm: React.FC = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            </div>
+            </div>}
 
-            {!isLogin && (
+            {!isLogin && !showForgot && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Confirm Password
@@ -180,21 +185,47 @@ const LoginForm: React.FC = () => {
               </div>
             )}
 
-            {!isLogin && (
+            {!isLogin && !showForgot && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Role
+                  Account Type
                 </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => handleInputChange('role', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="Winga">Winga</option>
-                  {/* <option value="storekeeper">Storekeeper</option> */}
-                  <option value="shop_owner">Shop Owner</option>
-                  {/* <option value="super_admin">Super Admin</option> */}
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('account_type', 'winga')}
+                    className={`text-xs px-3 py-2 rounded-lg border ${formData.account_type === 'winga' ? 'bg-[#1973AE] text-white border-[#1973AE]' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'}`}
+                  >
+                    Winga
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('account_type', 'shop_owner')}
+                    className={`text-xs px-3 py-2 rounded-lg border ${formData.account_type === 'shop_owner' ? 'bg-[#1973AE] text-white border-[#1973AE]' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'}`}
+                  >
+                    Shop Owner
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showForgot && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Enter your email to reset password</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                {resetRequested && (
+                  <p className="mt-2 text-xs text-green-600 dark:text-green-400">If the email exists, a reset link was generated (check mail or admin logs).</p>
+                )}
               </div>
             )}
 
@@ -204,29 +235,71 @@ const LoginForm: React.FC = () => {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1973AE] text-white py-2.5 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] focus:outline-none focus:ring-2 focus:ring-[#1973AE] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  {isLogin ? <LogIn className="h-4 w-4 mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
-                  {isLogin ? 'Sign In' : 'Sign Up'}
-                </>
-              )}
-            </button>
+            {!showForgot && (
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#1973AE] text-white py-2.5 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] focus:outline-none focus:ring-2 focus:ring-[#1973AE] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    {isLogin ? <LogIn className="h-4 w-4 mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+                    {isLogin ? 'Sign In' : 'Sign Up'}
+                  </>
+                )}
+              </button>
+            )}
+            {showForgot && (
+              <button
+                type="button"
+                onClick={async () => {
+                  setError('');
+                  try {
+                    const { requestPasswordReset } = await import('../../services/auth');
+                    await requestPasswordReset(resetEmail);
+                    setResetRequested(true);
+                    showSuccessToast('📧 If the email exists, a reset link was generated.');
+                  } catch (e: any) {
+                    showErrorToast(e.message || 'Failed to request reset');
+                  }
+                }}
+                disabled={loading || !resetEmail}
+                className="w-full bg-[#1973AE] text-white py-2.5 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] focus:outline-none focus:ring-2 focus:ring-[#1973AE] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
+              >
+                {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Request Reset Link'}
+              </button>
+            )}
           </form>
 
           <div className="mt-4 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-[#1973AE] dark:text-[#1973AE] hover:text-[#0d5a8a] dark:hover:text-[#0d5a8a] text-xs font-medium"
-            >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-            </button>
+            {!showForgot && (
+              <>
+                <button
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-[#1973AE] dark:text-[#1973AE] hover:text-[#0d5a8a] dark:hover:text-[#0d5a8a] text-xs font-medium block w-full"
+                >
+                  {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                </button>
+                {isLogin && (
+                  <button
+                    onClick={() => { setShowForgot(true); setResetRequested(false); }}
+                    className="mt-2 text-[#1973AE] hover:text-[#0d5a8a] dark:text-[#1973AE] dark:hover:text-[#0d5a8a] text-xs font-medium flex items-center justify-center"
+                  >
+                    <HelpCircle className="h-3 w-3 mr-1" /> Forgot password?
+                  </button>
+                )}
+              </>
+            )}
+            {showForgot && (
+              <button
+                onClick={() => { setShowForgot(false); setResetEmail(''); setResetRequested(false); }}
+                className="text-[#1973AE] hover:text-[#0d5a8a] dark:text-[#1973AE] dark:hover:text-[#0d5a8a] text-xs font-medium flex items-center justify-center"
+              >
+                <ArrowLeft className="h-3 w-3 mr-1" /> Back to login
+              </button>
+            )}
           </div>
         </div>
       </div>
