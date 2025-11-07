@@ -24,7 +24,11 @@ const UsersManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -142,14 +146,24 @@ const UsersManagement: React.FC = () => {
     }
   };
 
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
             Users Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm lg:text-base">
             Manage all users in the system
           </p>
         </div>
@@ -157,21 +171,21 @@ const UsersManagement: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Roles</option>
             <option value="super_admin">Super Admin</option>
@@ -196,63 +210,49 @@ const UsersManagement: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Desktop table */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Shop</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {users.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs font-semibold text-gray-900 dark:text-white">{u.name}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[160px]">{u.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs text-gray-900 dark:text-white">{u.shop?.name || '—'}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400">{u.shop?.location || '—'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full ${getRoleBadgeColor(u.role)}`}>{u.role.replace('_', ' ')}</span></td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusToggle value={u.status === 'inactive' ? 'inactive' : 'active'} onChange={(ns) => handleUserStatusChange(u, ns)} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs">
-                        <ActionsMenu onEdit={() => handleEdit(u)} onDelete={() => handleDelete(u.id, u.name)} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {/* Mobile cards */}
-            <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
-              {users.map(u => (
-                <div key={u.id} className="p-4 flex flex-col space-y-2 text-xs">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-semibold text-gray-900 dark:text-white">{u.name}</div>
-                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{u.email}</div>
+            {/* Users List - All Screens */}
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {currentUsers.map(u => (
+                <div 
+                  key={u.id} 
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  onClick={() => {
+                    setViewingUser(u);
+                    setShowViewModal(true);
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    {/* Name/Email */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{u.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.email}</div>
                     </div>
-                    <ActionsMenu onEdit={() => handleEdit(u)} onDelete={() => handleDelete(u.id, u.name)} />
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700 dark:text-gray-300">Shop:</span>
-                    <span className="text-gray-900 dark:text-white">{u.shop?.name || '—'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700 dark:text-gray-300">Location:</span>
-                    <span className="text-gray-900 dark:text-white">{u.shop?.location || '—'}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-1">
-                    <span className="text-gray-700 dark:text-gray-300">Status:</span>
-                    <StatusToggle value={u.status === 'inactive' ? 'inactive' : 'active'} onChange={(ns) => handleUserStatusChange(u, ns)} />
+                    
+                    {/* Shop/Role */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-gray-900 dark:text-white truncate">{u.shop?.name || 'No shop'}</div>
+                      <div className="text-xs">
+                        <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getRoleBadgeColor(u.role)}`}>
+                          {u.role.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Status Toggle */}
+                    <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <StatusToggle 
+                        value={u.status === 'inactive' ? 'inactive' : 'active'} 
+                        onChange={(ns) => handleUserStatusChange(u, ns)} 
+                      />
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <ActionsMenu 
+                        onEdit={() => handleEdit(u)} 
+                        onDelete={() => handleDelete(u.id, u.name)} 
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -260,6 +260,67 @@ const UsersManagement: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && users.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+              <span>Show</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+              <span>entries</span>
+            </div>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1))
+                .map((page, idx, arr) => (
+                  <React.Fragment key={page}>
+                    {idx > 0 && arr[idx - 1] !== page - 1 && <span className="px-1 text-gray-400">...</span>}
+                    <button
+                      onClick={() => handlePageChange(page)}
+                      className={`px-2 sm:px-3 py-1 border rounded text-xs sm:text-sm ${
+                        currentPage === page
+                          ? 'bg-[#1973AE] text-white border-[#1973AE]'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Next
+              </button>
+            </div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, users.length)} of {users.length}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {showModal && editingUser && (
@@ -357,6 +418,105 @@ const UsersManagement: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && viewingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">User Details</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewingUser(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingUser.name}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingUser.email}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    {viewingUser.phone || 'N/A'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(viewingUser.role)}`}>
+                      {viewingUser.role.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      viewingUser.status === 'active' 
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                    }`}>
+                      {viewingUser.status || 'active'}
+                    </span>
+                  </div>
+                </div>
+
+                {viewingUser.shop && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shop</label>
+                      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                        {viewingUser.shop.name}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shop Location</label>
+                      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                        {viewingUser.shop.location || 'N/A'}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-end pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowViewModal(false);
+                      setViewingUser(null);
+                    }}
+                    className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
