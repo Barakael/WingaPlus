@@ -13,21 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create test users with proper passwords
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password123'),
-            'role' => 'super_admin',
-            'phone' => '1234567890',
+        echo "\n╔══════════════════════════════════════╗\n";
+        echo "║   WingaPlus Database Seeding        ║\n";
+        echo "╚══════════════════════════════════════╝\n";
+
+        $this->call([
+            ShopSeeder::class,
+            UserSeeder::class,
+            ProductSeeder::class,
         ]);
 
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password123'),
-            'role' => 'salesman',
-            'phone' => '0987654321',
-        ]);
+        echo "╔══════════════════════════════════════╗\n";
+        echo "║   Seeding Completed Successfully!    ║\n";
+        echo "╚══════════════════════════════════════╝\n\n";
     }
 }
