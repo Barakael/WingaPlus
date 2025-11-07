@@ -66,6 +66,12 @@ export const register = async (userData: any) => {
     const data = await response.json();
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
+    // Include flag for shop setup scenario
+    if (data.needs_shop_setup) {
+      localStorage.setItem('needs_shop_setup', 'true');
+    } else {
+      localStorage.removeItem('needs_shop_setup');
+    }
     return data.user;
   } catch (error) {
     console.error(error);
@@ -76,6 +82,7 @@ export const register = async (userData: any) => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  localStorage.removeItem('needs_shop_setup');
 };
 
 export const getUser = async () => {
@@ -111,4 +118,28 @@ export const getUser = async () => {
 export const getStoredUser = () => {
   const userStr = localStorage.getItem('user');
   return userStr ? JSON.parse(userStr) : null;
+};
+
+export const needsShopSetup = () => localStorage.getItem('needs_shop_setup') === 'true';
+
+export const requestPasswordReset = async (email: string) => {
+  const response = await fetch(`${BASE_URL}/api/password/forgot`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to request reset');
+  return data;
+};
+
+export const resetPassword = async (payload: { email: string; token: string; password: string; password_confirmation: string }) => {
+  const response = await fetch(`${BASE_URL}/api/password/reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to reset password');
+  return data;
 };
