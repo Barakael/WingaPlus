@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Store, Plus, Edit, Trash2, Search, X } from 'lucide-react';
+import { Store, Plus, Search, X } from 'lucide-react';
 import { getShops, createShop, updateShop, deleteShop } from '../../services/superAdmin';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
@@ -116,6 +116,56 @@ const ShopsManagement: React.FC = () => {
     });
   };
 
+  // Mobile detection not directly needed; using CSS breakpoints
+
+  const StatusToggle: React.FC<{ value: string; onChange: (next: string) => void }> = ({ value, onChange }) => {
+    const active = value === 'active';
+    return (
+      <button
+        type="button"
+        onClick={() => onChange(active ? 'inactive' : 'active')}
+        className={`relative inline-flex h-6 w-12 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1973AE] ${active ? 'bg-white border border-green-500 shadow-inner' : 'bg-gray-300 border border-gray-500'}`}
+        aria-label={active ? 'Set inactive' : 'Set active'}
+      >
+        <span
+          className={`inline-block h-5 w-5 rounded-full transform transition-transform ${active ? 'translate-x-6 bg-green-500' : 'translate-x-1 bg-gray-700'}`}
+        />
+      </button>
+    );
+  };
+
+  const ActionsMenu: React.FC<{ onEdit: () => void; onDelete: () => void }> = ({ onEdit, onDelete }) => {
+    const [open, setOpen] = useState(false);
+    return (
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          aria-label="Actions"
+        >
+          <span className="text-xl leading-none text-gray-600 dark:text-gray-300">•••</span>
+        </button>
+        {open && (
+          <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 text-xs">
+            <button onClick={() => { setOpen(false); onEdit(); }} className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">Edit</button>
+            <button onClick={() => { setOpen(false); onDelete(); }} className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30">Delete</button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const handleStatusChange = async (shop: Shop, nextStatus: string) => {
+    try {
+      await updateShop(shop.id, { status: nextStatus });
+      showSuccessToast(`Status updated to ${nextStatus}`);
+      fetchShops();
+    } catch (e: any) {
+      showErrorToast(e.message || 'Failed to update status');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -178,87 +228,69 @@ const ShopsManagement: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">No shops found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Shop Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Owner
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {shops.map((shop) => (
-                  <tr key={shop.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Store className="h-5 w-5 text-[#1973AE] mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {shop.name}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {shop.description}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{shop.location}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{shop.address}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{shop.phone}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{shop.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {shop.owner?.name || 'No owner'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        shop.status === 'active' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : shop.status === 'inactive'
-                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      }`}>
-                        {shop.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEdit(shop)}
-                        className="text-[#1973AE] hover:text-[#0d5a8a] mr-3"
-                      >
-                        <Edit className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(shop.id, shop.name)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Shop</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contact</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Owner</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {shops.map(shop => (
+                    <tr key={shop.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs font-semibold text-gray-900 dark:text-white flex items-center"><Store className="h-4 w-4 text-[#1973AE] mr-1" /> {shop.name}</div>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400">{shop.location}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs text-gray-900 dark:text-white">{shop.address}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs text-gray-900 dark:text-white">{shop.phone}</div>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{shop.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900 dark:text-white">{shop.owner?.name || 'No owner'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap"><StatusToggle value={shop.status} onChange={(ns) => handleStatusChange(shop, ns)} /></td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs"><ActionsMenu onEdit={() => handleEdit(shop)} onDelete={() => handleDelete(shop.id, shop.name)} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+              {shops.map(shop => (
+                <div key={shop.id} className="p-4 flex flex-col space-y-2 text-xs">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-semibold text-gray-900 dark:text-white flex items-center"><Store className="h-4 w-4 text-[#1973AE] mr-1" /> {shop.name}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{shop.location}</div>
+                    </div>
+                    <ActionsMenu onEdit={() => handleEdit(shop)} onDelete={() => handleDelete(shop.id, shop.name)} />
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700 dark:text-gray-300">Owner:</span>
+                    <span className="text-gray-900 dark:text-white">{shop.owner?.name || '—'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700 dark:text-gray-300">Phone:</span>
+                    <span className="text-gray-900 dark:text-white">{shop.phone || '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1">
+                    <span className="text-gray-700 dark:text-gray-300">Status:</span>
+                    <StatusToggle value={shop.status} onChange={(ns) => handleStatusChange(shop, ns)} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
