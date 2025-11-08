@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Lock, Mail, Phone, Save, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
+import { getRoleDisplayName } from '../../lib/roleMapping';
 
 interface UserProfile {
   id: number;
@@ -301,7 +302,7 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={profile?.role === 'salesman' ? 'Winga' : (profile?.role || '')}
+                    value={profile?.role ? getRoleDisplayName(profile.role) : ''}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                     disabled
                   />
