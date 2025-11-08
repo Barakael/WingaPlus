@@ -2,6 +2,7 @@ import React from 'react';
 import { Menu, Moon, Sun, LogOut, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { getRoleDisplayName } from '../../lib/roleMapping';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -49,10 +50,12 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 <User className="h-5 w-5 text-gray-600 dark:text-white lg:text-gray-600 lg:dark:text-gray-300" />
                 <div className="hidden sm:block">
                   <p className="text-sm font-medium text-white lg:text-gray-900 lg:dark:text-white">
-                    {user?.name}
+                    {user?.role === 'shop_owner' && user?.owned_shop?.name 
+                      ? `${user.owned_shop.name}'s Owner` 
+                      : user?.name}
                   </p>
                   <p className="text-xs text-white/80 lg:text-gray-500 lg:dark:text-gray-400 capitalize">
-                    {user?.role && typeof user.role === 'string' ? user.role.replace('_', ' ') : 'Role'}
+                    {user?.role && typeof user.role === 'string' ? getRoleDisplayName(user.role) : 'Role'}
                   </p>
                 </div>
               </div>
