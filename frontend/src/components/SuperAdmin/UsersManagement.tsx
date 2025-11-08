@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Users, Search, X } from 'lucide-react';
 import { getUsers, updateUser, deleteUser } from '../../services/superAdmin';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
+import { getRoleDisplayName, getRoleBadgeColor } from '../../lib/roleMapping';
 
 interface User {
   id: number;
@@ -131,20 +132,7 @@ const UsersManagement: React.FC = () => {
     });
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'super_admin':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case 'shop_owner':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'salesman':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'storekeeper':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
-    }
-  };
+
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -179,18 +167,18 @@ const UsersManagement: React.FC = () => {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full pl-9 pr-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Roles</option>
             <option value="super_admin">Super Admin</option>
             <option value="shop_owner">Shop Owner</option>
-            <option value="salesman">Salesman</option>
+            <option value="salesman">Winga</option>
             <option value="storekeeper">Storekeeper</option>
           </select>
         </div>
@@ -224,16 +212,16 @@ const UsersManagement: React.FC = () => {
                   <div className="flex items-center justify-between gap-3">
                     {/* Name/Email */}
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{u.name}</div>
+                      <div className="text-xs font-semibold text-gray-900 dark:text-white truncate">{u.name}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.email}</div>
                     </div>
                     
                     {/* Shop/Role */}
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm text-gray-900 dark:text-white truncate">{u.shop?.name || 'No shop'}</div>
+                      <div className="text-xs text-gray-900 dark:text-white truncate">{u.shop?.name || 'No shop'}</div>
                       <div className="text-xs">
                         <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getRoleBadgeColor(u.role)}`}>
-                          {u.role.replace('_', ' ')}
+                          {getRoleDisplayName(u.role)}
                         </span>
                       </div>
                     </div>
@@ -247,7 +235,7 @@ const UsersManagement: React.FC = () => {
                     </div>
                     
                     {/* Actions */}
-                    <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex-shrink-0 text-black dark:text-white" onClick={(e) => e.stopPropagation()}>
                       <ActionsMenu 
                         onEdit={() => handleEdit(u)} 
                         onDelete={() => handleDelete(u.id, u.name)} 
@@ -325,10 +313,10 @@ const UsersManagement: React.FC = () => {
       {/* Edit Modal */}
       {showModal && editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[95vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Edit User
                 </h2>
                 <button
@@ -336,83 +324,83 @@ const UsersManagement: React.FC = () => {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Name *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Email *
                     </label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Phone
                     </label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Role *
                   </label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   >
-                    <option value="salesman">Salesman</option>
+                    <option value="salesman">Winga</option>
                     <option value="shop_owner">Shop Owner</option>
                     <option value="storekeeper">Storekeeper</option>
                     <option value="super_admin">Super Admin</option>
                   </select>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-1">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="px-4 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
+                    className="px-4 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
                   >
                     Update User
                   </button>
@@ -426,9 +414,9 @@ const UsersManagement: React.FC = () => {
       {/* View Modal */}
       {showViewModal && viewingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">User Details</h2>
                 <button
                   type="button"
@@ -436,51 +424,52 @@ const UsersManagement: React.FC = () => {
                     setShowViewModal(false);
                     setViewingUser(null);
                   }}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-white">
                     {viewingUser.name}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-white">
                     {viewingUser.email}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
-                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-white">
                     {viewingUser.phone || 'N/A'}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
-                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(viewingUser.role)}`}>
-                      {viewingUser.role.replace('_', ' ')}
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getRoleBadgeColor(viewingUser.role)}`}>
+                      {getRoleDisplayName(viewingUser.role)}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${
                       viewingUser.status === 'active' 
                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
                     }`}>
+
                       {viewingUser.status || 'active'}
                     </span>
                   </div>
@@ -489,29 +478,29 @@ const UsersManagement: React.FC = () => {
                 {viewingUser.shop && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shop</label>
-                      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Shop</label>
+                      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-white">
                         {viewingUser.shop.name}
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shop Location</label>
-                      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Shop Location</label>
+                      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-white">
                         {viewingUser.shop.location || 'N/A'}
                       </div>
                     </div>
                   </>
                 )}
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-1">
                   <button
                     type="button"
                     onClick={() => {
                       setShowViewModal(false);
                       setViewingUser(null);
                     }}
-                    className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
+                    className="px-4 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
                   >
                     Close
                   </button>
@@ -532,10 +521,10 @@ const StatusToggle: React.FC<{ value: string; onChange: (next: string) => void }
     <button
       type="button"
       onClick={() => onChange(active ? 'inactive' : 'active')}
-      className={`relative inline-flex h-6 w-12 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1973AE] ${active ? 'bg-white border border-green-500 shadow-inner' : 'bg-gray-300 border border-gray-500'}`}
+      className={`relative inline-flex h-4 w-8 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1973AE] ${active ? 'bg-white border border-green-500 shadow-inner' : 'bg-gray-300 border border-gray-500'}`}
       aria-label={active ? 'Set inactive' : 'Set active'}
     >
-      <span className={`inline-block h-5 w-5 rounded-full transform transition-transform ${active ? 'translate-x-6 bg-green-500' : 'translate-x-1 bg-gray-700'}`} />
+      <span className={`inline-block h-3 w-3 rounded-full transform transition-transform ${active ? 'translate-x-4 bg-green-500' : 'translate-x-0.5 bg-gray-700'}`} />
     </button>
   );
 };
@@ -544,8 +533,8 @@ const ActionsMenu: React.FC<{ onEdit: () => void; onDelete: () => void }> = ({ o
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
-      <button type="button" onClick={() => setOpen(o => !o)} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Actions">
-        <span className="text-xl leading-none text-gray-600 dark:text-gray-300">•••</span>
+      <button type="button" onClick={() => setOpen(o => !o)} className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Actions">
+        <span className="text-base leading-none text-gray-600 dark:text-gray-300">•••</span>
       </button>
       {open && (
         <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 text-xs">

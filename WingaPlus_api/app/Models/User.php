@@ -69,6 +69,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the primary shop owned by this user (for shop_owner role).
+     */
+    public function ownedShop()
+    {
+        return $this->hasOne(Shop::class, 'owner_id');
+    }
+
+    /**
      * Get the sales made by this user (for salesman role).
      */
     public function sales()
