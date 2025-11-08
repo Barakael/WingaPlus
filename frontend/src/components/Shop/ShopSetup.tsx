@@ -12,7 +12,6 @@ const ShopSetup: React.FC = () => {
     location: '',
     address: '',
     phone: '',
-    email: '',
     description: '',
   });
 
@@ -59,9 +58,11 @@ const ShopSetup: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed');
-      showSuccessToast('🏬 Shop created successfully!');
+      showSuccessToast(`🏬 Welcome to ${form.name}!`);
       localStorage.removeItem('needs_shop_setup');
-      setHasShop(true);
+      
+      // Reload the page to fetch updated user data with shop info
+      window.location.reload();
     } catch (e: any) {
       showErrorToast(e.message || 'Failed to create shop');
     } finally {
@@ -121,30 +122,18 @@ const ShopSetup: React.FC = () => {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={e => handleChange('email', e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="shop@email.com"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
-              <input
-                type="text"
-                value={form.address}
-                onChange={e => handleChange('address', e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Street / Building"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Address (Optional)</label>
+            <input
+              type="text"
+              value={form.address}
+              onChange={e => handleChange('address', e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Street / Building"
+            />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Description (Optional)</label>
             <textarea
               value={form.description}
               onChange={e => handleChange('description', e.target.value)}
