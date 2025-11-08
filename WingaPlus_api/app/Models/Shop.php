@@ -24,9 +24,19 @@ class Shop extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected $appends = ['effective_email'];
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * Get the effective email (shop email or owner's email)
+     */
+    public function getEffectiveEmailAttribute(): ?string
+    {
+        return $this->email ?: $this->owner?->email;
     }
 
     public function users(): HasMany

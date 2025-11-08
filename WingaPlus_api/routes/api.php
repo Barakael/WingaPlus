@@ -12,7 +12,16 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\MyShopController;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    // Load shop relationship for shop owners
+    if ($user && $user->role === 'shop_owner') {
+        $user->load('ownedShop');
+    }
+    // Load shop relationship for other users
+    if ($user && $user->shop_id) {
+        $user->load('shop');
+    }
+    return $user;
 })->middleware('auth:sanctum');
 
 // Sanctum authentication routes
