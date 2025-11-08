@@ -102,7 +102,7 @@ const LoginForm: React.FC = () => {
             {!isLogin && !showForgot && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Full Name
+                  {formData.account_type === 'winga' ? 'Store Name' : 'Full Name'}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -111,7 +111,7 @@ const LoginForm: React.FC = () => {
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Enter your full name"
+                    placeholder={formData.account_type === 'winga' ? 'Enter store name' : 'Enter your full name'}
                     required={!isLogin}
                   />
                 </div>
