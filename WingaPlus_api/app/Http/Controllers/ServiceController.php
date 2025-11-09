@@ -18,6 +18,14 @@ class ServiceController extends Controller
             $query->where('salesman_id', $request->input('salesman_id'));
         }
 
+        // Filter by shop via related salesman
+        if ($request->filled('shop_id')) {
+            $shopId = $request->input('shop_id');
+            $query->whereHas('salesman', function ($q) use ($shopId) {
+                $q->where('shop_id', $shopId);
+            });
+        }
+
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
@@ -25,10 +33,11 @@ class ServiceController extends Controller
             $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
+        $data = $query->get();
         return response()->json([
             'data' => [
-                'data' => $query->get(),
-                'total' => $query->count(),
+                'data' => $data,
+                'total' => $data->count(),
             ],
         ]);
     }
