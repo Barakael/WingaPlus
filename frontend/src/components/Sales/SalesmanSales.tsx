@@ -92,8 +92,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-TZ', {
       style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -825,7 +825,7 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
                   <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[60px] lg:min-w-[80px]">Ganji</th>
                   <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px] hidden md:table-cell">Zoezi</th>
                   <th className="text-right py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[100px] hidden md:table-cell">Bei</th>                  
-                  <th className="text-center py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[120px] lg:min-w-[140px]">Actions</th>
+                  <th className="text-center py-2 px-1 lg:py-3 lg:px-2 font-semibold text-gray-900 dark:text-white min-w-[80px] lg:min-w-[80px]">Actions</th>
                 </tr>
               </thead>
               <tbody>
