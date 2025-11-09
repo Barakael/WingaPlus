@@ -57,7 +57,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
           </div>
 
           {/* Email Report */}
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+          <div className="bg-indigo-50 dark:bg-red-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mb-6">
             <div className="flex items-center space-x-3 mb-3">
               <Send className="h-5 w-5 text-[#1973AE] dark:text-[#5da3d5]" />
               <h3 className="font-semibold text-[#094a73] dark:text-red-100">
@@ -75,7 +75,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
               </div>
               <div className="flex justify-between">
                 <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Subject:</span>
-                <span className="font-medium">Warranty Confirmation - {warrantyData.phone_name}</span>
+                <span className="font-medium">Warranty - {warrantyData.phone_name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Sent At:</span>
@@ -84,7 +84,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
             </div>
           </div>
 
-          {/* Warranty Details */}
+          {/* Warranty Details
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
             <div className="flex items-center space-x-2 mb-4">
               <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
@@ -148,7 +148,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
                 </span>
               </div>
             </div>
-          </div>
+          </div> */}
 {/* 
           {warrantyData.linked_sale && (
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
@@ -179,22 +179,14 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
           )} */}
 
           {/* Action Buttons */}
-          <div className="flex space-x-3">
+          <div className="flex space-x-2">
             <button
               onClick={onClose}
-              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Close
             </button>
-            <button
-              onClick={() => {
-                // Could add print functionality here
-                window.print();
-              }}
-              className="flex-1 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] text-white py-3 px-4 rounded-lg font-medium hover:from-[#0d5a8a] hover:to-[#094a73] transition-colors"
-            >
-              Print Report
-            </button>
+           
           </div>
         </div>
       </div>

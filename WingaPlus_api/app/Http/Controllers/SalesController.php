@@ -20,10 +20,18 @@ class SalesController extends BaseController
     }
     public function index(Request $request)
     {
-        $query = Sale::query()->orderByDesc('sale_date');
+        $query = Sale::query()->with('salesman')->orderByDesc('sale_date');
 
         if ($request->filled('salesman_id')) {
             $query->where('salesman_id', $request->input('salesman_id'));
+        }
+
+        // Filter by shop_id via salesman relationship
+        if ($request->filled('shop_id')) {
+            $shopId = $request->input('shop_id');
+            $query->whereHas('salesman', function ($q) use ($shopId) {
+                $q->where('shop_id', $shopId);
+            });
         }
 
         if ($request->filled('date_from')) {
@@ -33,8 +41,9 @@ class SalesController extends BaseController
             $query->whereDate('sale_date', '<=', $request->input('date_to'));
         }
 
+        $data = $query->get();
         return $this->sendResponse(
-            ['data' => $query->get(), 'total' => $query->count()],
+            ['data' => $data, 'total' => $data->count()],
             'Sales retrieved successfully'
         );
     }
