@@ -190,10 +190,10 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
         </div>
         <button
           onClick={onFileWarranty}
-          className="md:text-base text-sm bg-[#1973AE] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
+          className="md:text-base text-xs bg-[#1973AE] text-white px-2 py-2 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
         >
          
-          File New Warranty
+          New Warranty
         </button>
       </div>
 
@@ -252,7 +252,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                 {paginatedWarranties.map((warranty) => (
                   <tr 
                     key={warranty.id} 
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors"
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors"
                     onClick={() => handleViewWarranty(warranty)}
                   >
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white">

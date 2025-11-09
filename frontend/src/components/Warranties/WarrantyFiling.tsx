@@ -252,7 +252,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             {/* Phone Details - Compact Grid */}
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+            <div className="p-3 bg-indigo-50 dark:bg-red-900/20 rounded-lg border border-blue-200 dark:border-red-800">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
