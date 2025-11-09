@@ -45,7 +45,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           ...baseItems,
           { id: 'products', label: 'Products', icon: Package },
           // Categories (QR) removed to decouple sales from QR codes
-          { id: 'sales', label: 'Sales', icon: ShoppingCart },
+          { id: 'sales', label: 'Store', icon: ShoppingCart },
+          { id: 'services', label: 'Services', icon: Wrench },
+          { id: 'winga', label: 'Winga', icon: Target },
           { id: 'staff', label: 'Staff', icon: Users },
           { id: 'warranties', label: 'Warranties', icon: Shield },
           { id: 'reports', label: 'Reports', icon: BarChart3 },
