@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ShoppingCart, User, Phone, Type } from 'lucide-react';
+import { ShoppingCart, Phone, Type } from 'lucide-react';
 import Receipt from './Receipt';
 import { createSale } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
-import { showSuccessToast, showErrorToast, showWarningToast } from '../../lib/toast';
+import { showSuccessToast, showErrorToast } from '../../lib/toast';
 // Free-text product entry; no product list import
 
 interface SalePrefill {
@@ -21,7 +21,7 @@ interface SaleFormProps {
   prefill?: SalePrefill; // optional prefill coming from warranties/orders/etc
 }
 
-type SaleCategory = 'phones' | 'accessories';
+type SaleCategory = 'phones' | 'accessories' | 'laptops';
 
 const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
   const { user } = useAuth();
@@ -35,6 +35,9 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
   const [imei, setImei] = useState('');
   const [color, setColor] = useState('');
   const [storage, setStorage] = useState('');
+  // Laptop-specific fields
+  const [laptopName, setLaptopName] = useState('');
+  const [ram, setRam] = useState('');
   // Keep raw input as string to avoid transient NaN states
   const [quantityInput, setQuantityInput] = useState<string>('1');
   const [unitPriceInput, setUnitPriceInput] = useState<string>(
@@ -124,6 +127,42 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
           setSubmitting(false);
           return;
         }
+      } else if (category === 'laptops') {
+        if (!customerName.trim()) {
+          const errorMsg = 'Customer name is required for laptop sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
+          setSubmitting(false);
+          return;
+        }
+        if (!laptopName.trim()) {
+          const errorMsg = 'Laptop name is required for laptop sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
+          setSubmitting(false);
+          return;
+        }
+        if (!ram) {
+          const errorMsg = 'RAM is required for laptop sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
+          setSubmitting(false);
+          return;
+        }
+        if (!color.trim()) {
+          const errorMsg = 'Color is required for laptop sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
+          setSubmitting(false);
+          return;
+        }
+        if (!storage) {
+          const errorMsg = 'Storage is required for laptop sales';
+          setError(errorMsg);
+          showErrorToast(errorMsg);
+          setSubmitting(false);
+          return;
+        }
       } else if (category === 'accessories') {
         if (!productName.trim()) {
           const errorMsg = 'Product name is required for accessory sales';
@@ -136,11 +175,11 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
 
       const saleData = {
         product_id: prefill?.product_id ? String(prefill.product_id) : undefined,
-        product_name: category === 'phones' ? phoneName.trim() : productName.trim(),
+        product_name: category === 'phones' ? phoneName.trim() : category === 'laptops' ? laptopName.trim() : productName.trim(),
         reference_store: referenceStore.trim(),
         category,
         // Always include customer fields, but they can be empty for accessories
-        customer_name: category === 'phones' ? customerName.trim() : '',
+        customer_name: (category === 'phones' || category === 'laptops') ? customerName.trim() : '',
         // Phone-specific fields
         ...(category === 'phones' && {
           phone_name: phoneName.trim(),
@@ -148,7 +187,14 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
           color: color.trim(),
           storage: storage,
         }),
-        quantity: category === 'phones' ? 1 : parseInt(quantityInput),
+        // Laptop-specific fields
+        ...(category === 'laptops' && {
+          laptop_name: laptopName.trim(),
+          ram: ram,
+          color: color.trim(),
+          storage: storage,
+        }),
+        quantity: (category === 'phones' || category === 'laptops') ? 1 : parseInt(quantityInput),
         unit_price: unitPrice,
         selling_price: unitPrice,
         cost_price: costPrice,
@@ -263,22 +309,57 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                 required
               >
                 <option value="phones">📱 Phones</option>
+                <option value="laptops">💻 Laptops</option>
                 <option value="accessories">🔧 Accessories</option>
               </select>
             </div>
 
-            {/* Row 2: Product Name (Accessories) or Phone Name (Phones) */}
-            {(category === 'accessories' || category === 'phones') && (
+            {/* Row 2: Product Name */}
+            {category === 'accessories' && (
               <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-                  {category === 'accessories' ? <Type className="h-3 w-3 mr-1" /> : <Phone className="h-3 w-3 mr-1" />}
-                  {category === 'phones' ? 'Phone Name (Product)' : 'Product Name'}
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
+                  <Type className="h-3 w-3 mr-1" />
+                  Product Name
                 </label>
                 <input
                   type="text"
-                  value={category === 'phones' ? phoneName : productName}
-                  onChange={(e) => category === 'phones' ? setPhoneName(e.target.value) : setProductName(e.target.value)}
-                  placeholder={category === 'phones' ? 'iPhone 15 Pro, Samsung Galaxy S24' : 'Phone Case, Screen Protector'}
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="Phone Case, Screen Protector"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                />
+              </div>
+            )}
+
+            {category === 'phones' && (
+              <div>
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
+                  <Phone className="h-3 w-3 mr-1" />
+                  Phone Name (Product)
+                </label>
+                <input
+                  type="text"
+                  value={phoneName}
+                  onChange={(e) => setPhoneName(e.target.value)}
+                  placeholder="iPhone 15 Pro, Samsung Galaxy S24"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                />
+              </div>
+            )}
+
+            {category === 'laptops' && (
+              <div>
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
+                  <Phone className="h-3 w-3 mr-1" />
+                  Laptop Name (Product)
+                </label>
+                <input
+                  type="text"
+                  value={laptopName}
+                  onChange={(e) => setLaptopName(e.target.value)}
+                  placeholder="HP Pavilion 15, Dell XPS 13"
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
@@ -350,6 +431,78 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       <option value="256GB">256GB</option>
                       <option value="512GB">512GB</option>
                       <option value="1TB">1TB</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Customer
+                    </label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Customer name"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Laptop Details - Compact Grid */}
+            {category === 'laptops' && (
+              <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      RAM
+                    </label>
+                    <select
+                      value={ram}
+                      onChange={(e) => setRam(e.target.value)}
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    >
+                      <option value="">RAM</option>
+                      <option value="4GB">4GB</option>
+                      <option value="8GB">8GB</option>
+                      <option value="16GB">16GB</option>
+                      <option value="32GB">32GB</option>
+                      <option value="64GB">64GB</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Color
+                    </label>
+                    <input
+                      type="text"
+                      value={color}
+                      onChange={(e) => setColor(e.target.value)}
+                      placeholder="Silver"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Storage
+                    </label>
+                    <select
+                      value={storage}
+                      onChange={(e) => setStorage(e.target.value)}
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    >
+                      <option value="">Storage</option>
+                      <option value="128GB SSD">128GB SSD</option>
+                      <option value="256GB SSD">256GB SSD</option>
+                      <option value="512GB SSD">512GB SSD</option>
+                      <option value="1TB SSD">1TB SSD</option>
+                      <option value="2TB SSD">2TB SSD</option>
+                      <option value="500GB HDD">500GB HDD</option>
+                      <option value="1TB HDD">1TB HDD</option>
                     </select>
                   </div>
                   <div>
