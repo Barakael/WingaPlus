@@ -43,6 +43,7 @@ const pageLabels: Record<string, string> = {
   'my-sales': 'My Sales',
   'sales-orders': 'Sales Orders',
   'commissions': 'Commissions',
+  'winga': 'Winga',
   'targets': 'Targets',
   'settings': 'Settings',
 };
@@ -151,9 +152,15 @@ const AppContent: React.FC = () => {
   }
 
   const renderContent = () => {
+    // Check if this is a shop owner accessing a specific tab
+    const shopOwnerTabs = ['dashboard', 'products', 'sales', 'staff', 'warranties', 'reports', 'settings'];
+    if (user?.role === 'shop_owner' && shopOwnerTabs.includes(activeTab)) {
+      return <Dashboard activeTab={activeTab} onTabChange={navigateToPage} />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard onTabChange={navigateToPage} />;
+        return <Dashboard activeTab={activeTab} onTabChange={navigateToPage} />;
       case 'shop-setup':
         return <ShopSetup />;
       // 'qr-scanner' route removed
@@ -190,12 +197,15 @@ const AppContent: React.FC = () => {
         return <SalesOrders openSaleForm={openSaleForm} />;
       case 'commissions':
         return <CommissionTracking />;
+      case 'winga':
+        // Shop owner's personal sales tracking and commissions
+        return <SalesmanSales openSaleForm={openSaleForm} />;
       case 'targets':
         return <TargetManagement />;
       case 'settings':
         return <Settings />;
       default:
-        return <Dashboard />;
+        return <Dashboard activeTab={activeTab} onTabChange={navigateToPage} />;
     }
   };
 
