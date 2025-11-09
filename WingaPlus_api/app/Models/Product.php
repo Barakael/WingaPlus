@@ -14,6 +14,7 @@ class Product extends Model
         'name',
         'sku',
         'category',
+        'category_id',
         'price',
         'cost_price',
         'stock',
@@ -22,6 +23,11 @@ class Product extends Model
         'description',
         'image_url',
         'status',
+        'source',
+        'imei',
+        'ram',
+        'color',
+        'storage',
     ];
 
     protected $casts = [
@@ -37,6 +43,11 @@ class Product extends Model
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     // Check if product is low on stock
