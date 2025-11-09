@@ -10,6 +10,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\MyShopController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/user', function (Request $request) {
     $user = $request->user();
@@ -120,6 +122,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Authenticated shop owner shop setup & retrieval
     Route::get('/my/shop', [MyShopController::class, 'show']);
     Route::post('/my/shop', [MyShopController::class, 'store']);
+    // Products & Categories
+    Route::apiResource('products', ProductController::class);
+    Route::apiResource('categories', CategoryController::class);
 });
 
 // Super Admin routes (protected by auth)
