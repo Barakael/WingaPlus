@@ -20,21 +20,21 @@ const StatCard: React.FC<StatCardProps> = ({
   color = 'blue' 
 }) => {
   const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
-    orange: 'from-orange-500 to-orange-600',
-    red: 'from-red-500 to-red-600',
+    blue: 'gray-100',
+    green: 'gray-100',
+    purple: 'gray-100',
+    orange: 'gray-100',
+    red: 'red-200',
   };
 
   return (
-    <div className={`bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300`}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
             {title}
           </p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+          <p className="text-sm font-bold text-gray-900 dark:text-white">
             {value}
           </p>
           {trend && (
@@ -50,8 +50,8 @@ const StatCard: React.FC<StatCardProps> = ({
             </div>
           )}
         </div>
-        <div className={`w-12 h-12 bg-gradient-to-r ${colorClasses[color]} rounded-lg flex items-center justify-center`}>
-          <Icon className="h-6 w-6 text-white" />
+        <div className={`w-10 h-10 bg-${colorClasses[color]} dark:bg-gray-700 rounded-lg flex items-center justify-center`}>
+          <Icon className="h-6 w-6 text-[#1973AE]"/>
         </div>
       </div>
     </div>
