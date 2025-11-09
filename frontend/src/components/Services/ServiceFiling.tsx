@@ -134,7 +134,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  File New Service
+                  Record Service
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-xs">
                   Complete device service and customer details

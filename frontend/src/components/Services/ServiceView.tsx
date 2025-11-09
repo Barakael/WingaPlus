@@ -136,10 +136,10 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
         </div>
         <button
           onClick={onFileService}
-          className="md:text-base text-sm bg-[#1973AE] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
+          className="md:text-base text-sm bg-[#1973AE] text-white px-2 py-2 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
         >
           <Wrench className="h-4 w-4 mr-2" />
-          File New Service
+          Record Service
         </button>
       </div>
 
