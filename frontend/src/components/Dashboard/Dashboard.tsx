@@ -9,7 +9,11 @@ interface DashboardProps {
   onTabChange?: (tab: string) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
+interface ExtendedDashboardProps extends DashboardProps {
+  activeTab?: string;
+}
+
+const Dashboard: React.FC<ExtendedDashboardProps> = ({ onTabChange, activeTab }) => {
   const { user } = useAuth();
 
   if (!user) return null;
@@ -18,7 +22,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
     case 'super_admin':
       return <SuperAdminDashboard />;
     case 'shop_owner':
-      return <ShopOwnerDashboard />;
+      return <ShopOwnerDashboard activeTab={activeTab} onTabChange={onTabChange} />;
     case 'salesman':
       return <SalesmanDashboard onTabChange={onTabChange} />;
     case 'storekeeper':
