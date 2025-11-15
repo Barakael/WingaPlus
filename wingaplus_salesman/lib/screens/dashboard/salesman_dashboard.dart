@@ -63,16 +63,17 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                     // Welcome message
                     Text(
                       'Welcome back, ${user?.name ?? 'User'}!',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Here\'s your sales overview for today',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.mediumGray,
-                      ),
+                            color: AppTheme.mediumGray,
+                          ),
                     ),
                     const SizedBox(height: 24),
 
@@ -128,8 +129,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                     Text(
                       'Quick Actions',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -139,7 +140,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                             title: 'My Sales',
                             icon: Icons.list_alt,
                             color: AppTheme.primaryBlue,
-                            onTap: () => Navigator.of(context).pushNamed('/sales'),
+                            onTap: () =>
+                                Navigator.of(context).pushNamed('/sales'),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -148,7 +150,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                             title: 'Commissions',
                             icon: Icons.monetization_on,
                             color: AppTheme.successGreen,
-                            onTap: () => Navigator.of(context).pushNamed('/commissions'),
+                            onTap: () =>
+                                Navigator.of(context).pushNamed('/commissions'),
                           ),
                         ),
                       ],
@@ -161,7 +164,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                             title: 'Targets',
                             icon: Icons.flag,
                             color: AppTheme.warningYellow,
-                            onTap: () => Navigator.of(context).pushNamed('/targets'),
+                            onTap: () =>
+                                Navigator.of(context).pushNamed('/targets'),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -174,8 +178,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                     Text(
                       'Recent Sales',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 12),
                     if (salesProvider.sales.isEmpty)
@@ -194,7 +198,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                           margin: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
+                              backgroundColor:
+                                  AppTheme.primaryBlue.withOpacity(0.1),
                               child: Icon(
                                 Icons.shopping_bag,
                                 color: AppTheme.primaryBlue,
@@ -203,7 +208,8 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                             ),
                             title: Text(
                               sale.productName,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
                             ),
                             subtitle: Text(
                               '${sale.quantity} x ${sale.formattedUnitPrice}',
@@ -308,7 +314,8 @@ class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
               enabled: false,
               child: Text(
                 '${user?.name ?? 'User'}\n${user?.email ?? ''}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),
             const PopupMenuDivider(),
