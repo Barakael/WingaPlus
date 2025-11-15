@@ -135,21 +135,12 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, serviceDat
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-3">
+          <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}
-              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Close
-            </button>
-            <button
-              onClick={() => {
-                // Could add print functionality here
-                window.print();
-              }}
-              className="flex-1 bg-[#1973AE] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#0d5a8a] transition-colors"
-            >
-              Print Report
             </button>
           </div>
         </div>
