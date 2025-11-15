@@ -25,7 +25,13 @@ class WarrantySaleFiled extends Mailable
     {
         $this->sale = $sale;
         $this->warranty = $warranty;
-        $this->userName = $userName ?: 'WingaPlus';
+        // Try to get the store name or full name from the salesman user
+        if ($sale->salesman_id) {
+            $user = \App\Models\User::find($sale->salesman_id);
+            $this->userName = $user ? ($user->store_name ?: $user->name) : ($userName ?: 'WingaPlus');
+        } else {
+            $this->userName = $userName ?: 'WingaPlus';
+        }
     }
 
     /**

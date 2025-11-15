@@ -32,7 +32,7 @@ class SaleRequest extends FormRequest
             'warranty_details' => 'nullable|array',
             'sale_date' => 'nullable|date',
             'reference_store' => 'nullable|string|max:255',
-            'category' => 'nullable|string|in:phones,accessories',
+            'category' => 'nullable|string|in:phones,accessories,laptops',
             'phone_name' => 'nullable|string|max:255',
             'imei' => 'nullable|string|max:50',
             'color' => 'nullable|string|max:100',
