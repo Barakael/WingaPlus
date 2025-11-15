@@ -7,19 +7,19 @@ class AppTheme {
   static const Color primaryBlueDark = Color(0xFF0D5A8A);
   static const Color secondaryBlue = Color(0xFF04BCF2);
   static const Color secondaryBlueDark = Color(0xFF03A8D8);
-  
+
   // Status Colors
   static const Color successGreen = Color(0xFF10B981);
   static const Color warningYellow = Color(0xFFF59E0B);
   static const Color errorRed = Color(0xFFEF4444);
   static const Color infoBlue = Color(0xFF3B82F6);
-  
+
   // Neutral Colors
   static const Color darkGray = Color(0xFF1F2937);
   static const Color mediumGray = Color(0xFF6B7280);
   static const Color lightGray = Color(0xFFF3F4F6);
   static const Color white = Color(0xFFFFFFFF);
-  
+
   // Dark Mode Colors
   static const Color darkBg = Color(0xFF111827);
   static const Color darkCard = Color(0xFF1F2937);
@@ -31,7 +31,6 @@ class AppTheme {
     brightness: Brightness.light,
     primaryColor: primaryBlue,
     scaffoldBackgroundColor: lightGray,
-    
     colorScheme: const ColorScheme.light(
       primary: primaryBlue,
       secondary: secondaryBlue,
@@ -42,12 +41,10 @@ class AppTheme {
       onSurface: darkGray,
       onError: white,
     ),
-    
     textTheme: GoogleFonts.interTextTheme().apply(
       bodyColor: darkGray,
       displayColor: darkGray,
     ),
-    
     appBarTheme: AppBarTheme(
       backgroundColor: white,
       foregroundColor: darkGray,
@@ -59,7 +56,6 @@ class AppTheme {
         color: darkGray,
       ),
     ),
-    
     cardTheme: CardThemeData(
       color: white,
       elevation: 2,
@@ -68,7 +64,6 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
       ),
     ),
-    
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryBlue,
@@ -84,7 +79,6 @@ class AppTheme {
         ),
       ),
     ),
-    
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: white,
@@ -110,7 +104,6 @@ class AppTheme {
         fontSize: 14,
       ),
     ),
-    
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: secondaryBlue,
       foregroundColor: white,
@@ -124,7 +117,6 @@ class AppTheme {
     brightness: Brightness.dark,
     primaryColor: primaryBlue,
     scaffoldBackgroundColor: darkBg,
-    
     colorScheme: const ColorScheme.dark(
       primary: primaryBlue,
       secondary: secondaryBlue,
@@ -135,12 +127,10 @@ class AppTheme {
       onSurface: white,
       onError: white,
     ),
-    
     textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).apply(
       bodyColor: white,
       displayColor: white,
     ),
-    
     appBarTheme: AppBarTheme(
       backgroundColor: darkCard,
       foregroundColor: white,
@@ -152,7 +142,6 @@ class AppTheme {
         color: white,
       ),
     ),
-    
     cardTheme: CardThemeData(
       color: darkCard,
       elevation: 2,
@@ -161,7 +150,6 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
       ),
     ),
-    
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryBlue,
@@ -177,7 +165,6 @@ class AppTheme {
         ),
       ),
     ),
-    
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: darkCard,
@@ -203,7 +190,6 @@ class AppTheme {
         fontSize: 14,
       ),
     ),
-    
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: secondaryBlue,
       foregroundColor: white,
