@@ -616,9 +616,10 @@ const CommissionTracking: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row sm:justify-between text-xs sm:text-sm space-y-1 sm:space-y-0">
             <span className="text-gray-600 dark:text-gray-400">
-              Current: {selectedTarget?.metric === 'profit' 
-                ? `TSh ${formatCurrency(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)}`
-                : `${Math.round(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)} items`
+              Current: {
+                !selectedTarget || selectedTarget.metric === 'profit'
+                  ? `TSh ${Math.round(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100).toLocaleString()}`
+                  : `${Math.round(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)} items`
               }
             </span>
             <span className={`font-medium ${
@@ -626,9 +627,10 @@ const CommissionTracking: React.FC = () => {
               performanceStats.currentPeriodProgress >= 75 ? 'text-[#1973AE]' :
               performanceStats.currentPeriodProgress >= 50 ? 'text-yellow-600' : 'text-red-600'
             }`}>
-              {selectedTarget?.metric === 'profit'
-                ? `TSh ${formatCurrency(Math.max(0, (selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)))} remaining`
-                : `${Math.max(0, Math.round((selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)))} items remaining`
+              {
+                !selectedTarget || selectedTarget.metric === 'profit'
+                  ? `TSh ${Math.max(0, Math.round((selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100))).toLocaleString()} remaining`
+                  : `${Math.max(0, Math.round((selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)))} items remaining`
               }
             </span>
           </div>
@@ -696,25 +698,19 @@ const CommissionTracking: React.FC = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Monthly Profit Flow Chart */}
+        {/* Monthly Profit Bar Chart with dynamic scaling */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              {selectedYear} Monthly Profit Flow
+              {selectedYear} Monthly Profit Bar Chart
             </h2>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 sm:mt-0">
-              Target Levels: 250K � 500K � 750K � 1M 
+              Target Levels: Auto
             </div>
           </div>
           <div className="h-80 sm:h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={periodData} margin={{ top: 20, right: 20, left: 20, bottom: 60 }}>
-                <defs>
-                  <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#17946aff" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
-                  </linearGradient>
-                </defs>
+              <BarChart data={periodData} margin={{ top: 20, right: 10, left: 0, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis
                   dataKey="period"
@@ -725,13 +721,12 @@ const CommissionTracking: React.FC = () => {
                   interval={0}
                 />
                 <YAxis
+                  domain={[0, Math.max(...periodData.map(p => p.totalGanji), 1500000) * 1.2]}
                   tickFormatter={(value: number) => {
                     if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
                     if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
                     return value.toString();
                   }}
-                  ticks={[250000, 500000, 750000, 1000000, 1250000, 1500000]}
-                  domain={[0, 1500000]}
                   tick={{ fontSize: 11, fill: '#6b7280' }}
                 />
                 <Tooltip
@@ -744,94 +739,9 @@ const CommissionTracking: React.FC = () => {
                     color: '#f9fafb'
                   }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="totalGanji"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  fill="url(#profitGradient)"
-                  dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
-                />
-                {/* Target reference lines */}
-                <Line
-                  type="monotone"
-                  dataKey={() => 250000}
-                  stroke="#ef4444"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                  dot={false}
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey={() => 500000}
-                  stroke="#f59e0b"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                  dot={false}
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey={() => 750000}
-                  stroke="#3b82f6"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                  dot={false}
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey={() => 1000000}
-                  stroke="#8b5cf6"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                  dot={false}
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey={() => 1250000}
-                  stroke="#ec4899"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                  dot={false}
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey={() => 1500000}
-                  stroke="#06b6d4"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                  dot={false}
-                  legendType="none"
-                />
-              </AreaChart>
+                <Bar dataKey="totalGanji" fill="#10b981" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              <span className="text-gray-600 dark:text-gray-400">Monthly Profit</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-red-500 mr-2"></div>
-              <span className="text-gray-600 dark:text-gray-400">250K Target</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-yellow-500 mr-2"></div>
-              <span className="text-gray-600 dark:text-gray-400">500K Target</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-red-500 mr-2"></div>
-              <span className="text-gray-600 dark:text-gray-400">750K Target</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-[#1973AE] mr-2"></div>
-              <span className="text-gray-600 dark:text-gray-400">1M Target</span>
-            </div>
           </div>
         </div>
       </div>
@@ -852,6 +762,7 @@ const CommissionTracking: React.FC = () => {
             <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Month</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Profit</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell">Services</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell">Items</th>
@@ -862,11 +773,14 @@ const CommissionTracking: React.FC = () => {
               <tbody>
                 {periodData.map((period) => (
                   <tr key={period.period} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-left text-gray-900 dark:text-white font-semibold">
+                      {period.period.split(' ')[0]}
+                    </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-green-600 dark:text-green-400 font-semibold font-mono">
-                      TSh {formatCurrency(period.totalGanji)}
+                      TSh {Math.round(period.totalGanji).toLocaleString()}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white font-mono hidden sm:table-cell">
-                      TSh {formatCurrency(period.services)}
+                      TSh {Math.round(period.services).toLocaleString()}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white hidden md:table-cell">
                       {period.items}
@@ -875,7 +789,7 @@ const CommissionTracking: React.FC = () => {
                       {period.totalTransactions}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-[#1973AE] dark:text-[#5da3d5] font-mono hidden xl:table-cell">
-                      TSh {formatCurrency(period.totalTransactions > 0 ? period.totalGanji / period.totalTransactions : 0)}
+                      TSh {period.totalTransactions > 0 ? Math.round(period.totalGanji / period.totalTransactions).toLocaleString() : '0'}
                     </td>
                   </tr>
                 ))}
