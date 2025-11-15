@@ -259,8 +259,8 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
       // Table headers
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      const headers = ['Date', 'Product', 'Customer', 'Qty', 'Zoezi', 'Sell Price', 'Ganji'];
-      const columnWidths = [25, 35, 30, 15, 25, 25, 25];
+      const headers = ['Date', 'Product', 'Customer', 'Qty', 'Zoezi', 'Ganji'];
+      const columnWidths = [30, 50, 40, 20, 20, 20];
       let xPosition = 20;
 
       headers.forEach((header, index) => {
@@ -282,10 +282,10 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           yPosition = 30;
         }
 
-        const costPrice = Number(sale.cost_price) || 0;
-        const sellingPrice = Number(sale.unit_price) || 0;
         const quantity = Number(sale.quantity) || 1;
         const offers = Number(sale.offers) || 0;
+        const costPrice = Number(sale.cost_price) || 0;
+        const sellingPrice = Number(sale.unit_price) || 0;
         const profit = (sellingPrice - costPrice) * quantity - offers;
 
         const rowData = [
@@ -294,7 +294,6 @@ const SalesmanSales: React.FC<SalesmanSalesProps> = ({ openSaleForm }) => {
           (sale.customer_name || 'N/A').substring(0, 12),
           quantity.toString(),
           formatCurrency(costPrice),
-          formatCurrency(sellingPrice),
           formatCurrency(profit)
         ];
 
