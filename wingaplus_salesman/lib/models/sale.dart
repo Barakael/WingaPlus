@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class Sale {
   final int id;
   final int salesmanId;
@@ -106,4 +108,6 @@ class Sale {
   String get formattedProfit => formatCurrency(profit);
   String get formattedUnitPrice => formatCurrency(unitPrice);
   String get formattedCostPrice => formatCurrency(costPrice);
+  String get formattedCreatedAt =>
+      DateFormat('dd MMM yyyy').format(createdAt);
 }

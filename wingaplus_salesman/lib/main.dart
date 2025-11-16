@@ -5,6 +5,11 @@ import 'providers/auth_provider.dart';
 import 'providers/sales_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/salesman_dashboard.dart';
+import 'screens/sales/my_sales_screen.dart';
+import 'screens/warranties/warranty_screen.dart';
+import 'screens/services/service_screen.dart';
+import 'screens/commissions/commission_tracking_screen.dart';
+import 'screens/targets/target_management_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,11 +35,11 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (context) => const LoginScreen(),
           '/dashboard': (context) => const SalesmanDashboard(),
-          // Add more routes as you create screens:
-          // '/sales': (context) => const MySalesScreen(),
-          // '/sale-form': (context) => const SaleFormScreen(),
-          // '/commissions': (context) => const CommissionScreen(),
-          // '/targets': (context) => const TargetsScreen(),
+          '/my-sales': (context) => const MySalesScreen(),
+          '/warranties': (context) => const WarrantyScreen(),
+          '/services': (context) => const ServiceScreen(),
+          '/commissions': (context) => const CommissionTrackingScreen(),
+          '/targets': (context) => const TargetManagementScreen(),
         },
       ),
     );
