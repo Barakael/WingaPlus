@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
 
         // Super Admin
         User::firstOrCreate(
-            ['email' => 'admin@wingaplus.com'],
+            ['email' => 'admin@WingaPro.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
                 'shop_id' => null,
             ]
         );
-        echo "✓ Super Admin: admin@wingaplus.com / password\n";
+        echo "✓ Super Admin: admin@WingaPro.com / password\n";
 
         // Shop Owners
         $owner1 = User::firstOrCreate(

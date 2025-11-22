@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         echo "\n╔══════════════════════════════════════╗\n";
-        echo "║   WingaPlus Database Seeding        ║\n";
+        echo "║   WingaPro Database Seeding        ║\n";
         echo "╚══════════════════════════════════════╝\n";
 
         $this->call([
