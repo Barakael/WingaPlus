@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
-import 'wingaplus_destination.dart';
+import 'WingaPro_destination.dart';
 
-typedef WingaplusNavCallback = void Function(int index);
+typedef WingaProNavCallback = void Function(int index);
 
-class WingaplusNavRail extends StatelessWidget {
-  final List<WingaplusDestination> destinations;
+class WingaProNavRail extends StatelessWidget {
+  final List<WingaProDestination> destinations;
   final int currentIndex;
-  final WingaplusNavCallback onDestinationSelected;
+  final WingaProNavCallback onDestinationSelected;
 
-  const WingaplusNavRail({
+  const WingaProNavRail({
     super.key,
     required this.destinations,
     required this.currentIndex,
@@ -25,7 +25,7 @@ class WingaplusNavRail extends StatelessWidget {
       onDestinationSelected: onDestinationSelected,
       minExtendedWidth: 220,
       extended: MediaQuery.sizeOf(context).width >= 1400,
-      leading: const SizedBox(height: WingaplusSpacing.xl),
+      leading: const SizedBox(height: WingaProSpacing.xl),
       groupAlignment: -0.8,
       labelType: NavigationRailLabelType.none,
       destinations: destinations
@@ -34,7 +34,7 @@ class WingaplusNavRail extends StatelessWidget {
               icon: Icon(dest.icon),
               selectedIcon: Icon(
                 dest.icon,
-                color: WingaplusColors.brandPrimary,
+                color: WingaProColors.brandPrimary,
               ),
               label: Text(dest.label),
             ),
@@ -44,12 +44,12 @@ class WingaplusNavRail extends StatelessWidget {
   }
 }
 
-class WingaplusNavDrawer extends StatelessWidget {
-  final List<WingaplusDestination> destinations;
+class WingaProNavDrawer extends StatelessWidget {
+  final List<WingaProDestination> destinations;
   final int currentIndex;
-  final WingaplusNavCallback onDestinationSelected;
+  final WingaProNavCallback onDestinationSelected;
 
-  const WingaplusNavDrawer({
+  const WingaProNavDrawer({
     super.key,
     required this.destinations,
     required this.currentIndex,
@@ -69,18 +69,17 @@ class WingaplusNavDrawer extends StatelessWidget {
               leading: Icon(
                 destination.icon,
                 color: isSelected
-                    ? WingaplusColors.brandPrimary
-                    : WingaplusColors.gray500,
+                    ? WingaProColors.brandPrimary
+                    : WingaProColors.gray500,
               ),
               title: Text(
                 destination.label,
                 style: TextStyle(
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
               selected: isSelected,
-              selectedTileColor: WingaplusColors.primary50,
+              selectedTileColor: WingaProColors.primary50,
               onTap: () {
                 Navigator.of(context).pop();
                 onDestinationSelected(index);
@@ -93,12 +92,12 @@ class WingaplusNavDrawer extends StatelessWidget {
   }
 }
 
-class WingaplusBottomNav extends StatelessWidget {
-  final List<WingaplusDestination> destinations;
+class WingaProBottomNav extends StatelessWidget {
+  final List<WingaProDestination> destinations;
   final int currentIndex;
-  final WingaplusNavCallback onDestinationSelected;
+  final WingaProNavCallback onDestinationSelected;
 
-  const WingaplusBottomNav({
+  const WingaProBottomNav({
     super.key,
     required this.destinations,
     required this.currentIndex,
@@ -122,4 +121,3 @@ class WingaplusBottomNav extends StatelessWidget {
     );
   }
 }
-

@@ -121,7 +121,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 ## 🔐 Test Credentials
 
 ### Super Admin Login
-- **Email:** admin@wingaplus.com
+- **Email:** admin@WingaPro.com
 - **Password:** password
 
 ### Database Stats
@@ -139,7 +139,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
 ### 1. Start Backend (if not running)
 ```bash
-cd WingaPlus_api
+cd WingaPro_api
 php artisan serve
 ```
 Backend runs on: http://127.0.0.1:8000
@@ -154,7 +154,7 @@ Frontend runs on: http://localhost:5173 (or 5174 if 5173 is busy)
 ### 3. Login
 1. Open frontend URL in browser
 2. Login with super admin credentials
-3. Email: `admin@wingaplus.com`
+3. Email: `admin@WingaPro.com`
 4. Password: `password`
 
 ### 4. Test Each Page
@@ -226,7 +226,7 @@ Frontend runs on: http://localhost:5173 (or 5174 if 5173 is busy)
 
 ## 🎨 UI/UX Highlights
 
-- **Brand Color:** #1973AE (WingaPlus blue)
+- **Brand Color:** #1973AE (WingaPro blue)
 - **Design:** Modern, clean, professional
 - **Icons:** Lucide React
 - **Notifications:** React Hot Toast
@@ -240,7 +240,7 @@ Frontend runs on: http://localhost:5173 (or 5174 if 5173 is busy)
 ## 📁 File Structure
 
 ```
-WingaPlus_api/
+WingaPro_api/
 ├── app/
 │   ├── Http/Controllers/
 │   │   └── SuperAdminController.php ✅

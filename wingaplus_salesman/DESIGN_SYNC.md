@@ -6,7 +6,7 @@ This document explains how we aligned the salesman Flutter app with the React fr
 
 - Source of truth: `frontend/tailwind.config.js` (colors, typography, animations).  
 - Flutter mirror: `lib/design/tokens.dart`.  
-- When updating a token on the web, copy the new value into `WingaplusColors`, `WingaplusSpacing`, etc., then rebuild the app so every widget picks up the change automatically.
+- When updating a token on the web, copy the new value into `WingaProColors`, `WingaProSpacing`, etc., then rebuild the app so every widget picks up the change automatically.
 
 ## 2. Theme Configuration
 
@@ -26,9 +26,9 @@ The following widgets keep the Flutter UI visually identical to the React layout
 
 | React Concept | Flutter Counterpart | Path |
 | --- | --- | --- |
-| `Layout` (navbar + sidebar) | `WingaplusShell` | `lib/widgets/layout/wingaplus_shell.dart` |
-| KPI cards (`StatsCard`, etc.) | `WingaplusStatCard`, `WingaplusSection` | `lib/widgets/ui/` |
-| Toast styling | `WingaplusToast` (coming soon) | `lib/widgets/feedback/` |
+| `Layout` (navbar + sidebar) | `WingaProShell` | `lib/widgets/layout/WingaPro_shell.dart` |
+| KPI cards (`StatsCard`, etc.) | `WingaProStatCard`, `WingaProSection` | `lib/widgets/ui/` |
+| Toast styling | `WingaProToast` (coming soon) | `lib/widgets/feedback/` |
 
 > **Action**: When porting a new React component, first ask “does a Flutter widget already exist?” If not, add it to the UI kit so other screens can reuse it.
 
@@ -36,9 +36,9 @@ The following widgets keep the Flutter UI visually identical to the React layout
 
 1. **Identify** the React page (e.g., `Dashboard`, `Sales Report`).  
 2. **Create** the Flutter screen under `lib/screens/<module>/<name>_screen.dart`.  
-3. **Compose** it from shared widgets (`WingaplusStatCard`, `WingaplusSectionHeader`, etc.).  
+3. **Compose** it from shared widgets (`WingaProStatCard`, `WingaProSectionHeader`, etc.).  
 4. **Wire** it to data providers (`AuthProvider`, `SalesProvider`, future `TargetsProvider`).  
-5. **Route** it inside `MaterialApp.routes` and the forthcoming `WingaplusShell` navigation map.
+5. **Route** it inside `MaterialApp.routes` and the forthcoming `WingaProShell` navigation map.
 
 ## 5. Future Improvements
 

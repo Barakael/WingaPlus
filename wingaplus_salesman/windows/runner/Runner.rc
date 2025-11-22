@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "wingaplus_salesman" "\0"
+            VALUE "FileDescription", "WingaPro_salesman" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "wingaplus_salesman" "\0"
+            VALUE "InternalName", "WingaPro_salesman" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "wingaplus_salesman.exe" "\0"
-            VALUE "ProductName", "wingaplus_salesman" "\0"
+            VALUE "OriginalFilename", "WingaPro_salesman.exe" "\0"
+            VALUE "ProductName", "WingaPro_salesman" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

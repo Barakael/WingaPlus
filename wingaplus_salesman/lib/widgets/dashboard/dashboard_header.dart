@@ -29,22 +29,21 @@ class DashboardHeader extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
               ),
-              const SizedBox(height: WingaplusSpacing.sm),
+              const SizedBox(height: WingaProSpacing.sm),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: WingaplusColors.gray500,
+                      color: WingaProColors.gray500,
                     ),
               ),
             ],
           ),
         ),
         if (trailing != null) ...[
-          const SizedBox(width: WingaplusSpacing.lg),
+          const SizedBox(width: WingaProSpacing.lg),
           trailing!,
         ],
       ],
     );
   }
 }
-

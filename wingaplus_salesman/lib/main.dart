@@ -16,7 +16,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SalesProvider()),
       ],
       child: MaterialApp(
-        title: 'WingaPlus Salesman',
+        title: 'WingaPro Salesman',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
 }
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -62,18 +62,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 1)); // Minimum splash time
-    
+
     if (!mounted) return;
-    
+
     final authProvider = context.read<AuthProvider>();
-    
+
     // Wait for auth initialization
     while (authProvider.isLoading) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    
+
     if (!mounted) return;
-    
+
     if (authProvider.isAuthenticated) {
       Navigator.of(context).pushReplacementNamed('/dashboard');
     } else {
@@ -89,25 +89,25 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.store_mall_directory_rounded,
               size: 100,
               color: AppTheme.white,
             ),
             const SizedBox(height: 24),
             Text(
-              'WingaPlus',
+              'WingaPro',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.white,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.white,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Salesman App',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppTheme.white.withOpacity(0.9),
-              ),
+                    color: AppTheme.white.withOpacity(0.9),
+                  ),
             ),
             const SizedBox(height: 48),
             const CircularProgressIndicator(

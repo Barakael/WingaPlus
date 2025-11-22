@@ -10,7 +10,7 @@ import '../../widgets/dashboard/dashboard_header.dart';
 import '../../widgets/dashboard/quick_actions.dart';
 import '../../widgets/dashboard/recent_sales_list.dart';
 import '../../widgets/dashboard/stats_overview.dart';
-import '../../widgets/layout/wingaplus_shell.dart';
+import '../../widgets/layout/WingaPro_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 
 class SalesmanDashboard extends StatefulWidget {
@@ -21,7 +21,6 @@ class SalesmanDashboard extends StatefulWidget {
 }
 
 class _SalesmanDashboardState extends State<SalesmanDashboard> {
-
   @override
   void initState() {
     super.initState();
@@ -59,7 +58,7 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
     final salesProvider = context.watch<SalesProvider>();
     final user = authProvider.user;
 
-    return WingaplusShell(
+    return WingaProShell(
       destinations: SalesmanNav.destinations,
       currentIndex: SalesmanNav.getCurrentIndex('/dashboard'),
       onDestinationSelected: _handleDestinationSelected,
@@ -82,7 +81,7 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(WingaplusSpacing.xl),
+                padding: const EdgeInsets.all(WingaProSpacing.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -90,7 +89,7 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                       title: 'Welcome back, ${user?.name ?? 'User'}!',
                       subtitle: 'Here\'s your sales overview for today',
                     ),
-                    const SizedBox(height: WingaplusSpacing.xl),
+                    const SizedBox(height: WingaProSpacing.xl),
                     StatsOverviewGrid(
                       stats: [
                         DashboardStat(
@@ -121,7 +120,7 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: WingaplusSpacing.xl),
+                    const SizedBox(height: WingaProSpacing.xl),
                     QuickActionsGrid(
                       actions: [
                         QuickAction(
@@ -147,7 +146,7 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: WingaplusSpacing.xl),
+                    const SizedBox(height: WingaProSpacing.xl),
                     RecentSalesList(
                       items: salesProvider.sales.take(5).map((sale) {
                         return RecentSaleItem(
@@ -165,5 +164,4 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
       ),
     );
   }
-
 }

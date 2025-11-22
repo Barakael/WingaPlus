@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
-import 'wingaplus_destination.dart';
+import 'WingaPro_destination.dart';
 
 /// Navigation helper for salesman role matching React Sidebar
 class SalesmanNav {
-  static const List<WingaplusDestination> destinations = [
-    WingaplusDestination(
+  static const List<WingaProDestination> destinations = [
+    WingaProDestination(
       label: 'Dashboard',
       icon: Icons.dashboard_rounded,
       route: '/dashboard',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'My Sales',
       icon: Icons.list_alt_rounded,
       route: '/my-sales',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Ufundi',
       icon: Icons.build_rounded,
       route: '/services',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Ganji',
       icon: Icons.monetization_on_rounded,
       route: '/commissions',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Targets',
       icon: Icons.flag_circle_rounded,
       route: '/targets',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Warranties',
       icon: Icons.shield_rounded,
       route: '/warranties',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Settings',
       icon: Icons.settings_rounded,
       route: '/settings',
@@ -49,9 +49,9 @@ class SalesmanNav {
   }) {
     if (newIndex < 0 || newIndex >= destinations.length) return;
     if (newIndex == currentIndex) return;
-    
+
     final destination = destinations[newIndex];
-    
+
     // Use pushReplacementNamed to match React app behavior (single-page app style)
     Navigator.of(context).pushReplacementNamed(destination.route);
   }
@@ -72,4 +72,3 @@ class SalesmanNav {
     return 0; // Default to dashboard
   }
 }
-

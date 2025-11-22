@@ -35,10 +35,10 @@ class QuickActionsGrid extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: WingaplusSpacing.md),
+        const SizedBox(height: WingaProSpacing.md),
         Wrap(
-          spacing: WingaplusSpacing.md,
-          runSpacing: WingaplusSpacing.md,
+          spacing: WingaProSpacing.md,
+          runSpacing: WingaProSpacing.md,
           children: actions
               .map(
                 (action) => _QuickActionCard(action: action),
@@ -70,9 +70,9 @@ class _QuickActionCard extends StatelessWidget {
       child: Card(
         child: InkWell(
           onTap: action.onTap,
-          borderRadius: WingaplusRadius.md,
+          borderRadius: WingaProRadius.md,
           child: Padding(
-            padding: const EdgeInsets.all(WingaplusSpacing.lg),
+            padding: const EdgeInsets.all(WingaProSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -85,11 +85,11 @@ class _QuickActionCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: WingaplusSpacing.sm),
-                    Text(
+                    const SizedBox(height: WingaProSpacing.sm),
+                    const Text(
                       'Tap to open',
                       style: TextStyle(
-                        color: WingaplusColors.gray500,
+                        color: WingaProColors.gray500,
                         fontSize: 12,
                       ),
                     ),
@@ -98,9 +98,9 @@ class _QuickActionCard extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: action.color.withOpacity(0.15),
-                    borderRadius: WingaplusRadius.md,
+                    borderRadius: WingaProRadius.md,
                   ),
-                  padding: const EdgeInsets.all(WingaplusSpacing.sm),
+                  padding: const EdgeInsets.all(WingaProSpacing.sm),
                   child: Icon(
                     action.icon,
                     color: action.color,
@@ -114,4 +114,3 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
-

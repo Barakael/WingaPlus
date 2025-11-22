@@ -7,7 +7,7 @@ import '../../providers/sales_provider.dart';
 import '../../widgets/dashboard/dashboard_header.dart';
 import '../../widgets/dashboard/stats_overview.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/layout/wingaplus_shell.dart';
+import '../../widgets/layout/WingaPro_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 import '../../widgets/sales/sales_filters.dart';
 
@@ -47,7 +47,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
     final salesProvider = context.watch<SalesProvider>();
     final user = authProvider.user;
 
-    return WingaplusShell(
+    return WingaProShell(
       destinations: SalesmanNav.destinations,
       currentIndex: SalesmanNav.getCurrentIndex('/my-sales'),
       onDestinationSelected: (index) {
@@ -75,11 +75,16 @@ class _MySalesScreenState extends State<MySalesScreen> {
         icon: const Icon(Icons.add),
         label: const Text('New Sale'),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).pushNamed('/sale-form'),
+        icon: const Icon(Icons.add),
+        label: const Text('Log Sale'),
+      ),
       child: RefreshIndicator(
         onRefresh: _loadData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(WingaplusSpacing.xl),
+          padding: const EdgeInsets.all(WingaProSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -87,7 +92,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
                 title: 'My Sales',
                 subtitle: 'Track individual sales performance and revenue',
               ),
-              const SizedBox(height: WingaplusSpacing.xl),
+              const SizedBox(height: WingaProSpacing.xl),
               SalesFilterBar(
                 activeFilter: _activeFilter,
                 onChanged: (filter) {
@@ -95,7 +100,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
                   _loadData();
                 },
               ),
-              const SizedBox(height: WingaplusSpacing.xl),
+              const SizedBox(height: WingaProSpacing.xl),
               StatsOverviewGrid(
                 stats: [
                   DashboardStat(
@@ -131,28 +136,23 @@ class _MySalesScreenState extends State<MySalesScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: WingaplusSpacing.xl),
+              const SizedBox(height: WingaProSpacing.xl),
               _buildSalesList(salesProvider),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed('/sale-form'),
-        icon: const Icon(Icons.add),
-        label: const Text('Log Sale'),
       ),
     );
   }
 
   Widget _buildSalesList(SalesProvider salesProvider) {
     if (salesProvider.sales.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.all(WingaplusSpacing.hero),
+          padding: EdgeInsets.all(WingaProSpacing.hero),
           child: Text(
             'No sales for the selected period.',
-            style: TextStyle(color: WingaplusColors.gray500),
+            style: TextStyle(color: WingaProColors.gray500),
           ),
         ),
       );
@@ -167,10 +167,10 @@ class _MySalesScreenState extends State<MySalesScreen> {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: WingaplusSpacing.md),
+        const SizedBox(height: WingaProSpacing.md),
         ...salesProvider.sales.map((sale) {
           return Card(
-            margin: const EdgeInsets.only(bottom: WingaplusSpacing.sm),
+            margin: const EdgeInsets.only(bottom: WingaProSpacing.sm),
             child: ListTile(
               title: Text(sale.productName),
               subtitle: Text(

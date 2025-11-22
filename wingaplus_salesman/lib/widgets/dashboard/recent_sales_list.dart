@@ -36,21 +36,21 @@ class RecentSalesList extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: WingaplusSpacing.md),
+        const SizedBox(height: WingaProSpacing.md),
         if (items.isEmpty)
-          Center(
+          const Center(
             child: Padding(
-              padding: const EdgeInsets.all(WingaplusSpacing.hero),
+              padding: EdgeInsets.all(WingaProSpacing.hero),
               child: Text(
                 'No sales yet today',
-                style: TextStyle(color: WingaplusColors.gray500),
+                style: TextStyle(color: WingaProColors.gray500),
               ),
             ),
           )
         else
           ...items.map((sale) {
             return Card(
-              margin: const EdgeInsets.only(bottom: WingaplusSpacing.sm),
+              margin: const EdgeInsets.only(bottom: WingaProSpacing.sm),
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
@@ -66,7 +66,7 @@ class RecentSalesList extends StatelessWidget {
                 ),
                 subtitle: Text(
                   sale.subtitle,
-                  style: TextStyle(color: WingaplusColors.gray500),
+                  style: const TextStyle(color: WingaProColors.gray500),
                 ),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -95,4 +95,3 @@ class RecentSalesList extends StatelessWidget {
     );
   }
 }
-

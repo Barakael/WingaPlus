@@ -5,7 +5,7 @@ import '../../design/tokens.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/sales_provider.dart'; // placeholder until WarrantyProvider exists
 import '../../widgets/dashboard/dashboard_header.dart';
-import '../../widgets/layout/wingaplus_shell.dart';
+import '../../widgets/layout/WingaPro_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 
 class WarrantyScreen extends StatefulWidget {
@@ -22,7 +22,7 @@ class _WarrantyScreenState extends State<WarrantyScreen> {
     final salesProvider = context.watch<SalesProvider>();
     final user = authProvider.user;
 
-    return WingaplusShell(
+    return WingaProShell(
       destinations: SalesmanNav.destinations,
       currentIndex: SalesmanNav.getCurrentIndex('/warranties'),
       onDestinationSelected: (index) {
@@ -40,8 +40,13 @@ class _WarrantyScreenState extends State<WarrantyScreen> {
           Navigator.of(context).pushReplacementNamed('/login');
         }
       },
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).pushNamed('/file-warranty'),
+        icon: const Icon(Icons.note_add),
+        label: const Text('File Warranty'),
+      ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(WingaplusSpacing.xl),
+        padding: const EdgeInsets.all(WingaProSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -49,15 +54,10 @@ class _WarrantyScreenState extends State<WarrantyScreen> {
               title: 'Warranties',
               subtitle: 'Track submitted warranties and their status',
             ),
-            const SizedBox(height: WingaplusSpacing.xl),
+            const SizedBox(height: WingaProSpacing.xl),
             _buildWarrantyList(salesProvider),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed('/file-warranty'),
-        icon: const Icon(Icons.note_add),
-        label: const Text('File Warranty'),
       ),
     );
   }
@@ -65,12 +65,12 @@ class _WarrantyScreenState extends State<WarrantyScreen> {
   Widget _buildWarrantyList(SalesProvider salesProvider) {
     // Placeholder: reuse sales data until warranties provider is available.
     if (salesProvider.sales.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.all(WingaplusSpacing.hero),
+          padding: EdgeInsets.all(WingaProSpacing.hero),
           child: Text(
             'No warranties yet.',
-            style: TextStyle(color: WingaplusColors.gray500),
+            style: TextStyle(color: WingaProColors.gray500),
           ),
         ),
       );
@@ -85,20 +85,20 @@ class _WarrantyScreenState extends State<WarrantyScreen> {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: WingaplusSpacing.md),
+        const SizedBox(height: WingaProSpacing.md),
         ...salesProvider.sales.map((sale) {
           return Card(
-            margin: const EdgeInsets.only(bottom: WingaplusSpacing.sm),
+            margin: const EdgeInsets.only(bottom: WingaProSpacing.sm),
             child: ListTile(
               leading: const Icon(Icons.verified, color: Colors.blue),
               title: Text('${sale.productName} Warranty'),
               subtitle: Text(
                 'Customer: ${sale.customerName ?? 'N/A'} • Filed on ${sale.formattedCreatedAt}',
               ),
-              trailing: Chip(
-                label: const Text('Pending'),
-                backgroundColor: WingaplusColors.primary50,
-                labelStyle: const TextStyle(color: WingaplusColors.brandPrimary),
+              trailing: const Chip(
+                label: Text('Pending'),
+                backgroundColor: WingaProColors.primary50,
+                labelStyle: TextStyle(color: WingaProColors.brandPrimary),
               ),
             ),
           );
@@ -107,4 +107,3 @@ class _WarrantyScreenState extends State<WarrantyScreen> {
     );
   }
 }
-

@@ -1,4 +1,4 @@
-# WingaPlus Salesman Mobile App
+# WingaPro Salesman Mobile App
 
 A Flutter mobile application for salesmen to manage sales, track commissions, and monitor targets. This app connects to the same Laravel API as your web application.
 
@@ -62,7 +62,7 @@ The app uses the same color scheme as your web application:
 
 1. **Navigate to project directory**
    ```bash
-   cd /Users/barakael0/WingaPlus/wingaplus_salesman
+   cd /Users/barakael0/WingaPro/WingaPro_salesman
    ```
 
 2. **Install dependencies**

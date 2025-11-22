@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../config/theme.dart';
 import '../../design/tokens.dart';
 import '../common/stats_card.dart';
 
@@ -33,8 +32,8 @@ class StatsOverviewGrid extends StatelessWidget {
     return Column(
       children: [
         Wrap(
-          spacing: WingaplusSpacing.md,
-          runSpacing: WingaplusSpacing.md,
+          spacing: WingaProSpacing.md,
+          runSpacing: WingaProSpacing.md,
           children: stats
               .map(
                 (stat) => SizedBox(
@@ -54,4 +53,3 @@ class StatsOverviewGrid extends StatelessWidget {
     );
   }
 }
-

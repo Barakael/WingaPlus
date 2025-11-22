@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/sales_provider.dart';
 import '../../design/tokens.dart';
-import '../../widgets/layout/wingaplus_shell.dart';
+import '../../widgets/layout/WingaPro_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 import '../../widgets/dashboard/dashboard_header.dart';
 
@@ -13,7 +13,8 @@ class CommissionTrackingScreen extends StatefulWidget {
   const CommissionTrackingScreen({super.key});
 
   @override
-  State<CommissionTrackingScreen> createState() => _CommissionTrackingScreenState();
+  State<CommissionTrackingScreen> createState() =>
+      _CommissionTrackingScreenState();
 }
 
 class _CommissionTrackingScreenState extends State<CommissionTrackingScreen> {
@@ -48,7 +49,7 @@ class _CommissionTrackingScreenState extends State<CommissionTrackingScreen> {
     final totalItems = salesProvider.totalItemsSold;
     final totalSales = salesProvider.totalRevenue;
 
-    return WingaplusShell(
+    return WingaProShell(
       destinations: SalesmanNav.destinations,
       currentIndex: SalesmanNav.getCurrentIndex('/commissions'),
       onDestinationSelected: (index) {
@@ -70,7 +71,7 @@ class _CommissionTrackingScreenState extends State<CommissionTrackingScreen> {
         onRefresh: _loadData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(WingaplusSpacing.xl),
+          padding: const EdgeInsets.all(WingaProSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -78,8 +79,8 @@ class _CommissionTrackingScreenState extends State<CommissionTrackingScreen> {
                 title: 'Ganji Dashboard',
                 subtitle: 'Track your profit "ganji" performance over time',
               ),
-              const SizedBox(height: WingaplusSpacing.xl),
-              
+              const SizedBox(height: WingaProSpacing.xl),
+
               // Summary Cards
               Row(
                 children: [
@@ -88,39 +89,39 @@ class _CommissionTrackingScreenState extends State<CommissionTrackingScreen> {
                       title: 'Total Profit',
                       value: _formatCurrency(totalGanji),
                       icon: Icons.trending_up,
-                      color: WingaplusColors.primary500,
+                      color: WingaProColors.primary500,
                     ),
                   ),
-                  const SizedBox(width: WingaplusSpacing.md),
+                  const SizedBox(width: WingaProSpacing.md),
                   Expanded(
                     child: _StatCard(
                       title: 'Items Sold',
                       value: totalItems.toString(),
                       icon: Icons.shopping_cart,
-                      color: WingaplusColors.secondary500,
+                      color: WingaProColors.secondary500,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: WingaplusSpacing.md),
-              
+              const SizedBox(height: WingaProSpacing.md),
+
               // Info message
               Container(
-                padding: const EdgeInsets.all(WingaplusSpacing.md),
+                padding: const EdgeInsets.all(WingaProSpacing.md),
                 decoration: BoxDecoration(
-                  color: WingaplusColors.primary50,
-                  borderRadius: WingaplusRadius.md,
-                  border: Border.all(color: WingaplusColors.primary200),
+                  color: WingaProColors.primary50,
+                  borderRadius: WingaProRadius.md,
+                  border: Border.all(color: WingaProColors.primary200),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    Icon(Icons.info_outline, color: WingaplusColors.primary600),
-                    const SizedBox(width: WingaplusSpacing.sm),
+                    Icon(Icons.info_outline, color: WingaProColors.primary600),
+                    SizedBox(width: WingaProSpacing.sm),
                     Expanded(
                       child: Text(
                         'View detailed monthly performance and commission tracking',
                         style: TextStyle(
-                          color: WingaplusColors.primary700,
+                          color: WingaProColors.primary700,
                           fontSize: 14,
                         ),
                       ),
@@ -153,7 +154,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(WingaplusSpacing.md),
+        padding: const EdgeInsets.all(WingaProSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -163,20 +164,20 @@ class _StatCard extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: WingaplusColors.gray600,
+                        color: WingaProColors.gray600,
                       ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
-                    borderRadius: WingaplusRadius.sm,
+                    borderRadius: WingaProRadius.sm,
                   ),
                   child: Icon(icon, color: color, size: 20),
                 ),
               ],
             ),
-            const SizedBox(height: WingaplusSpacing.sm),
+            const SizedBox(height: WingaProSpacing.sm),
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -190,4 +191,3 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
-

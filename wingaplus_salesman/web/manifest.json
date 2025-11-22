@@ -1,6 +1,6 @@
 {
-    "name": "wingaplus_salesman",
-    "short_name": "wingaplus_salesman",
+    "name": "WingaPro_salesman",
+    "short_name": "WingaPro_salesman",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

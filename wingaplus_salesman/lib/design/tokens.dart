@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Canonical design tokens shared across the Flutter salesman app.
 /// Values mirror the Tailwind palette and layout system from the React frontend.
-class WingaplusColors {
-  WingaplusColors._();
+class WingaProColors {
+  WingaProColors._();
 
   // Primary blue palette (tailwind primary scale)
   static const Color primary50 = Color(0xFFEFF6FF);
@@ -60,8 +60,8 @@ class WingaplusColors {
   static const Color gray900 = Color(0xFF111827);
 }
 
-class WingaplusSpacing {
-  WingaplusSpacing._();
+class WingaProSpacing {
+  WingaProSpacing._();
 
   static const double xs = 4;
   static const double sm = 8;
@@ -72,8 +72,8 @@ class WingaplusSpacing {
   static const double hero = 48;
 }
 
-class WingaplusRadius {
-  WingaplusRadius._();
+class WingaProRadius {
+  WingaProRadius._();
 
   static const BorderRadius sm = BorderRadius.all(Radius.circular(8));
   static const BorderRadius md = BorderRadius.all(Radius.circular(12));
@@ -81,8 +81,8 @@ class WingaplusRadius {
   static const BorderRadius xl = BorderRadius.all(Radius.circular(24));
 }
 
-class WingaplusShadows {
-  WingaplusShadows._();
+class WingaProShadows {
+  WingaProShadows._();
 
   static const List<BoxShadow> cardLight = [
     BoxShadow(
@@ -101,12 +101,10 @@ class WingaplusShadows {
   ];
 }
 
-class WingaplusDurations {
-  WingaplusDurations._();
+class WingaProDurations {
+  WingaProDurations._();
 
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration base = Duration(milliseconds: 250);
   static const Duration slow = Duration(milliseconds: 400);
 }
-
-

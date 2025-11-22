@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/sales_provider.dart';
 import '../../design/tokens.dart';
-import '../../widgets/layout/wingaplus_shell.dart';
+import '../../constants/WingaPro_colors.dart' as wpcolors;
+import '../../widgets/layout/WingaPro_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 import '../../widgets/dashboard/dashboard_header.dart';
 import '../../models/target.dart';
@@ -44,7 +45,7 @@ class _TargetManagementScreenState extends State<TargetManagementScreen> {
     final salesProvider = context.watch<SalesProvider>();
     final user = authProvider.user;
 
-    return WingaplusShell(
+    return WingaProShell(
       destinations: SalesmanNav.destinations,
       currentIndex: SalesmanNav.getCurrentIndex('/targets'),
       onDestinationSelected: (index) {
@@ -76,7 +77,7 @@ class _TargetManagementScreenState extends State<TargetManagementScreen> {
         onRefresh: _loadData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(WingaplusSpacing.xl),
+          padding: const EdgeInsets.all(WingaProSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -84,31 +85,32 @@ class _TargetManagementScreenState extends State<TargetManagementScreen> {
                 title: 'Target Management',
                 subtitle: 'Create and manage your sales targets',
               ),
-              const SizedBox(height: WingaplusSpacing.xl),
-              
+              const SizedBox(height: WingaProSpacing.xl),
+
               // Targets List
               if (salesProvider.targets.isEmpty)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(WingaplusSpacing.xl * 2),
+                    padding: const EdgeInsets.all(WingaProSpacing.xl * 2),
                     child: Column(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.flag_circle_outlined,
                           size: 64,
-                          color: WingaplusColors.gray400,
+                          color: WingaProColors.gray400,
                         ),
-                        const SizedBox(height: WingaplusSpacing.md),
+                        const SizedBox(height: WingaProSpacing.md),
                         Text(
                           'No targets set yet',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        const SizedBox(height: WingaplusSpacing.sm),
+                        const SizedBox(height: WingaProSpacing.sm),
                         Text(
                           'Create your first target to start tracking your performance',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: WingaplusColors.gray600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: WingaProColors.gray600,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -140,9 +142,9 @@ class _TargetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: WingaplusSpacing.md),
+      margin: const EdgeInsets.only(bottom: WingaProSpacing.md),
       child: Padding(
-        padding: const EdgeInsets.all(WingaplusSpacing.md),
+        padding: const EdgeInsets.all(WingaProSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -163,41 +165,38 @@ class _TargetCard extends StatelessWidget {
                     style: const TextStyle(fontSize: 12),
                   ),
                   backgroundColor: target.status == 'active'
-                      ? WingaplusColors.successGreen.withOpacity(0.2)
-                      : WingaplusColors.gray300,
+                      ? wpcolors.WingaProColors.successGreen.withOpacity(0.2)
+                      : WingaProColors.gray300,
                 ),
               ],
             ),
-            const SizedBox(height: WingaplusSpacing.sm),
+            const SizedBox(height: WingaProSpacing.sm),
             Text(
               '${target.period} • ${target.metric.replaceAll('_', ' ')}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: WingaplusColors.gray600,
+                    color: WingaProColors.gray600,
                   ),
             ),
-            const SizedBox(height: WingaplusSpacing.sm),
+            const SizedBox(height: WingaProSpacing.sm),
             Text(
               target.metric == 'profit'
                   ? 'Target: ${formatCurrency(target.targetValue)}'
                   : 'Target: ${target.targetValue.toString()} items',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: WingaplusColors.primary600,
+                    color: WingaProColors.primary600,
                   ),
             ),
-            if (target.bonusAmount != null) ...[
-              const SizedBox(height: WingaplusSpacing.xs),
-              Text(
-                'Bonus: ${formatCurrency(target.bonusAmount!)}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: WingaplusColors.successGreen,
-                    ),
-              ),
-            ],
+            const SizedBox(height: WingaProSpacing.xs),
+            Text(
+              'Bonus: ${formatCurrency(target.bonusAmount)}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: wpcolors.WingaProColors.successGreen,
+                  ),
+            ),
           ],
         ),
       ),
     );
   }
 }
-

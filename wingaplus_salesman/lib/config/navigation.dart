@@ -1,42 +1,42 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/layout/wingaplus_destination.dart';
+import '../widgets/layout/WingaPro_destination.dart';
 
 class SalesmanNav {
   SalesmanNav._();
 
-  static const List<WingaplusDestination> destinations = [
-    WingaplusDestination(
+  static const List<WingaProDestination> destinations = [
+    WingaProDestination(
       label: 'Dashboard',
       icon: Icons.dashboard_customize_rounded,
       route: '/dashboard',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'My Sales',
       icon: Icons.shopping_cart_rounded,
       route: '/sales',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Ufundi',
       icon: Icons.build_circle_rounded,
       route: '/services',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Ganji',
       icon: Icons.monetization_on_rounded,
       route: '/commissions',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Targets',
       icon: Icons.flag_circle_rounded,
       route: '/targets',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Warranties',
       icon: Icons.verified_user_rounded,
       route: '/warranties',
     ),
-    WingaplusDestination(
+    WingaProDestination(
       label: 'Settings',
       icon: Icons.settings_rounded,
       route: '/settings',
@@ -53,4 +53,3 @@ class SalesmanNav {
     Navigator.of(context).pushReplacementNamed(destination.route);
   }
 }
-

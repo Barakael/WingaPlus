@@ -32,21 +32,21 @@ Located in `lib/widgets/layout/salesman_nav.dart`
 6. **Warranties** (`/warranties`) - `WarrantyScreen`
 7. **Settings** (`/settings`) - Coming soon
 
-#### Layout Shell: `WingaplusShell`
-Located in `lib/widgets/layout/wingaplus_shell.dart`
+#### Layout Shell: `WingaProShell`
+Located in `lib/widgets/layout/WingaPro_shell.dart`
 
 - **Responsive Layout**:
   - Desktop (>1100px): Fixed navigation rail on left
   - Tablet (768-1100px): Drawer + bottom nav
   - Mobile (<768px): Drawer + bottom nav
-- **Top Bar**: `WingaplusTopBar` - matches React `Navbar.tsx`
+- **Top Bar**: `WingaProTopBar` - matches React `Navbar.tsx`
   - Brand logo ("WP")
   - Menu button (mobile)
   - Theme toggle
   - User info & logout
 - **Navigation**:
-  - Desktop: `WingaplusNavRail` (matches React Sidebar)
-  - Mobile: `WingaplusNavDrawer` + `WingaplusBottomNav`
+  - Desktop: `WingaProNavRail` (matches React Sidebar)
+  - Mobile: `WingaProNavDrawer` + `WingaProBottomNav`
 
 ### 3. Screen Pages (Matching React Components)
 
@@ -59,7 +59,7 @@ Located in `lib/widgets/layout/wingaplus_shell.dart`
   - Stats overview (Total Profit, Items Sold, Services Done)
   - Quick action cards (Commission/Ganji, Sales Records, Repair Service)
   - Recent sales list
-- **Navigation**: All screens use `WingaplusShell` with `SalesmanNav.destinations`
+- **Navigation**: All screens use `WingaProShell` with `SalesmanNav.destinations`
 
 #### My Sales (`MySalesScreen`)
 **React Equivalent**: `Sales/SalesmanSales.tsx`
@@ -118,7 +118,7 @@ Located in `lib/widgets/layout/wingaplus_shell.dart`
 #### Design Tokens
 - **Location**: `lib/design/tokens.dart`
 - **Purpose**: Centralized colors, spacing, typography matching React Tailwind config
-- **Usage**: All widgets import `WingaplusColors`, `WingaplusSpacing`, `WingaplusRadius`
+- **Usage**: All widgets import `WingaProColors`, `WingaProSpacing`, `WingaProRadius`
 
 #### Dashboard Widgets
 - `DashboardHeader` - Title/subtitle header
@@ -127,11 +127,11 @@ Located in `lib/widgets/layout/wingaplus_shell.dart`
 - `RecentSalesList` - Recent sales list
 
 #### Layout Widgets
-- `WingaplusShell` - Main layout wrapper
-- `WingaplusTopBar` - Top navigation bar
-- `WingaplusNavRail` - Desktop sidebar
-- `WingaplusNavDrawer` - Mobile drawer
-- `WingaplusBottomNav` - Mobile bottom nav
+- `WingaProShell` - Main layout wrapper
+- `WingaProTopBar` - Top navigation bar
+- `WingaProNavRail` - Desktop sidebar
+- `WingaProNavDrawer` - Mobile drawer
+- `WingaProBottomNav` - Mobile bottom nav
 
 ## Navigation Flow Diagram
 
@@ -179,7 +179,7 @@ routes: {
 - Sizes match React text scale
 
 ### Spacing
-- All spacing uses `WingaplusSpacing` constants matching Tailwind spacing scale
+- All spacing uses `WingaProSpacing` constants matching Tailwind spacing scale
 
 ### Components
 - Cards: 12px border radius, shadow elevation

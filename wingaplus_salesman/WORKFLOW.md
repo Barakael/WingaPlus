@@ -2,7 +2,7 @@
 
 ## 🎯 Project Overview
 
-This Flutter app provides mobile access to WingaPlus salesman features with the same design and functionality as your React web application.
+This Flutter app provides mobile access to WingaPro salesman features with the same design and functionality as your React web application.
 
 ## 📋 Implementation Status
 
@@ -140,7 +140,7 @@ This Flutter app provides mobile access to WingaPlus salesman features with the 
 ### Initial Setup
 ```bash
 # Navigate to project
-cd /Users/barakael0/WingaPlus/wingaplus_salesman
+cd /Users/barakael0/WingaPro/WingaPro_salesman
 
 # Get dependencies
 flutter pub get
@@ -184,7 +184,7 @@ static const String baseUrl = 'http://localhost:8000/api';
 static const String baseUrl = 'http://192.168.1.100:8000/api';
 
 // For production
-static const String baseUrl = 'https://api.wingaplus.com/api';
+static const String baseUrl = 'https://api.WingaPro.com/api';
 ```
 
 ### Find Your Computer's IP (for physical device testing)

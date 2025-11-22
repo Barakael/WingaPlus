@@ -19,17 +19,17 @@ class SalesFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: WingaplusSpacing.sm,
-      runSpacing: WingaplusSpacing.sm,
+      spacing: WingaProSpacing.sm,
+      runSpacing: WingaProSpacing.sm,
       children: _filters.map((filter) {
         final isSelected = filter == activeFilter;
         return ChoiceChip(
           label: Text(filter),
           selected: isSelected,
           onSelected: (_) => onChanged(filter),
-          selectedColor: WingaplusColors.brandPrimary,
+          selectedColor: WingaProColors.brandPrimary,
           labelStyle: TextStyle(
-            color: isSelected ? Colors.white : WingaplusColors.gray600,
+            color: isSelected ? Colors.white : WingaProColors.gray600,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
         );
@@ -37,4 +37,3 @@ class SalesFilterBar extends StatelessWidget {
     );
   }
 }
-

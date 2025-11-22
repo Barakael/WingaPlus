@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../design/tokens.dart';
 
-class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
+class WingaProTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;
   final bool showMenuButton;
   final String title;
@@ -13,7 +13,7 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onLogout;
   final List<Widget>? actions;
 
-  const WingaplusTopBar({
+  const WingaProTopBar({
     super.key,
     this.onMenuTap,
     this.showMenuButton = true,
@@ -35,13 +35,11 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
         bottom: false,
         child: Container(
           height: preferredSize.height,
-          padding: const EdgeInsets.symmetric(horizontal: WingaplusSpacing.lg),
+          padding: const EdgeInsets.symmetric(horizontal: WingaProSpacing.lg),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: isDark
-                    ? WingaplusColors.gray800
-                    : WingaplusColors.gray200,
+                color: isDark ? WingaProColors.gray800 : WingaProColors.gray200,
               ),
             ),
           ),
@@ -52,9 +50,9 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: const Icon(Icons.menu_rounded),
                   onPressed: onMenuTap,
                 ),
-              const SizedBox(width: WingaplusSpacing.md),
+              const SizedBox(width: WingaProSpacing.md),
               _buildBrand(context),
-              const SizedBox(width: WingaplusSpacing.lg),
+              const SizedBox(width: WingaProSpacing.lg),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -64,23 +62,22 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context)
-                                .appBarTheme
-                                .foregroundColor,
+                            color:
+                                Theme.of(context).appBarTheme.foregroundColor,
                           ),
                     ),
                     if (subtitle != null)
                       Text(
                         subtitle!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: WingaplusColors.gray500,
+                              color: WingaProColors.gray500,
                             ),
                       ),
                   ],
                 ),
               ),
               if (actions != null) ...actions!,
-              const SizedBox(width: WingaplusSpacing.lg),
+              const SizedBox(width: WingaProSpacing.lg),
               _buildUserChip(context),
             ],
           ),
@@ -90,16 +87,16 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildBrand(BuildContext context) {
-    final color = WingaplusColors.brandPrimary;
+    const color = WingaProColors.brandPrimary;
     return Row(
       children: [
         Container(
           width: 36,
           height: 36,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
-            borderRadius: WingaplusRadius.sm,
-            boxShadow: WingaplusShadows.cardLight,
+            borderRadius: WingaProRadius.sm,
+            boxShadow: WingaProShadows.cardLight,
           ),
           alignment: Alignment.center,
           child: const Text(
@@ -110,9 +107,9 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
-        const SizedBox(width: WingaplusSpacing.sm),
+        const SizedBox(width: WingaProSpacing.sm),
         Text(
-          'WingaPlus',
+          'WingaPro',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: color,
@@ -127,18 +124,18 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
     final role = userRole ?? 'Salesman';
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: WingaplusSpacing.md,
-        vertical: WingaplusSpacing.sm,
+        horizontal: WingaProSpacing.md,
+        vertical: WingaProSpacing.sm,
       ),
       decoration: BoxDecoration(
-        borderRadius: WingaplusRadius.lg,
+        borderRadius: WingaProRadius.lg,
         color: Theme.of(context).brightness == Brightness.dark
-            ? WingaplusColors.gray700
-            : WingaplusColors.gray50,
+            ? WingaProColors.gray700
+            : WingaProColors.gray50,
         border: Border.all(
           color: Theme.of(context).brightness == Brightness.dark
-              ? WingaplusColors.gray700
-              : WingaplusColors.gray200,
+              ? WingaProColors.gray700
+              : WingaProColors.gray200,
         ),
       ),
       child: Row(
@@ -146,14 +143,14 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           const CircleAvatar(
             radius: 14,
-            backgroundColor: WingaplusColors.brandPrimary,
+            backgroundColor: WingaProColors.brandPrimary,
             child: Icon(
               Icons.person,
               size: 16,
               color: Colors.white,
             ),
           ),
-          const SizedBox(width: WingaplusSpacing.sm),
+          const SizedBox(width: WingaProSpacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -166,13 +163,13 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
               Text(
                 role,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: WingaplusColors.gray500,
+                      color: WingaProColors.gray500,
                     ),
               ),
             ],
           ),
           if (onLogout != null) ...[
-            const SizedBox(width: WingaplusSpacing.sm),
+            const SizedBox(width: WingaProSpacing.sm),
             InkWell(
               onTap: onLogout,
               borderRadius: BorderRadius.circular(20),
@@ -193,4 +190,3 @@ class WingaplusTopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(64);
 }
-

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
-import 'wingaplus_destination.dart';
-import 'wingaplus_nav.dart';
-import 'wingaplus_top_bar.dart';
+import 'WingaPro_destination.dart';
+import 'WingaPro_nav.dart';
+import 'WingaPro_top_bar.dart';
 
-class WingaplusShell extends StatefulWidget {
-  final List<WingaplusDestination> destinations;
+class WingaProShell extends StatefulWidget {
+  final List<WingaProDestination> destinations;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
   final Widget child;
@@ -18,7 +18,7 @@ class WingaplusShell extends StatefulWidget {
   final Widget? floatingActionButton;
   final List<Widget>? actions;
 
-  const WingaplusShell({
+  const WingaProShell({
     super.key,
     required this.destinations,
     required this.currentIndex,
@@ -34,10 +34,10 @@ class WingaplusShell extends StatefulWidget {
   });
 
   @override
-  State<WingaplusShell> createState() => _WingaplusShellState();
+  State<WingaProShell> createState() => _WingaProShellState();
 }
 
-class _WingaplusShellState extends State<WingaplusShell> {
+class _WingaProShellState extends State<WingaProShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -49,9 +49,8 @@ class _WingaplusShellState extends State<WingaplusShell> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: WingaplusTopBar(
-        title:
-            widget.title ?? widget.destinations[widget.currentIndex].label,
+      appBar: WingaProTopBar(
+        title: widget.title ?? widget.destinations[widget.currentIndex].label,
         subtitle: widget.subtitle,
         showMenuButton: !isDesktop,
         onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
@@ -62,7 +61,7 @@ class _WingaplusShellState extends State<WingaplusShell> {
       ),
       drawer: isDesktop
           ? null
-          : WingaplusNavDrawer(
+          : WingaProNavDrawer(
               destinations: widget.destinations,
               currentIndex: widget.currentIndex,
               onDestinationSelected: widget.onDestinationSelected,
@@ -70,7 +69,7 @@ class _WingaplusShellState extends State<WingaplusShell> {
       body: Row(
         children: [
           if (isDesktop)
-            WingaplusNavRail(
+            WingaProNavRail(
               destinations: widget.destinations,
               currentIndex: widget.currentIndex,
               onDestinationSelected: widget.onDestinationSelected,
@@ -78,15 +77,15 @@ class _WingaplusShellState extends State<WingaplusShell> {
           Expanded(
             child: Container(
               padding: EdgeInsets.all(
-                isTablet ? WingaplusSpacing.xl : WingaplusSpacing.lg,
+                isTablet ? WingaProSpacing.xl : WingaProSpacing.lg,
               ),
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? WingaplusColors.gray900
-                    : WingaplusColors.gray100,
+                    ? WingaProColors.gray900
+                    : WingaProColors.gray100,
               ),
               child: ClipRRect(
-                borderRadius: WingaplusRadius.lg,
+                borderRadius: WingaProRadius.lg,
                 child: Container(
                   color: Theme.of(context).colorScheme.surface,
                   child: widget.child,
@@ -98,7 +97,7 @@ class _WingaplusShellState extends State<WingaplusShell> {
       ),
       bottomNavigationBar: isDesktop
           ? null
-          : WingaplusBottomNav(
+          : WingaProBottomNav(
               destinations: widget.destinations,
               currentIndex: widget.currentIndex,
               onDestinationSelected: widget.onDestinationSelected,
@@ -107,4 +106,3 @@ class _WingaplusShellState extends State<WingaplusShell> {
     );
   }
 }
-

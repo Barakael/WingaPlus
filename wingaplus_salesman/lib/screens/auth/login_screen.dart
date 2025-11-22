@@ -4,7 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../config/theme.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -61,29 +61,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo/Brand
-                  Icon(
+                  const Icon(
                     Icons.store_mall_directory_rounded,
                     size: 80,
                     color: AppTheme.primaryBlue,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Title
                   Text(
-                    'WingaPlus',
+                    'WingaPro',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryBlue,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryBlue,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     'Salesman Portal',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.mediumGray,
-                    ),
+                          color: AppTheme.mediumGray,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -173,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppTheme.infoBlue.withOpacity(0.3),
                       ),
                     ),
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               size: 16,
                               color: AppTheme.infoBlue,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Text(
                               'Demo Credentials',
                               style: TextStyle(
@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           'Email: james@wingaelectronics.co.tz\nPassword: password',
                           style: TextStyle(

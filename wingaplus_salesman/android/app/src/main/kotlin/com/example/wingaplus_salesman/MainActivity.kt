@@ -1,4 +1,4 @@
-package com.example.wingaplus_salesman
+package com.example.WingaPro_salesman
 
 import io.flutter.embedding.android.FlutterActivity
 
