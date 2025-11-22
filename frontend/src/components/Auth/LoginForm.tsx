@@ -44,7 +44,7 @@ const LoginForm: React.FC = () => {
         const payload = { ...formData };
         delete (payload as any).confirmPassword;
         await register(payload);
-        showSuccessToast('🎉 Account created! Welcome to WingaPlus.');
+        showSuccessToast('🎉 Account created! Welcome to WingaPro.');
       }
     } catch (err: any) {
       // Convert technical errors to user-friendly messages
@@ -91,7 +91,7 @@ const LoginForm: React.FC = () => {
               <span className="text-white font-bold text-xl">WP</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              WingaPlus
+              WingaPro
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {isLogin ? 'Sign in to your account' : 'Create your account'}

@@ -31,7 +31,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
               </div>
               <div className="ml-1">
                 <h1 className="text-xl font-bold text-[#1973AE] dark:text-[#1973AE] lg:text-gray-900 lg:dark:text-white">
-                  WingaPlus
+                  WingaPro
                 </h1>
               </div>
             </div>
