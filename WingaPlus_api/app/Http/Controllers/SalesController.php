@@ -117,7 +117,7 @@ class SalesController extends BaseController
                         'price' => $validated['selling_price'] ?? $validated['unit_price'] ?? 0,
                     ];
                     
-                    $userName = auth()->user() ? auth()->user()->name : 'WingaPlus Store';
+                    $userName = auth()->user() ? auth()->user()->name : 'WingaPro Store';
                     Mail::to($validated['warranty_details']['customer_email'])->send(new WarrantySaleFiled($sale, $mockWarranty, $userName));
                 } catch (\Exception $e) {
                     // Log email error but don't fail the sale
