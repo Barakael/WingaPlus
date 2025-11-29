@@ -142,6 +142,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/users', [SuperAdminController::class, 'getUsers']);
     Route::put('/users/{id}', [SuperAdminController::class, 'updateUser']);
     Route::delete('/users/{id}', [SuperAdminController::class, 'deleteUser']);
+    Route::post('/users/{id}/reset-password', [SuperAdminController::class, 'resetUserPassword']);
     
     // Reports
     Route::get('/reports', [SuperAdminController::class, 'getReports']);

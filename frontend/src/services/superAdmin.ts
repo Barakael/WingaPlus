@@ -123,6 +123,21 @@ export const deleteUser = async (id: number) => {
   return response.json();
 };
 
+export const resetUserPassword = async (id: number, payload: { password: string; password_confirmation: string }) => {
+  const response = await fetch(`${BASE_URL}/api/admin/users/${id}/reset-password`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || 'Failed to reset user password');
+  }
+
+  return response.json();
+};
+
 export const getReports = async () => {
   const response = await fetch(`${BASE_URL}/api/admin/reports`, {
     headers: getAuthHeaders(),

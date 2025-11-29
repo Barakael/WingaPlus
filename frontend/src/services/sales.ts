@@ -7,7 +7,7 @@ export interface Target {
   team_id?: number;
   shop_id?: number;
   name: string;
-  period: 'monthly' | 'yearly';
+  period: 'weekly' | 'monthly' | 'yearly';
   metric: 'profit' | 'items_sold';
   target_value: number;
   status: 'active' | 'completed' | 'failed' | 'cancelled';
@@ -129,7 +129,7 @@ export interface CreateTargetPayload {
   team_id?: number;
   shop_id?: number;
   name: string;
-  period: 'monthly' | 'yearly';
+  period: 'weekly' | 'monthly' | 'yearly';
   metric: 'profit' | 'items_sold';
   target_value: number;
   status?: 'active' | 'completed' | 'failed' | 'cancelled';
