@@ -15,9 +15,9 @@ return new class extends Migration
             // Add name field
             $table->string('name');
             
-            // Modify period enum to only allow monthly/yearly
+            // Modify period enum to allow weekly/monthly/yearly
             $table->dropColumn('period');
-            $table->enum('period', ['monthly', 'yearly']);
+            $table->enum('period', ['weekly', 'monthly', 'yearly']);
             
             // Modify metric enum to only allow profit/items_sold
             $table->dropColumn('metric');
