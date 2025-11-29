@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Search, X } from 'lucide-react';
-import { getUsers, updateUser, deleteUser } from '../../services/superAdmin';
+import { getUsers, updateUser, deleteUser, resetUserPassword } from '../../services/superAdmin';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
 import { getRoleDisplayName, getRoleBadgeColor } from '../../lib/roleMapping';
 
@@ -25,6 +25,7 @@ const UsersManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -37,6 +38,12 @@ const UsersManagement: React.FC = () => {
     role: 'salesman',
     shop_id: '',
   });
+  const [passwordData, setPasswordData] = useState({
+    password: '',
+    password_confirmation: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -130,6 +137,37 @@ const UsersManagement: React.FC = () => {
       role: 'salesman',
       shop_id: '',
     });
+  };
+
+  const resetPasswordForm = () => {
+    setPasswordData({
+      password: '',
+      password_confirmation: '',
+    });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    if (!passwordData.password || !passwordData.password_confirmation) {
+      showErrorToast('Please fill in both password fields');
+      return;
+    }
+
+    try {
+      await resetUserPassword(editingUser.id, {
+        password: passwordData.password,
+        password_confirmation: passwordData.password_confirmation,
+      });
+      showSuccessToast('🔑 Password reset successfully!');
+      setShowPasswordModal(false);
+      resetPasswordForm();
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to reset password');
+    }
   };
 
 
@@ -387,7 +425,17 @@ const UsersManagement: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-1">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetPasswordForm();
+                      setShowPasswordModal(true);
+                    }}
+                    className="px-4 py-2 text-xs sm:text-sm border border-[#1973AE] text-[#1973AE] rounded-lg hover:bg-[#1973AE]/5"
+                  >
+                    Reset Password
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -403,6 +451,104 @@ const UsersManagement: React.FC = () => {
                     className="px-4 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
                   >
                     Update User
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Reset Modal (separate view so it does not disturb the main edit form) */}
+      {showPasswordModal && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Reset Password
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    resetPasswordForm();
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
+                Set a new password for <span className="font-semibold">{editingUser.name}</span>. 
+                The user will use this password to log in next time.
+              </p>
+
+              <form onSubmit={handlePasswordSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    New Password *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      value={passwordData.password}
+                      onChange={(e) => setPasswordData(prev => ({ ...prev, password: e.target.value }))}
+                      className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Confirm New Password *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      value={passwordData.password_confirmation}
+                      onChange={(e) => setPasswordData(prev => ({ ...prev, password_confirmation: e.target.value }))}
+                      className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(prev => !prev)}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      {showConfirmPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      resetPasswordForm();
+                    }}
+                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a]"
+                  >
+                    Save New Password
                   </button>
                 </div>
               </form>
