@@ -68,7 +68,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white">
             {user?.name}'s Dashboard
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
@@ -97,8 +97,8 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit<br />(Sales + Services)</p>
-              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">TSh<br />{formatCurrency(totalGanji)}</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Profit(Sales + Services)</p>
+              <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">TSh {formatCurrency(totalGanji)}</p>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items<br />Sold</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
               <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{totalItems}</p>
             </div>
           </div>
@@ -121,7 +121,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
               <Wrench className="h-5 w-5 md:h-6 md:w-6 text-[#1973AE] dark:text-[#04BCF2]" />
             </div>
             <div className="ml-3 md:ml-4 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services<br />Done</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services Done</p>
               <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{myServices.length}</p>
             </div>
           </div>
@@ -138,6 +138,51 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
             </div>
           </div>
         </div> */}
+      </div>
+
+
+      {/* Recent Sales */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white ">
+          My Recent Sales
+        </h2>
+        <div className="space-y-2">
+          {loading ? (
+            <div className="text-center py-6 text-gray-500 dark:text-gray-400">Loading sales...</div>
+          ) : mySales.slice(0, 2).map((sale: any) => {
+            const costPrice = Number(sale.cost_price) || 0;
+            const sellingPrice = Number(sale.unit_price) || 0;
+            const quantity = Number(sale.quantity) || 1;
+            const offers = Number(sale.offers) || 0;
+            const profit = (sellingPrice - costPrice) * quantity - offers;
+            
+            return (
+              <div key={sale.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl shadow-2xl">
+                <div className="flex items-center">
+                  
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {sale.product_name || sale.product_id}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                      {sale.customer_name || 'Customer'} • Qty: {sale.quantity}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-gray-600 dark:text-gray-300 text-xs">
+                    TSh {formatCurrency(profit)}
+                  </p>
+                  <p className="text-xs text-green-500 dark:text-green-300 ">Profit (Ganji)</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-300 flex items-center justify-end">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {new Date(sale.sale_date).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
     
@@ -198,51 +243,6 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
         </div>
       </div>
 
-      {/* Recent Sales */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          My Recent Sales
-        </h2>
-        <div className="space-y-4">
-          {loading ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading sales...</div>
-          ) : mySales.slice(0, 2).map((sale: any) => {
-            const costPrice = Number(sale.cost_price) || 0;
-            const sellingPrice = Number(sale.unit_price) || 0;
-            const quantity = Number(sale.quantity) || 1;
-            const offers = Number(sale.offers) || 0;
-            const profit = (sellingPrice - costPrice) * quantity - offers;
-            
-            return (
-              <div key={sale.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-2xl">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-[#1973AE] rounded-lg flex items-center justify-center mr-4">
-                    <ShoppingCart className="h-5 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {sale.product_name || sale.product_id}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {sale.customer_name || 'Customer'} • Qty: {sale.quantity}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-green-600">
-                    TSh {formatCurrency(profit)}
-                  </p>
-                  <p className="text-xs text-gray-500">Profit (Ganji)</p>
-                  <p className="text-xs text-gray-500 flex items-center justify-end mt-1">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {new Date(sale.sale_date).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 };
