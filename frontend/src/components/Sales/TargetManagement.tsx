@@ -16,10 +16,9 @@ const TargetManagement: React.FC = () => {
   // Form state
   const [formData, setFormData] = useState({
     name: '',
-    period: 'monthly' as 'monthly' | 'yearly',
+    period: 'monthly' as 'weekly' | 'monthly' | 'yearly',
     metric: 'profit' as 'profit' | 'items_sold',
     target_value: '',
-    bonus_amount: '',
   });
 
   // Load targets
@@ -52,8 +51,7 @@ const TargetManagement: React.FC = () => {
         name: formData.name,
         period: formData.period,
         metric: formData.metric,
-        target_value: parseFloat(formData.target_value),
-        bonus_amount: formData.bonus_amount ? parseFloat(formData.bonus_amount) : undefined,
+        target_value: parseFloat(formData.target_value.replace(/,/g, '')),
       };
 
       if (editingTarget) {
@@ -78,7 +76,6 @@ const TargetManagement: React.FC = () => {
       period: 'monthly',
       metric: 'profit',
       target_value: '',
-      bonus_amount: '',
     });
   };
 
@@ -90,7 +87,6 @@ const TargetManagement: React.FC = () => {
       period: target.period,
       metric: target.metric,
       target_value: target.target_value.toString(),
-      bonus_amount: target.bonus_amount?.toString() || '',
     });
     setShowCreateModal(true);
   };
@@ -111,9 +107,17 @@ const TargetManagement: React.FC = () => {
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-TZ', {
       style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatNumberWithCommas = (value: string) => {
+    const numeric = value.replace(/,/g, '');
+    if (numeric === '') return '';
+    const cleaned = numeric.replace(/[^\d]/g, '');
+    if (cleaned === '') return '';
+    return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
   // Get status color
@@ -183,7 +187,6 @@ const TargetManagement: React.FC = () => {
                   <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white">Target</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white">Period</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white">Status</th>
-                  <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white">Bonus</th>
                   <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white">Actions</th>
                 </tr>
               </thead>
@@ -206,9 +209,6 @@ const TargetManagement: React.FC = () => {
                       <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(target.status)}`}>
                         {target.status}
                       </span>
-                    </td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-gray-900 dark:text-white">
-                      {target.bonus_amount ? `TSh ${formatCurrency(target.bonus_amount)}` : '-'}
                     </td>
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <div className="flex items-center justify-center space-x-1">
@@ -288,10 +288,11 @@ const TargetManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.period}
-                    onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value as 'monthly' | 'yearly' }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value as 'weekly' | 'monthly' | 'yearly' }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   >
+                    <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </select>
@@ -318,29 +319,16 @@ const TargetManagement: React.FC = () => {
                   Target Value {formData.metric === 'profit' ? '(TSh)' : '(Items)'}
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.target_value}
-                  onChange={(e) => setFormData(prev => ({ ...prev, target_value: e.target.value }))}
+                  onChange={(e) => {
+                    const formatted = formatNumberWithCommas(e.target.value);
+                    setFormData(prev => ({ ...prev, target_value: formatted }));
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder={`Enter target ${formData.metric === 'profit' ? 'amount' : 'quantity'}`}
                   required
-                  min="0"
-                  step={formData.metric === 'profit' ? '0.01' : '1'}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Bonus Amount (TSh) - Optional
-                </label>
-                <input
-                  type="number"
-                  value={formData.bonus_amount}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bonus_amount: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter bonus amount"
-                  min="0"
-                  step="0.01"
                 />
               </div>
 
