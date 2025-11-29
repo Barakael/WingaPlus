@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
 class SuperAdminController extends Controller
@@ -238,6 +239,36 @@ class SuperAdminController extends Controller
         return response()->json([
             'message' => 'User updated successfully',
             'data' => $user->load('shop')
+        ]);
+    }
+
+    /**
+     * Reset a user's password as super admin.
+     *
+     * This allows a privileged admin to set a new password for a user who has
+     * forgotten theirs, without requiring the current password.
+     */
+    public function resetUserPassword(Request $request, $id)
+    {
+        $authUser = $request->user();
+
+        if (!$authUser || $authUser->role !== 'super_admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        // Optionally, you could log this in ActivityLog later
+
+        return response()->json([
+            'message' => 'Password reset successfully',
         ]);
     }
 
