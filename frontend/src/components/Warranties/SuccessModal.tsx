@@ -57,29 +57,29 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, warrantyDa
           </div>
 
           {/* Email Report */}
-          <div className="bg-indigo-50 dark:bg-red-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mb-6">
+          <div className="bg-indigo-50 dark:bg-green-900/20 border border-indigo-200 dark:border-green-800 rounded-lg p-4 mb-6">
             <div className="flex items-center space-x-3 mb-3">
               <Send className="h-5 w-5 text-[#1973AE] dark:text-[#5da3d5]" />
-              <h3 className="font-semibold text-[#094a73] dark:text-red-100">
+              <h3 className="font-semibold text-[#094a73] dark:text-blue-400">
                 Email Report
               </h3>
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Status:</span>
+                <span className="text-[#0d5a8a] dark:text-gray-200">Status:</span>
                 <span className="font-medium text-green-600 dark:text-green-400">✓ Email Sent Successfully</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Recipient:</span>
-                <span className="font-medium">{warrantyData.customer_email}</span>
+                <span className="text-[#0d5a8a] dark:text-gray-200">Recipient:</span>
+                <span className="font-medium text-gray-900 dark:text-white">{warrantyData.customer_email}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Subject:</span>
-                <span className="font-medium">Warranty - {warrantyData.phone_name}</span>
+                <span className="text-[#0d5a8a] dark:text-gray-200">Subject:</span>
+                <span className="font-medium text-gray-900 dark:text-white">Warranty - {warrantyData.phone_name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#0d5a8a] dark:text-[#7db3d9]">Sent At:</span>
-                <span className="font-medium">{new Date(warrantyData.submitted_at).toLocaleString()}</span>
+                <span className="text-[#0d5a8a] dark:text-gray-200">Sent At:</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(warrantyData.submitted_at).toLocaleString()}</span>
               </div>
             </div>
           </div>

@@ -31,15 +31,15 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, serviceDat
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="w-12 h-12 bg-green-200 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-700 dark:text-green-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-md font-bold text-gray-900 dark:text-white">
                   Service Filed Successfully!
                 </h2>
               </div>
@@ -81,7 +81,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, serviceDat
           </div> */}
 
           {/* Service Details */}
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
+          <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-5 mb-6">
             <div className="flex items-center space-x-2 mb-4">
               <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -89,7 +89,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, serviceDat
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div>
                 <span className="text-gray-600 dark:text-gray-400">Device Name:</span>
                 <span className="ml-2 font-medium text-gray-900 dark:text-white">{serviceData.device_name}</span>
