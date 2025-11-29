@@ -273,7 +273,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
 
               {/* Offers field */}
-              <div>
+              {/* <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Offers/Discount
                 </label>
@@ -289,7 +289,7 @@ const ServiceFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   placeholder="0"
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
-              </div>
+              </div> */}
 
               {/* Final Price in full width */}
               <div>

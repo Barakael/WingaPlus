@@ -181,7 +181,7 @@ const ServiceView: React.FC<ServiceViewProps> = ({ onFileService }) => {
                 {paginatedServices.map((service) => (
                   <tr
                     key={service.id}
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors"
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
                     onClick={() => handleViewService(service)}
                   >
                     <td className="py-1 px-1 sm:py-2 sm:px-2 text-gray-900 dark:text-white">
