@@ -88,7 +88,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl h-[95vh] sm:h-[80vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] sm:h-[80vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
@@ -106,9 +106,9 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
         </div>
 
         {/* Content */}
-        <div className="p-3 sm:p-6">
+        <div className="p-2 sm:p-6">
           {/* Warranty ID and Status */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 dark:border-gray-700">
             {/* <div className="flex items-center mb-2 sm:mb-0">
               <Shield className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
               <span className="text-sm text-gray-600 dark:text-gray-400">Warranty ID:</span>
@@ -123,7 +123,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
           </div>
 
           {/* Product and Customer Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                 <Package className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
@@ -176,7 +176,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
 
           {/* Warranty Status and Timeline */}
           {warranty.expiry_date && (
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6">
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                 <Clock className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
                 Warranty Timeline
