@@ -30,6 +30,8 @@ interface PerformanceStats {
   periodType: 'weekly' | 'monthly';
   targetMetric: string;
   servicesGanji?: number;
+  currentPeriodProfit: number;
+  currentPeriodItems: number;
 }
 
 const CommissionTracking: React.FC = () => {
@@ -59,7 +61,9 @@ const CommissionTracking: React.FC = () => {
     currentPeriodProgress: 0,
     periodType: 'monthly',
     targetMetric: 'profit',
-    servicesGanji: 0
+    servicesGanji: 0,
+    currentPeriodProfit: 0,
+    currentPeriodItems: 0,
   });
 
   // Load targets data for current user
@@ -173,8 +177,11 @@ const CommissionTracking: React.FC = () => {
           period: periodKey,
           ganji: 0,
           sales: 0,
+          services: 0,
+          totalGanji: 0,
           items: 0,
-          transactions: 0
+          transactions: 0,
+          totalTransactions: 0,
         };
       }
 
@@ -297,8 +304,10 @@ const CommissionTracking: React.FC = () => {
     }
 
     const currentPeriodData = periods[currentPeriodKey];
+    const currentPeriodProfit = currentPeriodData ? currentPeriodData.totalGanji : 0;
+    const currentPeriodItems = currentPeriodData ? currentPeriodData.items : 0;
     if (currentPeriodData) {
-      currentPeriodValue = targetMetric === 'profit' ? currentPeriodData.ganji : currentPeriodData.items;
+      currentPeriodValue = targetMetric === 'profit' ? currentPeriodProfit : currentPeriodItems;
     }
 
     const currentPeriodProgress = targetValue > 0 ?
@@ -314,7 +323,9 @@ const CommissionTracking: React.FC = () => {
       currentPeriodProgress,
       periodType,
       targetMetric,
-      servicesGanji // Add services ganji to stats
+      servicesGanji, // Add services ganji to stats
+      currentPeriodProfit,
+      currentPeriodItems,
     });
   }, [sales, periodType, targets, selectedTargetId, selectedYear, services]);
 
@@ -616,22 +627,35 @@ const CommissionTracking: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row sm:justify-between text-xs sm:text-sm space-y-1 sm:space-y-0">
             <span className="text-gray-600 dark:text-gray-400">
-              Current: {
-                !selectedTarget || selectedTarget.metric === 'profit'
-                  ? `TSh ${Math.round(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100).toLocaleString()}`
-                  : `${Math.round(performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)} items`
-              }
+              Current:{' '}
+              {selectedTarget && selectedTarget.metric === 'items_sold'
+                ? `${performanceStats.currentPeriodItems} items`
+                : `TSh ${formatCurrency(performanceStats.currentPeriodProfit)}`}
             </span>
-            <span className={`font-medium ${
-              performanceStats.currentPeriodProgress >= 100 ? 'text-green-600' :
-              performanceStats.currentPeriodProgress >= 75 ? 'text-[#1973AE]' :
-              performanceStats.currentPeriodProgress >= 50 ? 'text-yellow-600' : 'text-red-600'
-            }`}>
-              {
-                !selectedTarget || selectedTarget.metric === 'profit'
-                  ? `TSh ${Math.max(0, Math.round((selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100))).toLocaleString()} remaining`
-                  : `${Math.max(0, Math.round((selectedTarget?.target_value || 200000) - (performanceStats.currentPeriodProgress * (selectedTarget?.target_value || 200000) / 100)))} items remaining`
-              }
+            <span
+              className={`font-medium ${
+                performanceStats.currentPeriodProgress >= 100
+                  ? 'text-green-600'
+                  : performanceStats.currentPeriodProgress >= 75
+                  ? 'text-[#1973AE]'
+                  : performanceStats.currentPeriodProgress >= 50
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
+              }`}
+            >
+              {selectedTarget && selectedTarget.metric === 'items_sold'
+                ? `${Math.max(
+                    0,
+                    Math.round(selectedTarget.target_value - performanceStats.currentPeriodItems),
+                  )} items remaining`
+                : `TSh ${formatCurrency(
+                    Math.max(
+                      0,
+                      Math.round(
+                        (selectedTarget?.target_value || 0) - performanceStats.currentPeriodProfit,
+                      ),
+                    ),
+                  )} remaining`}
             </span>
           </div>
         </div>
