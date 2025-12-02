@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/sales_provider.dart';
 import '../../design/tokens.dart';
-import '../../constants/WingaPro_colors.dart' as wpcolors;
-import '../../widgets/layout/WingaPro_shell.dart';
+import '../../config/theme.dart';
+import '../../widgets/layout/wingaplus_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 import '../../widgets/dashboard/dashboard_header.dart';
 import '../../models/target.dart';
@@ -139,8 +139,40 @@ class _TargetCard extends StatelessWidget {
     required this.formatCurrency,
   });
 
+  // Get display name from target type
+  String get _displayName {
+    final typeMap = {
+      'sales_count': 'Sales Count',
+      'revenue': 'Revenue',
+      'profit': 'Profit',
+      'items_sold': 'Items Sold',
+    };
+    return typeMap[target.type] ?? target.type.replaceAll('_', ' ').split(' ').map((word) => 
+      word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1)
+    ).join(' ');
+  }
+
+  // Get status based on dates
+  String get _status {
+    final now = DateTime.now();
+    if (now.isBefore(target.startDate)) {
+      return 'upcoming';
+    } else if (now.isAfter(target.endDate)) {
+      return 'completed';
+    } else {
+      return 'active';
+    }
+  }
+
+  // Check if target is for currency (revenue/profit) or count
+  bool get _isCurrencyType {
+    return target.type == 'revenue' || target.type == 'profit';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isActive = _status == 'active';
+    
     return Card(
       margin: const EdgeInsets.only(bottom: WingaProSpacing.md),
       child: Padding(
@@ -153,7 +185,7 @@ class _TargetCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    target.name,
+                    _displayName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -161,27 +193,27 @@ class _TargetCard extends StatelessWidget {
                 ),
                 Chip(
                   label: Text(
-                    target.status,
+                    _status.toUpperCase(),
                     style: const TextStyle(fontSize: 12),
                   ),
-                  backgroundColor: target.status == 'active'
-                      ? wpcolors.WingaProColors.successGreen.withOpacity(0.2)
+                  backgroundColor: isActive
+                      ? AppTheme.successGreen.withOpacity(0.2)
                       : WingaProColors.gray300,
                 ),
               ],
             ),
             const SizedBox(height: WingaProSpacing.sm),
             Text(
-              '${target.period} • ${target.metric.replaceAll('_', ' ')}',
+              '${target.period.toUpperCase()} • ${target.type.replaceAll('_', ' ').toUpperCase()}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: WingaProColors.gray600,
                   ),
             ),
             const SizedBox(height: WingaProSpacing.sm),
             Text(
-              target.metric == 'profit'
-                  ? 'Target: ${formatCurrency(target.targetValue)}'
-                  : 'Target: ${target.targetValue.toString()} items',
+              _isCurrencyType
+                  ? 'Target: ${formatCurrency(target.targetAmount)}'
+                  : 'Target: ${target.targetAmount.toStringAsFixed(0)} items',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: WingaProColors.primary600,
@@ -189,9 +221,25 @@ class _TargetCard extends StatelessWidget {
             ),
             const SizedBox(height: WingaProSpacing.xs),
             Text(
-              'Bonus: ${formatCurrency(target.bonusAmount)}',
+              'Current: ${_isCurrencyType ? formatCurrency(target.currentAmount) : target.currentAmount.toStringAsFixed(0)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: wpcolors.WingaProColors.successGreen,
+                    color: AppTheme.successGreen,
+                  ),
+            ),
+            const SizedBox(height: WingaProSpacing.xs),
+            // Progress indicator
+            LinearProgressIndicator(
+              value: target.achievementPercentage / 100,
+              backgroundColor: WingaProColors.gray200,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isActive ? AppTheme.successGreen : WingaProColors.gray400,
+              ),
+            ),
+            const SizedBox(height: WingaProSpacing.xs),
+            Text(
+              '${target.achievementPercentage.toStringAsFixed(1)}% achieved',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: WingaProColors.gray600,
                   ),
             ),
           ],

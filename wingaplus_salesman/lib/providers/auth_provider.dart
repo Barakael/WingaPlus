@@ -17,15 +17,22 @@ class AuthProvider with ChangeNotifier {
   // Initialize - check if user is already logged in
   Future<void> initialize() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
-      final isLoggedIn = await _authService.isLoggedIn();
+      // Add timeout to prevent hanging
+      final isLoggedIn = await _authService.isLoggedIn()
+          .timeout(const Duration(seconds: 5), onTimeout: () => false);
+      
       if (isLoggedIn) {
-        _user = await _authService.getSavedUser();
+        _user = await _authService.getSavedUser()
+            .timeout(const Duration(seconds: 5), onTimeout: () => null);
       }
     } catch (e) {
-      _error = e.toString();
+      // If initialization fails, clear error and proceed to login
+      _error = null;
+      _user = null;
     } finally {
       _isLoading = false;
       notifyListeners();

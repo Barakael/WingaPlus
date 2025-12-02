@@ -10,7 +10,7 @@ import '../../widgets/dashboard/dashboard_header.dart';
 import '../../widgets/dashboard/quick_actions.dart';
 import '../../widgets/dashboard/recent_sales_list.dart';
 import '../../widgets/dashboard/stats_overview.dart';
-import '../../widgets/layout/WingaPro_shell.dart';
+import '../../widgets/layout/wingaplus_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 
 class SalesmanDashboard extends StatefulWidget {
@@ -70,11 +70,12 @@ class _SalesmanDashboardState extends State<SalesmanDashboard> {
           Navigator.of(context).pushReplacementNamed('/login');
         }
       },
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed('/sale-form'),
-        icon: const Icon(Icons.add),
-        label: const Text('New Sale'),
-      ),
+      // TODO: Implement sale form screen and add route
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () => Navigator.of(context).pushNamed('/sale-form'),
+      //   icon: const Icon(Icons.add),
+      //   label: const Text('New Sale'),
+      // ),
       child: RefreshIndicator(
         onRefresh: _loadData,
         child: salesProvider.isLoading && salesProvider.sales.isEmpty

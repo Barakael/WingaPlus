@@ -12,6 +12,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\MyShopController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ExpenditureController;
 
 Route::get('/user', function (Request $request) {
     $user = $request->user();
@@ -108,6 +109,14 @@ Route::get('/services/{service}', [ServiceController::class, 'show']);
 Route::put('/services/{service}', [ServiceController::class, 'update']);
 Route::patch('/services/{service}', [ServiceController::class, 'update']);
 Route::delete('/services/{service}', [ServiceController::class, 'destroy']);
+
+// Expenditure routes
+Route::get('/expenditures', [ExpenditureController::class, 'index']);
+Route::post('/expenditures', [ExpenditureController::class, 'store']);
+Route::get('/expenditures/{expenditure}', [ExpenditureController::class, 'show']);
+Route::put('/expenditures/{expenditure}', [ExpenditureController::class, 'update']);
+Route::patch('/expenditures/{expenditure}', [ExpenditureController::class, 'update']);
+Route::delete('/expenditures/{expenditure}', [ExpenditureController::class, 'destroy']);
 
 // Target routes
 Route::middleware('auth:sanctum')->group(function () {

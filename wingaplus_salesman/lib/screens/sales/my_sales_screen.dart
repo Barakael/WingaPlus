@@ -7,7 +7,7 @@ import '../../providers/sales_provider.dart';
 import '../../widgets/dashboard/dashboard_header.dart';
 import '../../widgets/dashboard/stats_overview.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/layout/WingaPro_shell.dart';
+import '../../widgets/layout/wingaplus_shell.dart';
 import '../../widgets/layout/salesman_nav.dart';
 import '../../widgets/sales/sales_filters.dart';
 
@@ -75,11 +75,12 @@ class _MySalesScreenState extends State<MySalesScreen> {
         icon: const Icon(Icons.add),
         label: const Text('New Sale'),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed('/sale-form'),
-        icon: const Icon(Icons.add),
-        label: const Text('Log Sale'),
-      ),
+      // TODO: Implement sale form screen and add route
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () => Navigator.of(context).pushNamed('/sale-form'),
+      //   icon: const Icon(Icons.add),
+      //   label: const Text('Log Sale'),
+      // ),
       child: RefreshIndicator(
         onRefresh: _loadData,
         child: SingleChildScrollView(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'WingaPro_destination.dart';
+import 'wingaplus_destination.dart';
 
 /// Navigation helper for salesman role matching React Sidebar
 class SalesmanNav {

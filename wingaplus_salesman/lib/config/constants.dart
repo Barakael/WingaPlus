@@ -1,10 +1,9 @@
 class AppConstants {
   // API Configuration
-  static const String baseUrl = 'http://127.0.0.1:8000/api';
-
-  // Change this to your actual API URL:
-  // Development: 'http://localhost:8000/api'
-  // Production: 'https://WingaPro.com/api'
+  // Production API endpoint
+  // For localhost/web testing, use: 'http://127.0.0.1:8000/api'
+  // For local network testing, use: 'http://YOUR_IP:8000/api'
+  static const String baseUrl = 'https://wingapro.app/api';
 
   // API Endpoints
   static const String loginEndpoint = '/login';

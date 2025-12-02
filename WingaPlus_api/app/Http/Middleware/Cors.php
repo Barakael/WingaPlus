@@ -36,9 +36,13 @@ class Cors
         // Preflight handling: always respond with CORS headers and echo Origin when present
         if ($request->getMethod() === 'OPTIONS') {
             $response = response()->noContent(204);
+            // For mobile apps (no Origin header) or browsers, allow the origin
             if ($origin) {
                 // For credentialed requests you must echo the exact Origin
                 $response->headers->set('Access-Control-Allow-Origin', $origin);
+            } else {
+                // Mobile apps don't send Origin, allow all
+                $response->headers->set('Access-Control-Allow-Origin', '*');
             }
             $response->headers->set('Access-Control-Allow-Methods', $allowMethods);
             $response->headers->set('Access-Control-Allow-Headers', $allowHeaders);
@@ -50,9 +54,13 @@ class Cors
         /** @var \Symfony\Component\HttpFoundation\Response $response */
         $response = $next($request);
 
+        // For mobile apps (no Origin header) or browsers, allow the origin
         if ($origin) {
             // Echo the incoming origin so browsers accept credentialed responses
             $response->headers->set('Access-Control-Allow-Origin', $origin);
+        } else {
+            // Mobile apps don't send Origin header, allow all
+            $response->headers->set('Access-Control-Allow-Origin', '*');
         }
         $response->headers->set('Access-Control-Allow-Methods', $allowMethods);
         $response->headers->set('Access-Control-Allow-Headers', $allowHeaders);

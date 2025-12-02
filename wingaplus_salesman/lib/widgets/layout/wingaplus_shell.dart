@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
-import 'WingaPro_destination.dart';
-import 'WingaPro_nav.dart';
-import 'WingaPro_top_bar.dart';
+import 'wingaplus_destination.dart';
+import 'wingaplus_nav.dart';
+import 'wingaplus_top_bar.dart';
 
 class WingaProShell extends StatefulWidget {
   final List<WingaProDestination> destinations;

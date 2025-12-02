@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
-import 'WingaPro_destination.dart';
+import 'wingaplus_destination.dart';
 
 typedef WingaProNavCallback = void Function(int index);
 

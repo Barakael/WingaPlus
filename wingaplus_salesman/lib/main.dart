@@ -12,6 +12,7 @@ import 'screens/commissions/commission_tracking_screen.dart';
 import 'screens/targets/target_management_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -57,7 +58,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuth();
+    // Use addPostFrameCallback to ensure context is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuth();
+    });
   }
 
   Future<void> _checkAuth() async {
@@ -67,13 +71,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final authProvider = context.read<AuthProvider>();
 
-    // Wait for auth initialization
-    while (authProvider.isLoading) {
+    // Wait for auth initialization with timeout
+    int attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+    
+    while (authProvider.isLoading && attempts < maxAttempts) {
       await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
+      if (!mounted) return;
     }
 
     if (!mounted) return;
 
+    // Always navigate to login if initialization failed or user not authenticated
     if (authProvider.isAuthenticated) {
       Navigator.of(context).pushReplacementNamed('/dashboard');
     } else {

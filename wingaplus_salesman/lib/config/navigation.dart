@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/layout/WingaPro_destination.dart';
+import '../widgets/layout/wingaplus_destination.dart';
 
 class SalesmanNav {
   SalesmanNav._();

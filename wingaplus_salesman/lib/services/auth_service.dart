@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
 import '../config/constants.dart';
 import 'api_service.dart';
+import 'storage_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -10,7 +10,7 @@ class AuthService {
   AuthService._internal();
 
   final ApiService _apiService = ApiService();
-  final _storage = const FlutterSecureStorage();
+  final _storage = StorageService();
 
   User? _currentUser;
 
@@ -65,37 +65,56 @@ class AuthService {
   // Get saved user
   Future<User?> getSavedUser() async {
     try {
-      final userJson = await _storage.read(key: AppConstants.userKey);
-      if (userJson != null) {
-        _currentUser = User.fromJson(json.decode(userJson));
-        return _currentUser;
+      final userJson = await _storage.read(AppConstants.userKey);
+      if (userJson != null && userJson.isNotEmpty) {
+        try {
+          _currentUser = User.fromJson(json.decode(userJson));
+          return _currentUser;
+        } catch (e) {
+          // Invalid JSON, clear corrupted data
+          await _storage.delete(AppConstants.userKey);
+          return null;
+        }
       }
     } catch (e) {
-      // Error reading user data
+      // Error reading user data - return null (not logged in)
     }
     return null;
   }
 
   // Save user
   Future<void> _saveUser(User user) async {
-    await _storage.write(
-      key: AppConstants.userKey,
-      value: json.encode(user.toJson()),
-    );
+    try {
+      await _storage.write(
+        AppConstants.userKey,
+        json.encode(user.toJson()),
+      );
+    } catch (e) {
+      // If storage fails, continue without saving (user can still use app)
+    }
   }
 
   // Clear user data
   Future<void> _clearUserData() async {
     _currentUser = null;
-    await _apiService.clearToken();
-    await _storage.delete(key: AppConstants.userKey);
+    try {
+      await _apiService.clearToken();
+      await _storage.delete(AppConstants.userKey);
+    } catch (e) {
+      // If clearing fails, continue anyway
+    }
   }
 
   // Check if logged in
   Future<bool> isLoggedIn() async {
-    final token = await _apiService.getToken();
-    final user = await getSavedUser();
-    return token != null && user != null;
+    try {
+      final token = await _apiService.getToken();
+      final user = await getSavedUser();
+      return token != null && token.isNotEmpty && user != null;
+    } catch (e) {
+      // If check fails, assume not logged in
+      return false;
+    }
   }
 
   // Refresh user data
