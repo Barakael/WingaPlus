@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { TrendingUp, DollarSign, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, BarChart3, Wrench } from 'lucide-react';
+import { TrendingUp, DollarSign, Target, Calendar, FileText, FileSpreadsheet, RefreshCw, BarChart3, Wrench, AlertTriangle, Wallet } from 'lucide-react';
 import { listSales, listTargets, Target as TargetType } from '../../services/sales';
 import { useAuth } from '../../contexts/AuthContext';
 import { Sale } from '../../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { BASE_URL } from '../../components/api/api';
+import { listExpenditures, Expenditure } from '../../services/expenditures';
 
 interface PeriodData {
   period: string;
@@ -14,6 +15,8 @@ interface PeriodData {
   sales: number;
   services: number;
   totalGanji: number;
+  expenditures: number;
+  netCommission: number;
   items: number;
   transactions: number;
   totalTransactions: number;
@@ -22,7 +25,8 @@ interface PeriodData {
 interface PerformanceStats {
   totalGanji: number;
   totalSales: number;
-  totalItems: number;
+  totalExpenditures: number;
+  netCommission: number;
   totalTransactions: number;
   averageGanji: number;
   bestPeriod: string;
@@ -32,12 +36,14 @@ interface PerformanceStats {
   servicesGanji?: number;
   currentPeriodProfit: number;
   currentPeriodItems: number;
+  isNegative: boolean;
 }
 
 const CommissionTracking: React.FC = () => {
   const { user } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [services, setServices] = useState<any[]>([]);
+  const [expenditures, setExpenditures] = useState<Expenditure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,7 +60,8 @@ const CommissionTracking: React.FC = () => {
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats>({
     totalGanji: 0,
     totalSales: 0,
-    totalItems: 0,
+    totalExpenditures: 0,
+    netCommission: 0,
     totalTransactions: 0,
     averageGanji: 0,
     bestPeriod: '',
@@ -64,6 +71,7 @@ const CommissionTracking: React.FC = () => {
     servicesGanji: 0,
     currentPeriodProfit: 0,
     currentPeriodItems: 0,
+    isNegative: false,
   });
 
   // Load targets data for current user
@@ -98,12 +106,14 @@ const CommissionTracking: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [salesData, servicesResponse] = await Promise.all([
+      const [salesData, servicesResponse, expendituresData] = await Promise.all([
         listSales({ salesman_id: String(user.id) }),
-        fetch(`${BASE_URL}/api/services?salesman_id=${user.id}`)
+        fetch(`${BASE_URL}/api/services?salesman_id=${user.id}`),
+        listExpenditures({ salesman_id: String(user.id) })
       ]);
 
       setSales(salesData);
+      setExpenditures(expendituresData);
 
       if (servicesResponse.ok) {
         const servicesData = await servicesResponse.json();
@@ -149,6 +159,8 @@ const CommissionTracking: React.FC = () => {
         sales: 0,
         services: 0,
         totalGanji: 0,
+        expenditures: 0,
+        netCommission: 0,
         items: 0,
         transactions: 0,
         totalTransactions: 0
@@ -179,6 +191,8 @@ const CommissionTracking: React.FC = () => {
           sales: 0,
           services: 0,
           totalGanji: 0,
+          expenditures: 0,
+          netCommission: 0,
           items: 0,
           transactions: 0,
           totalTransactions: 0,
@@ -218,6 +232,8 @@ const CommissionTracking: React.FC = () => {
           sales: 0,
           services: 0,
           totalGanji: 0,
+          expenditures: 0,
+          netCommission: 0,
           items: 0,
           transactions: 0,
           totalTransactions: 0
@@ -229,9 +245,47 @@ const CommissionTracking: React.FC = () => {
       periods[periodKey].totalTransactions += 1;
     });
 
-    // Calculate total ganji for each period
+    // Process expenditures data
+    expenditures.forEach(expenditure => {
+      const expenditureDate = new Date(expenditure.expenditure_date || '');
+      if (expenditureDate.getFullYear() !== selectedYear) return; // Only include expenditures from selected year
+
+      let periodKey: string;
+
+      if (periodType === 'weekly') {
+        // Get week number and year
+        const startOfYear = new Date(expenditureDate.getFullYear(), 0, 1);
+        const weekNumber = Math.ceil(((expenditureDate.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
+        periodKey = `Week ${weekNumber}, ${expenditureDate.getFullYear()}`;
+      } else {
+        // Monthly
+        const monthName = expenditureDate.toLocaleDateString('en-US', { month: 'long' });
+        periodKey = `${monthName} ${expenditureDate.getFullYear()}`;
+      }
+
+      if (!periods[periodKey]) {
+        periods[periodKey] = {
+          period: periodKey,
+          ganji: 0,
+          sales: 0,
+          services: 0,
+          totalGanji: 0,
+          expenditures: 0,
+          netCommission: 0,
+          items: 0,
+          transactions: 0,
+          totalTransactions: 0
+        };
+      }
+
+      const expenditureAmount = parseFloat(String(expenditure.amount)) || 0;
+      periods[periodKey].expenditures += expenditureAmount;
+    });
+
+    // Calculate total ganji and net commission for each period
     Object.keys(periods).forEach(periodKey => {
       periods[periodKey].totalGanji = periods[periodKey].ganji + periods[periodKey].services;
+      periods[periodKey].netCommission = periods[periodKey].totalGanji - periods[periodKey].expenditures;
       periods[periodKey].totalTransactions = periods[periodKey].transactions + (periods[periodKey].totalTransactions - periods[periodKey].transactions);
     });
 
@@ -252,10 +306,10 @@ const CommissionTracking: React.FC = () => {
           return monthData;
         } else if (selectedYear === currentYear) {
           // For current year, only show months up to current month
-          return index <= currentMonth ? monthData : { ...monthData, ganji: 0, sales: 0, services: 0, totalGanji: 0, items: 0, transactions: 0, totalTransactions: 0 };
+          return index <= currentMonth ? monthData : { ...monthData, ganji: 0, sales: 0, services: 0, totalGanji: 0, expenditures: 0, netCommission: 0, items: 0, transactions: 0, totalTransactions: 0 };
         } else {
           // Future years - show all as zero
-          return { ...monthData, ganji: 0, sales: 0, services: 0, totalGanji: 0, items: 0, transactions: 0, totalTransactions: 0 };
+          return { ...monthData, ganji: 0, sales: 0, services: 0, totalGanji: 0, expenditures: 0, netCommission: 0, items: 0, transactions: 0, totalTransactions: 0 };
         }
       });
     } else {
@@ -275,14 +329,17 @@ const CommissionTracking: React.FC = () => {
 
     // Calculate performance stats
     const totalGanji = filteredPeriodArray.reduce((sum, p) => sum + p.ganji, 0);
-    const totalSales = filteredPeriodArray.reduce((sum, p) => sum + p.sales, 0);
-    const totalItems = filteredPeriodArray.reduce((sum, p) => sum + p.items, 0);
     const totalTransactions = filteredPeriodArray.reduce((sum, p) => sum + p.transactions, 0);
+    const totalExpenditures = filteredPeriodArray.reduce((sum, p) => sum + p.expenditures, 0);
 
     // Calculate services ganji
     const servicesGanji = services.reduce((sum, service) => sum + (parseFloat(service.ganji) || 0), 0);
     const salesGanji = totalGanji; // Rename for clarity
     const combinedGanji = salesGanji + servicesGanji;
+    const netCommission = combinedGanji - totalExpenditures;
+    
+    // Check if expenditures significantly exceed profit (more than 80% or negative)
+    const isNegative = netCommission < 0 || (totalExpenditures > 0 && totalExpenditures / combinedGanji > 0.8);
 
     const bestPeriod = filteredPeriodArray.reduce((best, current) =>
       current.ganji > best.ganji ? current : best, filteredPeriodArray[0] || { period: '' }
@@ -316,7 +373,8 @@ const CommissionTracking: React.FC = () => {
     setPerformanceStats({
       totalGanji: combinedGanji, // Now includes both sales and services
       totalSales: salesGanji, // This is now sales ganji only
-      totalItems,
+      totalExpenditures,
+      netCommission,
       totalTransactions,
       averageGanji: totalTransactions > 0 ? totalGanji / totalTransactions : 0,
       bestPeriod: bestPeriod?.period || '',
@@ -326,8 +384,9 @@ const CommissionTracking: React.FC = () => {
       servicesGanji, // Add services ganji to stats
       currentPeriodProfit,
       currentPeriodItems,
+      isNegative,
     });
-  }, [sales, periodType, targets, selectedTargetId, selectedYear, services]);
+  }, [sales, periodType, targets, selectedTargetId, selectedYear, services, expenditures]);
 
   useEffect(() => {
     loadSalesData();
@@ -375,7 +434,9 @@ const CommissionTracking: React.FC = () => {
       yPosition += 6;
       doc.text(`Services Ganji: ${formatCurrency(performanceStats.servicesGanji || 0)}`, 25, yPosition);
       yPosition += 6;
-      doc.text(`Total Items Sold: ${performanceStats.totalItems}`, 25, yPosition);
+      doc.text(`Total Expenditures: ${formatCurrency(performanceStats.totalExpenditures)}`, 25, yPosition);
+      yPosition += 6;
+      doc.text(`Net Commission (Profit - Expenditures): ${formatCurrency(performanceStats.netCommission)}`, 25, yPosition);
       yPosition += 6;
       doc.text(`Total Transactions: ${performanceStats.totalTransactions}`, 25, yPosition);
       yPosition += 6;
@@ -392,8 +453,8 @@ const CommissionTracking: React.FC = () => {
 
       // Headers
       doc.setFontSize(9);
-      const headers = ['Period', 'Total Profit', 'Services', 'Items', 'Transactions'];
-      const colWidths = [50, 35, 35, 25, 30];
+      const headers = ['Period', 'Total Profit', 'Expenditures', 'Net Commission', 'Transactions'];
+      const colWidths = [50, 30, 30, 35, 25];
       let xPos = 20;
 
       headers.forEach((header, index) => {
@@ -419,8 +480,8 @@ const CommissionTracking: React.FC = () => {
         const rowData = [
           period.period.substring(0, 15),
           formatCurrency(period.totalGanji),
-          formatCurrency(period.services),
-          period.items.toString(),
+          formatCurrency(period.expenditures),
+          formatCurrency(period.netCommission),
           period.totalTransactions.toString()
         ];
 
@@ -443,8 +504,8 @@ const CommissionTracking: React.FC = () => {
     const excelData = periodData.map(period => ({
       'Period': period.period,
       'Total Profit': period.totalGanji,
-      'Services': period.services,
-      'Items Sold': period.items,
+      'Expenditures': period.expenditures,
+      'Net Commission': period.netCommission,
       'Transactions': period.totalTransactions
     }));
 
@@ -463,8 +524,11 @@ const CommissionTracking: React.FC = () => {
       'Metric': 'Services Ganji',
       'Value': performanceStats.servicesGanji || 0
     }, {
-      'Metric': 'Total Items Sold',
-      'Value': performanceStats.totalItems
+      'Metric': 'Total Expenditures',
+      'Value': performanceStats.totalExpenditures
+    }, {
+      'Metric': 'Net Commission (Profit - Expenditures)',
+      'Value': performanceStats.netCommission
     }, {
       'Metric': 'Total Transactions',
       'Value': performanceStats.totalTransactions
@@ -661,6 +725,31 @@ const CommissionTracking: React.FC = () => {
         </div>
       </div>
 
+      {/* Negative Commission Warning */}
+      {performanceStats.isNegative && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-4 sm:p-6">
+          <div className="flex items-start">
+            <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-sm sm:text-base font-bold text-red-800 dark:text-red-300 mb-2">
+                ⚠️ Negative Commission Alert
+              </h3>
+              <p className="text-xs sm:text-sm text-red-700 dark:text-red-400 mb-2">
+                Your expenditures ({formatCurrency(performanceStats.totalExpenditures)}) are significantly impacting your commission.
+              </p>
+              <div className="text-xs sm:text-sm text-red-700 dark:text-red-400 space-y-1">
+                <p><strong>Total Profit:</strong> TSh {formatCurrency(performanceStats.totalGanji)}</p>
+                <p><strong>Total Expenditures:</strong> TSh {formatCurrency(performanceStats.totalExpenditures)}</p>
+                <p className="font-bold">
+                  <strong>Net Commission:</strong> TSh {formatCurrency(performanceStats.netCommission)}
+                  {performanceStats.netCommission < 0 && ' (NEGATIVE)'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
@@ -694,12 +783,12 @@ const CommissionTracking: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
             <div className="p-2 sm:p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
-              <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-[#1973AE] dark:text-[#5da3d5]" />
+              <Wallet className="h-4 w-4 sm:h-6 sm:w-6 text-red-600 dark:text-red-400" />
             </div>
             <div className="ml-1 sm:ml-1">
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
-              <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
-                {performanceStats.totalItems}
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenditures</p>
+              <p className="text-sm sm:text-xl font-bold text-red-600 dark:text-red-400">
+                TSh {formatCurrency(performanceStats.totalExpenditures)}
               </p>
             </div>
           </div>
@@ -707,13 +796,13 @@ const CommissionTracking: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex items-center">
-            <div className="p-2 sm:p-3 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-              <Wrench className="h-4 w-4 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
+            <div className={`p-2 sm:p-3 rounded-lg ${performanceStats.netCommission < 0 ? 'bg-red-100 dark:bg-red-900/20' : 'bg-orange-100 dark:bg-orange-900/20'}`}>
+              <Wrench className={`h-4 w-4 sm:h-6 sm:w-6 ${performanceStats.netCommission < 0 ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`} />
             </div>
             <div className="ml-1 sm:ml-1">
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Services Ganji</p>
-              <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">
-                TSh {formatCurrency(performanceStats.servicesGanji || 0)}
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Net Commission</p>
+              <p className={`text-sm sm:text-xl font-bold ${performanceStats.netCommission < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                TSh {formatCurrency(performanceStats.netCommission)}
               </p>
             </div>
           </div>
@@ -722,14 +811,14 @@ const CommissionTracking: React.FC = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Monthly Profit Bar Chart with dynamic scaling */}
+        {/* Monthly Net Commission Bar Chart with dynamic scaling */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              {selectedYear} Monthly Profit Bar Chart
+              {selectedYear} Monthly Net Commission Chart
             </h2>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 sm:mt-0">
-              Target Levels: Auto
+              Net Commission = Profit - Expenditures
             </div>
           </div>
           <div className="h-80 sm:h-96">
@@ -745,16 +834,29 @@ const CommissionTracking: React.FC = () => {
                   interval={0}
                 />
                 <YAxis
-                  domain={[0, Math.max(...periodData.map(p => p.totalGanji), 1500000) * 1.2]}
+                  domain={['auto', 'auto']}
                   tickFormatter={(value: number) => {
                     if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
                     if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                    if (value <= -1000000) return `-${(Math.abs(value) / 1000000).toFixed(1)}M`;
+                    if (value <= -1000) return `-${(Math.abs(value) / 1000).toFixed(0)}K`;
                     return value.toString();
                   }}
                   tick={{ fontSize: 11, fill: '#6b7280' }}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`TSh ${formatCurrency(value)}`, 'Total Monthly Profit']}
+                  formatter={(value: number, name: string) => {
+                    if (name === 'netCommission') {
+                      return [`TSh ${formatCurrency(value)}`, 'Net Commission'];
+                    }
+                    if (name === 'totalGanji') {
+                      return [`TSh ${formatCurrency(value)}`, 'Total Profit'];
+                    }
+                    if (name === 'expenditures') {
+                      return [`TSh ${formatCurrency(value)}`, 'Expenditures'];
+                    }
+                    return [`TSh ${formatCurrency(value)}`, name];
+                  }}
                   labelFormatter={(label) => `${label} ${selectedYear}`}
                   contentStyle={{
                     backgroundColor: '#1f2937',
@@ -763,7 +865,11 @@ const CommissionTracking: React.FC = () => {
                     color: '#f9fafb'
                   }}
                 />
-                <Bar dataKey="totalGanji" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="netCommission" radius={[4, 4, 0, 0]}>
+                  {periodData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.netCommission < 0 ? '#ef4444' : '#10b981'} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -788,8 +894,8 @@ const CommissionTracking: React.FC = () => {
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Month</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Profit</th>
-                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell">Services</th>
-                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell">Items</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell">Expenditures</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell">Net Commission</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell">Transactions</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell">Avg Profit</th>
                 </tr>
@@ -803,11 +909,11 @@ const CommissionTracking: React.FC = () => {
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-green-600 dark:text-green-400 font-semibold font-mono">
                       TSh {Math.round(period.totalGanji).toLocaleString()}
                     </td>
-                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white font-mono hidden sm:table-cell">
-                      TSh {Math.round(period.services).toLocaleString()}
+                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-red-600 dark:text-red-400 font-mono hidden sm:table-cell">
+                      TSh {Math.round(period.expenditures).toLocaleString()}
                     </td>
-                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white hidden md:table-cell">
-                      {period.items}
+                    <td className={`py-2 sm:py-3 px-2 sm:px-4 text-right font-semibold font-mono hidden md:table-cell ${period.netCommission < 0 ? 'text-red-600 dark:text-red-400' : 'text-[#1973AE] dark:text-[#5da3d5]'}`}>
+                      TSh {Math.round(period.netCommission).toLocaleString()}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-gray-900 dark:text-white hidden lg:table-cell">
                       {period.totalTransactions}
