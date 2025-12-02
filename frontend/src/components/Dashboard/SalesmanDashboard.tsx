@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { DollarSign, ShoppingCart, Target, TrendingUp, Clock, Wrench } from 'lucide-react';
+import { DollarSign, Target, TrendingUp, Clock, Wrench, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { listSales } from '../../services/sales';
+import { listExpenditures } from '../../services/expenditures';
 import { BASE_URL } from '../../components/api/api';
 
 interface SalesmanDashboardProps {
@@ -12,6 +13,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
   const { user } = useAuth();
   const [mySales, setMySales] = useState<any[]>([]);
   const [myServices, setMyServices] = useState<any[]>([]);
+  const [expenditures, setExpenditures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Helper function to format currency
@@ -28,12 +30,14 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
       if (!user) return;
       try {
         setLoading(true);
-        const [salesData, servicesResponse] = await Promise.all([
+        const [salesData, servicesResponse, expendituresData] = await Promise.all([
           listSales({ salesman_id: String(user.id) }),
-          fetch(`${BASE_URL}/api/services?salesman_id=${user.id}`)
+          fetch(`${BASE_URL}/api/services?salesman_id=${user.id}`),
+          listExpenditures({ salesman_id: String(user.id) })
         ]);
 
         setMySales(salesData);
+        setExpenditures(expendituresData);
 
         if (servicesResponse.ok) {
           const servicesData = await servicesResponse.json();
@@ -49,11 +53,6 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
   }, [user]);
 
   // Calculate stats
-  const totalSales = mySales.reduce((sum, sale) => {
-    const saleAmount = Number(sale.total_amount);
-    const offers = Number(sale.offers) || 0;
-    return sum + (saleAmount - offers); // Subtract offers from total sales
-  }, 0);
   const totalItems = mySales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
   const salesGanji = mySales.reduce((sum, sale) => {
     const baseGanji = (Number(sale.unit_price) - Number(sale.cost_price)) * Number(sale.quantity);
@@ -61,8 +60,8 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
     return sum + (baseGanji - offers); // Subtract offers from ganji
   }, 0);
   const servicesGanji = myServices.reduce((sum, service) => sum + (parseFloat(service.ganji) || 0), 0);
-  const totalGanji = salesGanji + servicesGanji;
-  const averageSale = mySales.length > 0 ? totalSales / mySales.length : 0;
+  const totalExpenditures = expenditures.reduce((sum, exp) => sum + (parseFloat(String(exp.amount)) || 0), 0);
+  const totalGanji = salesGanji + servicesGanji - totalExpenditures;
 
   return (
     <div className="space-y-6">
