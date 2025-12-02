@@ -23,6 +23,7 @@ import Settings from './components/Common/Settings';
 import ShopsManagement from './components/SuperAdmin/ShopsManagement';
 import UsersManagement from './components/SuperAdmin/UsersManagement';
 import SystemReports from './components/SuperAdmin/SystemReports';
+import ExpenditureView from './components/Expenditures/ExpenditureView';
 
 // Page labels for breadcrumbs
 const pageLabels: Record<string, string> = {
@@ -45,6 +46,7 @@ const pageLabels: Record<string, string> = {
   'commissions': 'Commissions',
   'winga': 'Winga',
   'targets': 'Targets',
+  'expenditures': 'Matumizi',
   'settings': 'Settings',
 };
 
@@ -202,6 +204,8 @@ const AppContent: React.FC = () => {
         return <SalesmanSales openSaleForm={openSaleForm} />;
       case 'targets':
         return <TargetManagement />;
+      case 'expenditures':
+        return <ExpenditureView />;
       case 'settings':
         return <Settings />;
       default:
