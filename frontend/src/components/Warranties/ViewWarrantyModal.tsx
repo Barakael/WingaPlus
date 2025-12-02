@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Eye, User, Package, Shield, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, Package, Calendar } from 'lucide-react';
 
 interface Warranty {
   id: number;
@@ -25,25 +25,6 @@ interface ViewWarrantyModalProps {
 
 const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen, onClose }) => {
   if (!isOpen || !warranty) return null;
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'Expired':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case 'pending':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'in_progress':
-        return <AlertTriangle className="h-5 w-5 text-[#1973AE]" />;
-      case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'rejected':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      default:
-        return <Clock className="h-5 w-5 text-gray-500" />;
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -87,136 +68,129 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] sm:h-[80vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-[#1973AE] dark:text-[#5da3d5] mr-2 sm:mr-3" />
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-              Warranty Details
-            </h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+        {/* Header - Compact with gradient */}
+        <div className="relative bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] p-4 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-white">Warranty Details</h2>
+              {warranty.expiry_date && (
+                <div className="flex items-center text-xs text-blue-100 mt-1">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Expires: {new Date(warranty.expiry_date).toLocaleDateString('en-GB')}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-white" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 dark:text-gray-400" />
-          </button>
         </div>
 
-        {/* Content */}
-        <div className="p-2 sm:p-6">
-          {/* Warranty ID and Status */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 dark:border-gray-700">
-            {/* <div className="flex items-center mb-2 sm:mb-0">
-              <Shield className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Warranty ID:</span>
-              <span className="ml-2 font-mono text-gray-900 dark:text-white">#{warranty.id}</span>
-            </div> */}
-            <div className="flex items-center">
-              {/* {getStatusIcon(warranty.status || 'active')} */}
-              <span className={`ml-2 px-2 py-1 text-xs rounded-full ${getStatusColor(warranty.status || 'active')}`}>
-                {warranty.status ? warranty.status.replace('_', ' ') : 'Active'}
-              </span>
+        {/* Content - Compact */}
+        <div className="p-4 space-y-3 max-h-[70vh] overflow-y-auto">
+
+          {/* Product Name */}
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+            <div className="flex items-start">
+              <Package className="h-4 w-4 text-[#1973AE] dark:text-[#5da3d5] mr-2 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-600 dark:text-gray-400">Product</p>
+                <p className="font-semibold text-gray-900 dark:text-white truncate">{warranty.phone_name || 'N/A'}</p>
+              </div>
             </div>
           </div>
 
-          {/* Product and Customer Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-                <Package className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
-                Product Information
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Product:</span>
-                  <span className="text-sm text-gray-900 dark:text-white font-medium">{warranty.phone_name}</span>
-                </div>
+          {/* Customer & Store - Two columns */}
+          <div className="grid grid-cols-2 gap-3">
+            {warranty.customer_name && (
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Customer</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{warranty.customer_name}</p>
+                {warranty.email && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{warranty.email}</p>
+                )}
+              </div>
+            )}
+            {warranty.reference_store && (
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Store</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{warranty.reference_store}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Product Specs - Compact if exists */}
+          {(warranty.color || warranty.storage) && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center mb-2">
+                <Package className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                <p className="text-xs font-semibold text-blue-900 dark:text-blue-100">Specifications</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 {warranty.color && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Color:</span>
-                    <span className="text-sm text-gray-900 dark:text-white font-medium">{warranty.color}</span>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Color:</span>
+                    <span className="ml-1 font-medium text-gray-900 dark:text-white">{warranty.color}</span>
                   </div>
                 )}
                 {warranty.storage && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Storage:</span>
-                    <span className="text-sm text-gray-900 dark:text-white font-medium">{warranty.storage}</span>
-                  </div>
-                )}
-                {warranty.reference_store && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Reference Store:</span>
-                    <span className="text-sm text-gray-900 dark:text-white font-medium">{warranty.reference_store}</span>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Storage:</span>
+                    <span className="ml-1 font-medium text-gray-900 dark:text-white">{warranty.storage}</span>
                   </div>
                 )}
               </div>
             </div>
+          )}
 
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-                <User className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
-                Customer Information
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Name:</span>
-                  <span className="text-sm text-gray-900 dark:text-white font-medium">{warranty.customer_name}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Email:</span>
-                  <span className="text-sm text-gray-900 dark:text-white font-medium">{warranty.email || 'N/A'}</span>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          {/* Warranty Status and Timeline */}
+          {/* Warranty Timeline */}
           {warranty.expiry_date && (
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
-                Warranty Timeline
-              </h3>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Filed Date</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Filed</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white">
                     {new Date(warranty.created_at).toLocaleDateString('en-GB')}
-                  </div>
+                  </p>
                 </div>
-
-                <div className="text-center">
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Expiry Date</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">
+                <div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Expires</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white">
                     {new Date(warranty.expiry_date).toLocaleDateString('en-GB')}
-                  </div>
+                  </p>
                 </div>
-
-                <div className="text-center sm:col-span-1 col-span-2">
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Status</div>
-                  <div className={`text-sm font-bold ${getDaysRemainingColor(warranty.expiry_date)}`}>
+                <div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Status</p>
+                  <p className={`text-xs font-bold ${getDaysRemainingColor(warranty.expiry_date)}`}>
                     {getDaysRemaining(warranty.expiry_date)}
-                  </div>
+                  </p>
                 </div>
               </div>
             </div>
           )}
+
+          {/* Status badge */}
+          <div className="flex items-center justify-center">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(warranty.status || 'active')}`}>
+              {warranty.status ? warranty.status.replace('_', ' ').toUpperCase() : 'ACTIVE'}
+            </span>
+          </div>
         </div>
 
-        {/* Footer
-        <div className="flex justify-end px-4 sm:px-6 pt-4 sm:pt-6 pb-0 border-t border-gray-200 dark:border-gray-700">
+        {/* Footer - Compact */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium text-sm"
           >
             Close
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );
