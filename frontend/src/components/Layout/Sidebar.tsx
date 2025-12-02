@@ -12,7 +12,8 @@ import {
   DollarSign,
   Wrench,
   Target,
-  Settings
+  Settings,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -59,7 +60,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
            { id: 'services', label: 'Ufundi', icon: Wrench },
           { id: 'commissions', label: 'Ganji', icon: DollarSign },
-          { id: 'targets', label: 'Targets', icon: Target },         
+          { id: 'targets', label: 'Targets', icon: Target },
+          { id: 'expenditures', label: 'Matumizi', icon: Wallet },         
           { id: 'warranties', label: 'Warranties', icon: Shield },
           { id: 'settings', label: 'Settings', icon: Settings },
         ];
