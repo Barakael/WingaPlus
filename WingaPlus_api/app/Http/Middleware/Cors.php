@@ -24,7 +24,10 @@ class Cors
             'http://127.0.0.1:5174',
             // include the hosted API origin (with port) to be explicit
             'http://95.111.247.129:8070',
-            'http://95.111.247.129'
+            'http://95.111.247.129',
+            // Production domains
+            'https://wingapro.app',
+            'https://www.wingapro.app',
         ];
 
         $origin = $request->headers->get('Origin');
