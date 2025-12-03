@@ -3,4 +3,4 @@
 // export const BASE_URL = 'http://127.0.0.1:8000';
 
 // for production
-export const BASE_URL = 'https://wingapro.app/';
+export const BASE_URL = 'https://wingapro.app';
