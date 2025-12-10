@@ -57,8 +57,10 @@ export interface Sale {
   color?: string; // Product color
   storage?: string; // Product storage capacity
   imei?: string; // IMEI number for phones
+  serial_number?: string; // Serial number for laptops
   ram?: string; // RAM for laptops
   phone_name?: string; // Phone model name
+  laptop_name?: string; // Laptop model name
   reference_store?: string; // Reference store
   category?: string; // Product category
   created_at?: string;

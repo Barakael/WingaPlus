@@ -41,13 +41,17 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
         // Map to the warranty shape expected by the UI
         const mapped = warrantySales.map((s: any) => ({
           id: s.id,
-          phone_name: s.product_name || (s.warranty_details?.phone_name ?? ''),
+          phone_name: s.product_name || (s.warranty_details?.phone_name ?? '') || (s.warranty_details?.laptop_name ?? ''),
+          laptop_name: s.laptop_name || (s.warranty_details?.laptop_name ?? ''),
           customer_name: s.customer_name || (s.warranty_details?.customer_name ?? ''),
           customer_phone: s.customer_phone || (s.warranty_details?.customer_phone ?? ''),
-          color: s.warranty_details?.color ?? '',
-          storage: s.warranty_details?.storage ?? '',
+          color: s.color || (s.warranty_details?.color ?? ''),
+          storage: s.storage || (s.warranty_details?.storage ?? ''),
           store_name: s.warranty_details?.store_name ?? '',
           reference_store: s.reference_store || (s.warranty_details?.reference_store ?? ''),
+          imei_number: s.imei || (s.warranty_details?.imei_number ?? ''),
+          serial_number: s.serial_number || (s.warranty_details?.serial_number ?? ''),
+          category: s.category || 'phones',
           email: s.warranty_details?.customer_email ?? '',
           expiry_date: s.warranty_end ?? null,
           warranty_months: s.warranty_months ?? (s.warranty_details?.warranty_months ?? null),
@@ -242,9 +246,10 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[150px]">Product</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[100px] sm:min-w-[120px]">Customer</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell min-w-[100px]">Phone</th>
-                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell min-w-[80px]">Color</th>
-                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell min-w-[80px]">Storage</th>
-                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[100px]">Expiry Date</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell min-w-[120px]">IMEI/Serial</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell min-w-[80px]">Color</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[80px]">Storage</th>
+                  <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden 2xl:table-cell min-w-[100px]">Expiry Date</th>
                   {/* <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[140px]">Actions</th> */}
                 </tr>
               </thead>
@@ -277,12 +282,17 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                       {warranty.customer_phone}
                     </td>
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden md:table-cell">
-                      {warranty.color || 'N/A'}
+                      <div className="font-mono text-xs">
+                        {warranty.imei_number || warranty.serial_number || 'N/A'}
+                      </div>
                     </td>
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden lg:table-cell">
-                      {warranty.storage || 'N/A'}
+                      {warranty.color || 'N/A'}
                     </td>
                     <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden xl:table-cell">
+                      {warranty.storage || 'N/A'}
+                    </td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-gray-900 dark:text-white hidden 2xl:table-cell">
                       <div className="text-sm">
                         {warranty.expiry_date ? new Date(warranty.expiry_date).toLocaleDateString() : 'N/A'}
                       </div>

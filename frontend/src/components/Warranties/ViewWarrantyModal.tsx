@@ -3,7 +3,8 @@ import { X, Package, Calendar } from 'lucide-react';
 
 interface Warranty {
   id: number;
-  phone_name: string;
+  phone_name?: string;
+  laptop_name?: string;
   customer_name: string;
   customer_phone: string;
   color?: string;
@@ -15,6 +16,9 @@ interface Warranty {
   warranty_months?: number;
   status?: string;
   created_at: string;
+  imei_number?: string;
+  serial_number?: string;
+  category?: string;
 }
 
 interface ViewWarrantyModalProps {
@@ -100,7 +104,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
               <Package className="h-4 w-4 text-[#1973AE] dark:text-[#5da3d5] mr-2 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-600 dark:text-gray-400">Product</p>
-                <p className="font-semibold text-gray-900 dark:text-white truncate">{warranty.phone_name || 'N/A'}</p>
+                <p className="font-semibold text-gray-900 dark:text-white truncate">{warranty.phone_name || warranty.laptop_name || 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -125,7 +129,7 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
           </div>
 
           {/* Product Specs - Compact if exists */}
-          {(warranty.color || warranty.storage) && (
+          {(warranty.color || warranty.storage || warranty.imei_number || warranty.serial_number) && (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
               <div className="flex items-center mb-2">
                 <Package className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
@@ -142,6 +146,18 @@ const ViewWarrantyModal: React.FC<ViewWarrantyModalProps> = ({ warranty, isOpen,
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Storage:</span>
                     <span className="ml-1 font-medium text-gray-900 dark:text-white">{warranty.storage}</span>
+                  </div>
+                )}
+                {warranty.imei_number && (
+                  <div className="col-span-2">
+                    <span className="text-gray-600 dark:text-gray-400">IMEI:</span>
+                    <span className="ml-1 font-mono text-xs font-medium text-gray-900 dark:text-white">{warranty.imei_number}</span>
+                  </div>
+                )}
+                {warranty.serial_number && (
+                  <div className="col-span-2">
+                    <span className="text-gray-600 dark:text-gray-400">Serial Number:</span>
+                    <span className="ml-1 font-mono text-xs font-medium text-gray-900 dark:text-white">{warranty.serial_number}</span>
                   </div>
                 )}
               </div>

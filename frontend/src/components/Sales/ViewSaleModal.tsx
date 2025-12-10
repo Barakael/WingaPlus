@@ -95,7 +95,7 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
           </div>
 
           {/* Product Specs - Compact if exists */}
-          {(sale.phone_name || sale.color || sale.storage || sale.imei || sale.ram) && (
+          {(sale.phone_name || sale.laptop_name || sale.color || sale.storage || sale.imei || sale.serial_number || sale.ram) && (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
               <div className="flex items-center mb-2">
                 <Smartphone className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
@@ -106,6 +106,12 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Model:</span>
                     <span className="ml-1 font-medium text-gray-900 dark:text-white">{sale.phone_name}</span>
+                  </div>
+                )}
+                {sale.laptop_name && (
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Model:</span>
+                    <span className="ml-1 font-medium text-gray-900 dark:text-white">{sale.laptop_name}</span>
                   </div>
                 )}
                 {sale.color && (
@@ -130,6 +136,12 @@ const ViewSaleModal: React.FC<ViewSaleModalProps> = ({ sale, isOpen, onClose }) 
                   <div className="col-span-2">
                     <span className="text-gray-600 dark:text-gray-400">IMEI:</span>
                     <span className="ml-1 font-mono text-xs font-medium text-gray-900 dark:text-white">{sale.imei}</span>
+                  </div>
+                )}
+                {sale.serial_number && (
+                  <div className="col-span-2">
+                    <span className="text-gray-600 dark:text-gray-400">Serial Number:</span>
+                    <span className="ml-1 font-mono text-xs font-medium text-gray-900 dark:text-white">{sale.serial_number}</span>
                   </div>
                 )}
               </div>
