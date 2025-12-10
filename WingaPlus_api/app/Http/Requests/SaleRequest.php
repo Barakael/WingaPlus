@@ -34,7 +34,10 @@ class SaleRequest extends FormRequest
             'reference_store' => 'nullable|string|max:255',
             'category' => 'nullable|string|in:phones,accessories,laptops',
             'phone_name' => 'nullable|string|max:255',
+            'laptop_name' => 'nullable|string|max:255',
             'imei' => 'nullable|string|max:50',
+            'serial_number' => 'nullable|string|max:100',
+            'ram' => 'nullable|string|max:50',
             'color' => 'nullable|string|max:100',
             'storage' => 'nullable|string|max:50',
         ];

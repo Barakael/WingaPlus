@@ -37,7 +37,10 @@ class Sale extends Model
         'reference_store',
         'category',
         'phone_name',
+        'laptop_name',
         'imei',
+        'serial_number',
+        'ram',
         'color',
         'storage',
     ];
