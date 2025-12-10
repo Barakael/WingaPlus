@@ -361,7 +361,7 @@ const CommissionTracking: React.FC = () => {
     }
 
     const currentPeriodData = periods[currentPeriodKey];
-    const currentPeriodProfit = currentPeriodData ? currentPeriodData.totalGanji : 0;
+    const currentPeriodProfit = currentPeriodData ? currentPeriodData.netCommission : 0;
     const currentPeriodItems = currentPeriodData ? currentPeriodData.items : 0;
     if (currentPeriodData) {
       currentPeriodValue = targetMetric === 'profit' ? currentPeriodProfit : currentPeriodItems;
@@ -691,7 +691,7 @@ const CommissionTracking: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row sm:justify-between text-xs sm:text-sm space-y-1 sm:space-y-0">
             <span className="text-gray-600 dark:text-gray-400">
-              Current:{' '}
+              Current Net Profit:{' '}
               {selectedTarget && selectedTarget.metric === 'items_sold'
                 ? `${performanceStats.currentPeriodItems} items`
                 : `TSh ${formatCurrency(performanceStats.currentPeriodProfit)}`}
@@ -893,11 +893,11 @@ const CommissionTracking: React.FC = () => {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Month</th>
-                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Profit</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white">Net Profit</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden sm:table-cell">Expenditures</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell">Net Commission</th>
                   <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell">Transactions</th>
-                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell">Avg Profit</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell">Avg Net Profit</th>
                 </tr>
               </thead>
               <tbody>
@@ -906,8 +906,8 @@ const CommissionTracking: React.FC = () => {
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-left text-gray-900 dark:text-white font-semibold">
                       {period.period.split(' ')[0]}
                     </td>
-                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-green-600 dark:text-green-400 font-semibold font-mono">
-                      TSh {Math.round(period.totalGanji).toLocaleString()}
+                    <td className={`py-2 sm:py-3 px-2 sm:px-4 text-right font-semibold font-mono ${period.netCommission < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                      TSh {Math.round(period.netCommission).toLocaleString()}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-red-600 dark:text-red-400 font-mono hidden sm:table-cell">
                       TSh {Math.round(period.expenditures).toLocaleString()}
@@ -919,7 +919,7 @@ const CommissionTracking: React.FC = () => {
                       {period.totalTransactions}
                     </td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-[#1973AE] dark:text-[#5da3d5] font-mono hidden xl:table-cell">
-                      TSh {period.totalTransactions > 0 ? Math.round(period.totalGanji / period.totalTransactions).toLocaleString() : '0'}
+                      TSh {period.totalTransactions > 0 ? Math.round(period.netCommission / period.totalTransactions).toLocaleString() : '0'}
                     </td>
                   </tr>
                 ))}
