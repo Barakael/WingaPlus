@@ -5,19 +5,25 @@ import { BASE_URL } from '../api/api';
 import SuccessModal from './SuccessModal';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
 
+type WarrantyCategory = 'phones' | 'laptops';
+
 const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { user } = useAuth();
+  const [category, setCategory] = useState<WarrantyCategory>('phones');
   const [warrantyPeriod, setWarrantyPeriod] = useState('');
   const [phoneName, setPhoneName] = useState('');
+  const [laptopName, setLaptopName] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [color, setColor] = useState('');
   const [storage, setStorage] = useState('');
+  const [ram, setRam] = useState('');
   const [costPriceInput, setCostPriceInput] = useState<string>('0');
   const [unitPriceInput, setUnitPriceInput] = useState<string>('0');
   const [offersInput, setOffersInput] = useState<string>('0');
   const [imeiNumber, setImeiNumber] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submittedWarranty, setSubmittedWarranty] = useState<any>(null);
@@ -49,7 +55,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         },
         body: JSON.stringify({
           // sale fields
-          product_name: phoneName,
+          product_name: category === 'phones' ? phoneName : laptopName,
           quantity: 1,
           unit_price: parseFloat(unitPriceInput) || 0,
           selling_price: parseFloat(unitPriceInput) || 0,
@@ -60,9 +66,18 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           customer_phone: customerPhone,
           reference_store: storeName,
           salesman_id: user?.id || 1, // Use authenticated user ID
-          // phone-specific fields (required by validation)
-          phone_name: phoneName,
-          imei: imeiNumber,
+          category: category,
+          // phone-specific fields
+          ...(category === 'phones' && {
+            phone_name: phoneName,
+            imei: imeiNumber,
+          }),
+          // laptop-specific fields
+          ...(category === 'laptops' && {
+            laptop_name: laptopName,
+            serial_number: serialNumber,
+            ram: ram,
+          }),
           color: color,
           storage: storage,
           // warranty flags/fields (unified single-table approach)
@@ -71,13 +86,19 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           warranty_start: new Date().toISOString(),
           // put device-specific details into warranty_details JSON
           warranty_details: {
-            phone_name: phoneName,
+            ...(category === 'phones' ? {
+              phone_name: phoneName,
+              imei_number: imeiNumber,
+            } : {
+              laptop_name: laptopName,
+              serial_number: serialNumber,
+              ram: ram,
+            }),
             customer_email: customerEmail,
             color: color,
             storage: storage,
             cost_price: parseFloat(costPriceInput) || 0,
             selling_price: parseFloat(unitPriceInput) || 0,
-            imei_number: imeiNumber,
           }
         }),
       });
@@ -111,14 +132,17 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       const warrantyData = {
         id: (salePayload?.id ?? '').toString(),
-        phone_name: salePayload?.product_name ?? warrantyDetails.phone_name ?? phoneName,
+        phone_name: category === 'phones' ? (salePayload?.product_name ?? warrantyDetails.phone_name ?? phoneName) : undefined,
+        laptop_name: category === 'laptops' ? (salePayload?.product_name ?? warrantyDetails.laptop_name ?? laptopName) : undefined,
         customer_name: salePayload?.customer_name ?? warrantyDetails.customer_name ?? customerName,
         customer_email: warrantyDetails.customer_email ?? customerEmail,
         customer_phone: salePayload?.customer_phone ?? customerPhone,
         sales_person: warrantyDetails.color ?? color,
         storage: warrantyDetails.storage ?? storage,
         price: (warrantyDetails.price ?? salePayload?.unit_price ?? '').toString(),
-        imei_number: warrantyDetails.imei_number ?? imeiNumber,
+        imei_number: category === 'phones' ? (warrantyDetails.imei_number ?? imeiNumber) : undefined,
+        serial_number: category === 'laptops' ? (warrantyDetails.serial_number ?? serialNumber) : undefined,
+        ram: category === 'laptops' ? (warrantyDetails.ram ?? ram) : undefined,
         warranty_period: (salePayload?.warranty_months ?? warrantyPeriod ?? '').toString(),
         status: salePayload?.warranty_status ?? 'unknown',
         expiry_date: salePayload?.warranty_end ?? null,
@@ -134,16 +158,19 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       // Reset form
       setWarrantyPeriod('');
       setPhoneName('');
+      setLaptopName('');
       setCustomerName('');
       setCustomerEmail('');
       setCustomerPhone('');
       setStoreName('');
       setColor('');
       setStorage('');
+      setRam('');
       setCostPriceInput('0');
       setUnitPriceInput('0');
       setOffersInput('0');
       setImeiNumber('');
+      setSerialNumber('');
     } catch (error) {
       console.error('Error filing warranty:', error);
       const technicalError = error instanceof Error ? error.message : '';
@@ -251,23 +278,40 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
             </div>
 
+            {/* Category Selector */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Device Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value as WarrantyCategory)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                required
+              >
+                <option value="phones">Phone</option>
+                <option value="laptops">Laptop</option>
+              </select>
+            </div>
+
             {/* Phone Details - Compact Grid */}
-            <div className="p-3 bg-indigo-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    <Smartphone className="inline h-3 w-3 mr-1" />
-                    Phone Name
-                  </label>
-                  <input
-                    type="text"
-                    value={phoneName}
-                    onChange={(e) => setPhoneName(e.target.value)}
-                    placeholder="iPhone 15 Pro"
-                    className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    required
-                  />
-                </div>
+            {category === 'phones' && (
+              <div className="p-3 bg-indigo-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <Smartphone className="inline h-3 w-3 mr-1" />
+                      Phone Name
+                    </label>
+                    <input
+                      type="text"
+                      value={phoneName}
+                      onChange={(e) => setPhoneName(e.target.value)}
+                      placeholder="iPhone 15 Pro"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Color
@@ -315,6 +359,93 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
               </div>
             </div>
+            )}
+
+            {/* Laptop Details - Compact Grid */}
+            {category === 'laptops' && (
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Laptop Name
+                    </label>
+                    <input
+                      type="text"
+                      value={laptopName}
+                      onChange={(e) => setLaptopName(e.target.value)}
+                      placeholder="MacBook Pro"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      IMEI/Serial Number
+                    </label>
+                    <input
+                      type="text"
+                      value={serialNumber}
+                      onChange={(e) => setSerialNumber(e.target.value)}
+                      placeholder="IMEI/Serial Number"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      RAM
+                    </label>
+                    <select
+                      value={ram}
+                      onChange={(e) => setRam(e.target.value)}
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    >
+                      <option value="">RAM</option>
+                      <option value="4GB">4GB</option>
+                      <option value="8GB">8GB</option>
+                      <option value="16GB">16GB</option>
+                      <option value="32GB">32GB</option>
+                      <option value="64GB">64GB</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Color
+                    </label>
+                    <input
+                      type="text"
+                      value={color}
+                      onChange={(e) => setColor(e.target.value)}
+                      placeholder="Silver"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <HardDrive className="inline h-3 w-3 mr-1" />
+                      Storage
+                    </label>
+                    <select
+                      value={storage}
+                      onChange={(e) => setStorage(e.target.value)}
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    >
+                      <option value="">Storage</option>
+                      <option value="128GB SSD">128GB SSD</option>
+                      <option value="256GB SSD">256GB SSD</option>
+                      <option value="512GB SSD">512GB SSD</option>
+                      <option value="1TB SSD">1TB SSD</option>
+                      <option value="2TB SSD">2TB SSD</option>
+                      <option value="500GB HDD">500GB HDD</option>
+                      <option value="1TB HDD">1TB HDD</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Sale Details - Compact */}
             <div>
@@ -429,7 +560,20 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !phoneName || !customerName || !customerEmail || !customerPhone || !storeName || !color || !storage || !costPriceInput || !unitPriceInput || !imeiNumber || !warrantyPeriod}
+                disabled={
+                  isSubmitting || 
+                  !customerName || 
+                  !customerEmail || 
+                  !customerPhone || 
+                  !storeName || 
+                  !color || 
+                  !storage || 
+                  !costPriceInput || 
+                  !unitPriceInput || 
+                  !warrantyPeriod ||
+                  (category === 'phones' && (!phoneName || !imeiNumber)) ||
+                  (category === 'laptops' && (!laptopName || !serialNumber || !ram))
+                }
                 className="flex-1 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] text-white py-2 px-4 rounded-lg font-medium hover:from-[#0d5a8a] hover:to-[#094a73] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
               >
                 {isSubmitting ? (

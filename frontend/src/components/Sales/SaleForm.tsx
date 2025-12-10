@@ -38,6 +38,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
   // Laptop-specific fields
   const [laptopName, setLaptopName] = useState('');
   const [ram, setRam] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
   // Keep raw input as string to avoid transient NaN states
   const [quantityInput, setQuantityInput] = useState<string>('1');
   const [unitPriceInput, setUnitPriceInput] = useState<string>(
@@ -191,6 +192,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
         ...(category === 'laptops' && {
           laptop_name: laptopName.trim(),
           ram: ram,
+          serial_number: serialNumber.trim(),
           color: color.trim(),
           storage: storage,
         }),
@@ -365,20 +367,35 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                 />
               </div>
             )}
-
-            {/* Row 3: Reference Store */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Reference Store
-              </label>
-              <input
-                type="text"
-                value={referenceStore}
-                onChange={(e) => setReferenceStore(e.target.value)}
-                placeholder="Store/location"
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                required
-              />
+            {/* Row 3: Customer Name */}  
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Customer
+                      </label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Customer name"
+                        className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        required
+                      />
+                    </div>
+                {/* Row 3: Reference Store */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reference Store
+                  </label>
+                  <input
+                    type="text"
+                    value={referenceStore}
+                    onChange={(e) => setReferenceStore(e.target.value)}
+                    placeholder="Store/location"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
             </div>
 
             {/* Phone Details - Compact Grid */}
@@ -474,6 +491,19 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      IMEI/Serial Number
+                    </label>
+                    <input
+                      type="text"
+                      value={serialNumber}
+                      onChange={(e) => setSerialNumber(e.target.value)}
+                      placeholder="IMEI/Serial Number"
+                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Color
                     </label>
                     <input
@@ -505,20 +535,8 @@ const SaleForm: React.FC<SaleFormProps> = ({ onClose, onSale, prefill }) => {
                       <option value="1TB HDD">1TB HDD</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Customer
-                    </label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Customer name"
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required
-                    />
-                  </div>
                 </div>
+                
               </div>
             )}
 
