@@ -59,7 +59,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           ...baseItems,
           { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
            { id: 'services', label: 'Ufundi', icon: Wrench },
-          { id: 'commissions', label: 'Ganji', icon: DollarSign },
           { id: 'targets', label: 'Targets', icon: Target },
           { id: 'expenditures', label: 'Matumizi', icon: Wallet },         
           { id: 'warranties', label: 'Warranties', icon: Shield },

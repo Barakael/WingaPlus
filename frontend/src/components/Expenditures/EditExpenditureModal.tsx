@@ -206,3 +206,5 @@ const EditExpenditureModal: React.FC<EditExpenditureModalProps> = ({ expenditure
 
 export default EditExpenditureModal;
 
+
+
