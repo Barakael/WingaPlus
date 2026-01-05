@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertTriangle, Clock, Wrench } from 'lucide-react';
+import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertTriangle, Clock } from 'lucide-react';
 import StatCard from '../Common/StatCard';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
@@ -7,7 +7,6 @@ import ShopProducts from '../Shop/ShopProducts';
 import ShopSales from '../Shop/ShopSales';
 import ShopStaff from '../Shop/ShopStaff';
 import ShopServices from '../Shop/ShopServices';
-import ShopGanji from '../Shop/ShopGanji';
 import WarrantyView from '../Warranties/WarrantyView';
 import Reports from '../Reports/Reports';
 import Settings from '../Common/Settings';
@@ -123,8 +122,6 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
         return <ShopSales />;
       case 'services':
         return <ShopServices />;
-      case 'ganji':
-        return <ShopGanji />;
       case 'staff':
         return <ShopStaff />;
       case 'warranties':
@@ -192,7 +189,7 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-shadow duration-200">
           <div className="flex items-center mb-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#1973AE] rounded-lg flex items-center justify-center mr-3 sm:mr-4">
@@ -282,7 +279,7 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
             View Services
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Charts and Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

@@ -533,7 +533,7 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
             Current Month Progress
           </h2>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 Select Target:
               </label>
@@ -545,13 +545,13 @@ const SalesmanDashboard: React.FC<SalesmanDashboardProps> = ({ onTabChange }) =>
                     localStorage.setItem(`commission_selected_target_${user.id}`, e.target.value);
                   }
                 }}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-[200px]"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-0 max-w-[200px] sm:min-w-[200px] truncate"
                 disabled={loading}
               >
                 {targets.length > 0 ? (
                   targets.map((target) => (
-                    <option key={target.id} value={String(target.id)}>
-                      {target.name} ({target.period}) - {target.metric === 'profit' ? 'TSh ' + formatCurrency(target.target_value) : target.target_value + ' items'}
+                    <option key={target.id} value={String(target.id)} className="truncate">
+                      {target.name}
                     </option>
                   ))
                 ) : (
