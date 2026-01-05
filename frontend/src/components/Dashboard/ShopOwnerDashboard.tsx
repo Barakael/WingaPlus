@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertTriangle, Clock } from 'lucide-react';
+import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertTriangle, Clock, Wallet } from 'lucide-react';
 import StatCard from '../Common/StatCard';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
@@ -10,6 +10,7 @@ import ShopServices from '../Shop/ShopServices';
 import WarrantyView from '../Warranties/WarrantyView';
 import Reports from '../Reports/Reports';
 import Settings from '../Common/Settings';
+import ExpenditureView from '../Expenditures/ExpenditureView';
 
 interface ShopOwnerDashboardProps {
   activeTab?: string;
@@ -23,7 +24,7 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
     totalSales: 0,
     totalProducts: 0,
     lowStockProducts: 0,
-    totalStaff: 0,
+    totalExpenditures: 0,
     totalProfit: 0,
   });
   const [recentSales, setRecentSales] = useState<any[]>([]);
@@ -38,7 +39,7 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
       setLoading(true);
       const shopId = user.shop_id || user.id;
 
-      const [salesRes, productsRes, staffRes] = await Promise.all([
+      const [salesRes, productsRes, expendituresRes] = await Promise.all([
         fetch(`${BASE_URL}/api/sales?shop_id=${shopId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -51,7 +52,7 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
             'Accept': 'application/json',
           },
         }),
-        fetch(`${BASE_URL}/api/users?shop_id=${shopId}`, {
+        fetch(`${BASE_URL}/api/expenditures?shop_id=${shopId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
@@ -61,11 +62,11 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
 
       const salesData = await salesRes.json();
       const productsData = await productsRes.json();
-      const staffData = await staffRes.json();
+      const expendituresData = await expendituresRes.json();
 
       const sales = salesData?.data?.data || salesData?.data || [];
       const products = productsData?.data?.data || productsData?.data || [];
-      const staff = staffData?.data?.data || staffData?.data || [];
+      const expenditures = expendituresData?.data?.data || expendituresData?.data || [];
 
       // Calculate stats
       const totalRevenue = sales.reduce((sum: number, sale: any) => {
@@ -81,12 +82,16 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
         p.stock_quantity > 0 && p.stock_quantity <= p.min_stock_level
       );
 
+      const totalExpenditures = expenditures.reduce((sum: number, exp: any) => {
+        return sum + Number(exp.amount || 0);
+      }, 0);
+
       setStats({
         totalRevenue,
         totalSales: sales.length,
         totalProducts: products.length,
         lowStockProducts: lowStock.length,
-        totalStaff: staff.filter((s: any) => s.role === 'salesman' || s.role === 'storekeeper').length,
+        totalExpenditures,
         totalProfit,
       });
 
@@ -124,6 +129,8 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
         return <ShopServices />;
       case 'staff':
         return <ShopStaff />;
+      case 'matumizi':
+        return <ExpenditureView />;
       case 'warranties':
         return <WarrantyView onFileWarranty={() => {}} />;
       case 'reports':
@@ -149,7 +156,7 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
         <StatCard
           title="Revenue"
           value={`TSh ${formatCurrency(stats.totalRevenue)}`}
@@ -168,24 +175,24 @@ const ShopOwnerDashboard: React.FC<ShopOwnerDashboardProps> = ({ activeTab = 'da
           icon={ShoppingCart}
           color="purple"
         />
-        <StatCard
+        {/* <StatCard
           title="Products"
           value={stats.totalProducts}
           icon={Package}
           color="purple"
-        />
+        /> */}
         <StatCard
-          title="Staff"
-          value={stats.totalStaff}
-          icon={Users}
-          color="blue"
+          title="Matumizi"
+          value={`TSh ${formatCurrency(stats.totalExpenditures)}`}
+          icon={Wallet}
+          color="orange"
         />
-        <StatCard
+        {/* <StatCard
           title="Low Stock"
           value={stats.lowStockProducts}
           icon={AlertTriangle}
           color="red"
-        />
+        /> */}
       </div>
 
       {/* Quick Actions */}

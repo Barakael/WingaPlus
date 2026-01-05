@@ -40,6 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
         { id: 'products', label: 'Products', icon: Package },
         { id: 'sales', label: 'Store', icon: ShoppingCart },
         { id: 'staff', label: 'Staff', icon: Users },
+        { id: 'matumizi', label: 'Matumizi', icon: Wallet },
         { id: 'reports', label: 'Reports', icon: BarChart3 },
         { id: 'settings', label: 'Settings', icon: Settings },
       ];
