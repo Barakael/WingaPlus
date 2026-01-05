@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, Package, AlertTriangle, Search, RefreshCw, Eye, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, AlertTriangle, Search, RefreshCw, Eye, TrendingUp, TrendingDown, MoreVertical, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
@@ -54,6 +54,7 @@ const ShopProducts: React.FC = () => {
   const [categorySelectionModalOpen, setCategorySelectionModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
 
   // Fetch products
   const fetchProducts = useCallback(async () => {
@@ -225,22 +226,25 @@ const ShopProducts: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Product Management
           </h1>
+          <div className="h-1 w-36 bg-sky-600 rounded-full" />
+        <div className='grid grid-cols-2 md:grid-cols-2 gap-4'>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             Manage your product inventory and stock levels
           </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+       
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-[150px] sm:w-auto">
           <button
             onClick={() => setCategorySelectionModalOpen(true)}
-            className="w-full sm:w-auto bg-[#1973AE] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center justify-center"
+            className="w-full sm:w-auto bg-sky-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-sky-600 transition-all duration-200 flex items-center justify-center"
           >
             <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Add Product
           </button>
+          </div>
+        </div>
         </div>
       </div>
-
-      {/* Stats Cards */}
+          {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
           <div className="flex items-center justify-between">
@@ -282,31 +286,93 @@ const ShopProducts: React.FC = () => {
           </div>
         </div>
 
-        <div className="col-span-2 lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Inventory Value</p>
-              <p className="text-lg sm:text-xl font-bold text-[#1973AE] dark:text-[#5da3d5] mt-1">
-                TSh {formatCurrency(totalInventoryValue)}
-              </p>
-            </div>
-            <Package className="h-6 w-6 sm:h-8 sm:w-8 text-[#1973AE]" />
-          </div>
-        </div>
+       
       </div>
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Mobile Layout - Search + 3-dot menu */}
+        <div className="lg:hidden">
+          <div className="flex gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+            <button
+              onClick={() => setFilterMenuOpen(!filterMenuOpen)}
+              className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </button>
+          </div>
+
+          {/* Mobile Filter Dropdown */}
+          {filterMenuOpen && (
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Filters</h3>
+                <button
+                  onClick={() => setFilterMenuOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Category
+                </label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Stock Level
+                </label>
+                <select
+                  value={stockFilter}
+                  onChange={(e) => setStockFilter(e.target.value as any)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="all">All Stock Levels</option>
+                  <option value="in-stock">In Stock</option>
+                  <option value="low">Low Stock</option>
+                  <option value="out">Out of Stock</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Layout - All filters in a row */}
+        <div className="hidden lg:grid lg:grid-cols-4 gap-4">
           {/* Search */}
-          <div className="relative col-span-1 sm:col-span-2">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+          <div className="relative col-span-2">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search products, barcode..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full pl-10 pr-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
 
@@ -315,7 +381,7 @@ const ShopProducts: React.FC = () => {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">All Categories</option>
               {categories.map((category) => (
@@ -331,7 +397,7 @@ const ShopProducts: React.FC = () => {
             <select
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value as any)}
-              className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">All Stock Levels</option>
               <option value="in-stock">In Stock</option>
@@ -341,6 +407,8 @@ const ShopProducts: React.FC = () => {
           </div>
         </div>
       </div>
+
+  
 
       {/* Products List */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
