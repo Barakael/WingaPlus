@@ -153,7 +153,13 @@ const ShopSales: React.FC = () => {
     return sum + profit;
   }, 0);
 
-  const totalItemsSold = filteredSales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
+  // Calculate weekly sales (last 7 days)
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const weeklySales = sales.filter(sale => {
+    const saleDate = new Date(sale.sale_date || '');
+    return saleDate >= oneWeekAgo;
+  }).length;
 
   // Pagination
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
@@ -286,6 +292,53 @@ const ShopSales: React.FC = () => {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
+              <p className="text-base sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+                TSh {formatCurrency(totalRevenue)}
+              </p>
+            </div>
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit</p>
+              <p className="text-base sm:text-2xl font-bold text-[#1973AE] dark:text-[#5da3d5] mt-1">
+                TSh {formatCurrency(totalProfit)}
+              </p>
+            </div>
+            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-[#1973AE]" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
+              <p className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">{filteredSales.length}</p>
+            </div>
+            <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-[#1973AE]" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Weekly Sales</p>
+              <p className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">{weeklySales}</p>
+            </div>
+            <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
+          </div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
         {/* Mobile Layout - Search + 3-dot menu */}
@@ -312,7 +365,7 @@ const ShopSales: React.FC = () => {
           {/* Mobile Filter Dropdown */}
           {filterMenuOpen && (
             <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-3">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Filters</h3>
                 <button
                   onClick={() => setFilterMenuOpen(false)}
@@ -323,83 +376,102 @@ const ShopSales: React.FC = () => {
               </div>
 
               {/* Filter Type Selection */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setFilterType('daily')}
-                  className={`px-3 py-2 text-xs rounded-lg transition-colors ${
-                    filterType === 'daily'
-                      ? 'bg-[#1973AE] text-white'
-                      : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  Daily
-                </button>
-                <button
-                  onClick={() => setFilterType('monthly')}
-                  className={`px-3 py-2 text-xs rounded-lg transition-colors ${
-                    filterType === 'monthly'
-                      ? 'bg-[#1973AE] text-white'
-                      : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setFilterType('yearly')}
-                  className={`px-3 py-2 text-xs rounded-lg transition-colors ${
-                    filterType === 'yearly'
-                      ? 'bg-[#1973AE] text-white'
-                      : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  Yearly
-                </button>
-                <button
-                  onClick={() => setFilterType('range')}
-                  className={`px-3 py-2 text-xs rounded-lg transition-colors ${
-                    filterType === 'range'
-                      ? 'bg-[#1973AE] text-white'
-                      : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  Range
-                </button>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Period</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setFilterType('daily')}
+                    className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                      filterType === 'daily'
+                        ? 'bg-[#1973AE] text-white'
+                        : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500'
+                    }`}
+                  >
+                    Daily
+                  </button>
+                  <button
+                    onClick={() => setFilterType('monthly')}
+                    className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                      filterType === 'monthly'
+                        ? 'bg-[#1973AE] text-white'
+                        : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setFilterType('yearly')}
+                    className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                      filterType === 'yearly'
+                        ? 'bg-[#1973AE] text-white'
+                        : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500'
+                    }`}
+                  >
+                    Yearly
+                  </button>
+                  <button
+                    onClick={() => setFilterType('range')}
+                    className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                      filterType === 'range'
+                        ? 'bg-[#1973AE] text-white'
+                        : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500'
+                    }`}
+                  >
+                    Range
+                  </button>
+                </div>
               </div>
 
               {/* Date Filter Inputs */}
-              {filterType === 'daily' && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              )}
-
-              {filterType === 'monthly' && (
-                <>
+              <div className="space-y-3">
+                {filterType === 'daily' && (
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Month
+                      Date
                     </label>
-                    <select
-                      value={monthFilter}
-                      onChange={(e) => setMonthFilter(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    >
-                      <option value="">Select month...</option>
-                      {Array.from({ length: 12 }, (_, i) => (
-                        <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
-                          {new Date(2000, i).toLocaleString('default', { month: 'long' })}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="date"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                    />
                   </div>
+                )}
+
+                {filterType === 'monthly' && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Month
+                      </label>
+                      <select
+                        value={monthFilter}
+                        onChange={(e) => setMonthFilter(e.target.value)}
+                        className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                      >
+                        <option value="">Select month...</option>
+                        {Array.from({ length: 12 }, (_, i) => (
+                          <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                            {new Date(2000, i).toLocaleString('default', { month: 'long' })}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Year
+                      </label>
+                      <input
+                        type="number"
+                        value={yearFilter}
+                        onChange={(e) => setYearFilter(e.target.value)}
+                        className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {filterType === 'yearly' && (
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Year
@@ -408,76 +480,62 @@ const ShopSales: React.FC = () => {
                       type="number"
                       value={yearFilter}
                       onChange={(e) => setYearFilter(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
-                </>
-              )}
+                )}
 
-              {filterType === 'yearly' && (
+                {filterType === 'range' && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        value={startDateFilter}
+                        onChange={(e) => setStartDateFilter(e.target.value)}
+                        className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        value={endDateFilter}
+                        onChange={(e) => setEndDateFilter(e.target.value)}
+                        className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Salesman Filter */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Year
+                    Salesman
                   </label>
-                  <input
-                    type="number"
-                    value={yearFilter}
-                    onChange={(e) => setYearFilter(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
+                  <select
+                    value={salesmanFilter}
+                    onChange={(e) => setSalesmanFilter(e.target.value)}
+                    className="w-full px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                  >
+                    <option value="">All Salesmen</option>
+                    {salesmen.map((salesman) => (
+                      <option key={salesman.id} value={salesman.id}>
+                        {salesman.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              )}
-
-              {filterType === 'range' && (
-                <>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={startDateFilter}
-                      onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={endDateFilter}
-                      onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Salesman Filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Salesman
-                </label>
-                <select
-                  value={salesmanFilter}
-                  onChange={(e) => setSalesmanFilter(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">All Salesmen</option>
-                  {salesmen.map((salesman) => (
-                    <option key={salesman.id} value={salesman.id}>
-                      {salesman.name}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           )}
         </div>
 
-        {/* Desktop Layout - All filters visible */}
+        {/* Desktop Layout - All filters in full view */}
         <div className="hidden lg:block">
           <div className="flex items-center mb-4">
             <Filter className="h-5 w-5 text-gray-600 dark:text-gray-400 mr-2" />
@@ -486,7 +544,7 @@ const ShopSales: React.FC = () => {
 
           <div className="space-y-4">
             {/* Filter Type Selection */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 onClick={() => setFilterType('daily')}
                 className={`px-4 py-2 text-sm rounded-lg transition-colors ${
@@ -659,54 +717,7 @@ const ShopSales: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
-              <p className="text-base sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
-                TSh {formatCurrency(totalRevenue)}
-              </p>
-            </div>
-            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Profit</p>
-              <p className="text-base sm:text-2xl font-bold text-[#1973AE] dark:text-[#5da3d5] mt-1">
-                TSh {formatCurrency(totalProfit)}
-              </p>
-            </div>
-            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-[#1973AE]" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
-              <p className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">{filteredSales.length}</p>
-            </div>
-            <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-[#1973AE]" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Items Sold</p>
-              <p className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">{totalItemsSold}</p>
-            </div>
-            <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* Sales List */
+      {/* Sales List */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">

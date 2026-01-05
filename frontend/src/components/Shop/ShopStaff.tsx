@@ -258,10 +258,10 @@ const ShopStaff: React.FC = () => {
         </div>
         <button
           onClick={() => setAddModalOpen(true)}
-          className="w-full sm:w-auto bg-[#1973AE] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center justify-center"
+          className="w-full sm:w-auto bg-sky-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-sky-600 transition-all duration-200 flex items-center justify-center"
         >
           <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-          Add Staff Member
+          Add Staff
         </button>
       </div>
 
@@ -280,76 +280,15 @@ const ShopStaff: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Salesmen</p>
-              <p className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{activeSalesmen}</p>
-            </div>
-            <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Storekeepers</p>
               <p className="text-lg sm:text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{activeStorekeepers}</p>
             </div>
             <Award className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
           </div>
         </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Inactive</p>
-              <p className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{inactiveStaff}</p>
-            </div>
-            <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
-          </div>
-        </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search staff..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-
-          {/* Role Filter */}
-          <div>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as any)}
-              className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="all">All Roles</option>
-              <option value="salesman">Salesmen</option>
-              <option value="storekeeper">Storekeepers</option>
-            </select>
-          </div>
-
-          {/* Status Filter */}
-          <div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
-      </div>
+   
 
       {/* Staff List */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
