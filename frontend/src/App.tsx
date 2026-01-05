@@ -6,6 +6,7 @@ import LoginForm from './components/Auth/LoginForm';
 import ShopSetup from './components/Shop/ShopSetup';
 import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
+import SalesmanDashboard from './components/Dashboard/SalesmanDashboard';
 // QR-related components removed (scanner, generator, product selection) as sales no longer depend on QR codes
 import SaleForm from './components/Sales/SaleForm';
 import SalesReport from './components/Sales/SalesReport';
@@ -58,6 +59,7 @@ const StockMovementsPage = () => <div className="p-6"><h1 className="text-2xl fo
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [dashboardMode, setDashboardMode] = useState<'shop' | 'salesman'>('shop');
   
   // Generic Sale Form control (decoupled from QR scanning)
   const [showSaleForm, setShowSaleForm] = useState(false);
@@ -79,6 +81,14 @@ const AppContent: React.FC = () => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Handle dashboard mode change
+  const handleDashboardModeChange = (mode: 'shop' | 'salesman') => {
+    setDashboardMode(mode);
+    setActiveTab('dashboard');
+    window.history.replaceState({ page: 'dashboard' }, '', '');
+    localStorage.setItem(`dashboardMode_${user?.id}`, mode);
+  };
 
   // Navigate to a new page
   const navigateToPage = (page: string) => {
@@ -154,12 +164,42 @@ const AppContent: React.FC = () => {
   }
 
   const renderContent = () => {
-    // Check if this is a shop owner accessing a specific tab
-    const shopOwnerTabs = ['dashboard', 'products', 'sales', 'staff', 'warranties', 'reports', 'settings'];
-    if (user?.role === 'shop_owner' && shopOwnerTabs.includes(activeTab)) {
-      return <Dashboard activeTab={activeTab} onTabChange={navigateToPage} />;
+    // For shop owners, route based on dashboard mode
+    if (user?.role === 'shop_owner') {
+      if (dashboardMode === 'salesman') {
+        // Salesman mode - route to salesman pages
+        // Show salesman dashboard for 'dashboard' tab
+        if (activeTab === 'dashboard') {
+          return <SalesmanDashboard onTabChange={navigateToPage} />;
+        }
+        
+        switch (activeTab) {
+          case 'my-sales':
+            return <SalesmanSales openSaleForm={openSaleForm} />;
+          case 'services':
+            return <ServiceView onFileService={() => navigateToPage('file-service')} />;
+          case 'targets':
+            return <TargetManagement />;
+          case 'expenditures':
+            return <ExpenditureView />;
+          case 'warranties':
+            return <WarrantyView onFileWarranty={() => navigateToPage('file-warranty')} openSaleForm={openSaleForm} />;
+          case 'file-warranty':
+            return <WarrantyFiling onBack={() => window.history.back()} />;
+          case 'file-service':
+            return <ServiceFiling onBack={() => window.history.back()} />;
+          case 'settings':
+            return <Settings />;
+          default:
+            return <SalesmanDashboard onTabChange={navigateToPage} />;
+        }
+      } else {
+        // Shop owner mode - show shop dashboard with shop-specific pages
+        return <Dashboard activeTab={activeTab} onTabChange={navigateToPage} />;
+      }
     }
 
+    // For other roles, use the standard routing
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard activeTab={activeTab} onTabChange={navigateToPage} />;
@@ -200,8 +240,8 @@ const AppContent: React.FC = () => {
       case 'commissions':
         return <CommissionTracking />;
       case 'winga':
-        // Shop owner's personal sales tracking and commissions
-        return <SalesmanSales openSaleForm={openSaleForm} />;
+        // Regular salesman's winga view
+        return <SalesmanDashboard onTabChange={navigateToPage} />;
       case 'targets':
         return <TargetManagement />;
       case 'expenditures':
@@ -218,6 +258,8 @@ const AppContent: React.FC = () => {
       activeTab={activeTab} 
       onTabChange={navigateToPage}
       breadcrumbs={getBreadcrumbs()}
+      dashboardMode={dashboardMode}
+      onDashboardModeChange={handleDashboardModeChange}
     >
       {renderContent()}
       
