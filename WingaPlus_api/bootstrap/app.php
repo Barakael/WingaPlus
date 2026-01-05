@@ -12,18 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->use([
-            \App\Http\Middleware\Cors::class,
-        ]);
+        // Apply CORS globally to all requests (both web and API)
+        $middleware->prepend(\App\Http\Middleware\Cors::class);
 
         $middleware->alias([
             'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
-            'api/warranties',
-            'api/login',
-            'api/logout',
+            'api/*',
             'sanctum/csrf-cookie',
         ]);
     })

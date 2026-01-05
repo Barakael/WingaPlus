@@ -37,6 +37,10 @@ return [
 
     'mailers' => [
 
+        'gmail-api' => [
+            'transport' => 'gmail-api',
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
@@ -82,6 +86,10 @@ return [
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
+
+        'gmail-api' => [
+            'transport' => 'gmail-api',
+        ],
                 'smtp',
                 'log',
             ],
@@ -91,6 +99,10 @@ return [
         'roundrobin' => [
             'transport' => 'roundrobin',
             'mailers' => [
+
+        'gmail-api' => [
+            'transport' => 'gmail-api',
+        ],
                 'ses',
                 'postmark',
             ],
