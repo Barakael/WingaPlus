@@ -8,16 +8,18 @@ interface LayoutProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   breadcrumbs: Array<{ label: string; path: string }>;
+  dashboardMode?: 'shop' | 'salesman';
+  onDashboardModeChange?: (mode: 'shop' | 'salesman') => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, breadcrumbs }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, breadcrumbs, dashboardMode = 'shop', onDashboardModeChange }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Fixed Navbar */}
       <div className="fixed top-0 left-0 right-0 z-30">
-        <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        <Navbar onMenuClick={() => setSidebarOpen(true)} dashboardMode={dashboardMode} onDashboardModeChange={onDashboardModeChange} />
       </div>
       
       <div className="flex pt-16"> {/* Add top padding to account for fixed navbar */}
@@ -25,7 +27,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, bread
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           activeTab={activeTab}
-          onTabChange={onTabChange} 
+          onTabChange={onTabChange}
+          dashboardMode={dashboardMode}
         />
         
         {/* Main Content */}
