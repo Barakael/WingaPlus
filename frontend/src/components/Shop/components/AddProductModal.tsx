@@ -363,7 +363,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             )}
 
             {/* Description */}
-            <div>
+            {/* <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
@@ -375,7 +375,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                 placeholder="Additional details about the product"
                 rows={2}
               />
-            </div>
+            </div> */}
 
             {/* Stock Quantity and Min Level - 2 columns */}
             <div className="grid grid-cols-2 gap-3">
@@ -460,19 +460,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               </div>
             )}
 
-            {/* Image Upload Section */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Product Image <span className="text-red-500">*</span>
-              </label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-                disabled={loading}
-              />
+         
               {/* <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -484,25 +472,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               </button>
                */}
               {/* Image Preview */}
-              {(imagePreview || formData.image_url) && (
-                <div className="mt-2 relative">
-                  <img
-                    src={imagePreview || formData.image_url}
-                    alt="Preview"
-                    className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImagePreview('');
-                      setFormData({ ...formData, image_url: '' });
-                    }}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
+           
             </div>
 
             {/* Actions */}

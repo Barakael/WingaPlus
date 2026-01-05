@@ -83,7 +83,7 @@ const ProductManagement: React.FC = () => {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-[#1973AE] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#0d5a8a] transition-all duration-200 flex items-center"
+          className="bg-sky-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-sky-700 transition-all duration-200 flex items-center"
         >
           <Plus className="h-5 w-5 mr-2" />
           Add Product
