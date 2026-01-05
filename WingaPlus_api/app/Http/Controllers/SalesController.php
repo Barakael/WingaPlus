@@ -113,7 +113,7 @@ class SalesController extends BaseController
                         'customer_phone' => $validated['customer_phone'] ?? '',
                         'color' => $validated['color'] ?? '',
                         'storage' => $validated['storage'] ?? '',
-                        'imei_number' => $validated['imei'] ?? $validated['warranty_details']['imei_number'] ?? '',
+                        'imei_number' => $validated['imei'] ?? $validated['serial_number'] ?? $validated['warranty_details']['imei_number'] ?? '',
                         'price' => $validated['selling_price'] ?? $validated['unit_price'] ?? 0,
                     ];
                     

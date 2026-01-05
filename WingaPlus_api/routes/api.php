@@ -51,7 +51,7 @@ Route::post('/login', function (Request $request) {
     } catch (\Exception $e) {
         return response()->json(['message' => 'Login failed: ' . $e->getMessage()], 500);
     }
-});
+})->name('login');
 
 Route::post('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
