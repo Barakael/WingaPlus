@@ -472,8 +472,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               </button>
                */}
               {/* Image Preview */}
-           
-            </div>
 
             {/* Actions */}
             <div className="flex space-x-3 pt-1">
