@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Mail, Phone, Save, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Lock, Mail, Phone, Save, Eye, EyeOff, AlertCircle, CheckCircle, Tag } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import { getRoleDisplayName } from '../../lib/roleMapping';
+import CategoryManagement from '../Shop/components/CategoryManagement';
 
 interface UserProfile {
   id: number;
@@ -21,7 +22,7 @@ interface PasswordChange {
   confirm_password: string;
 }
 
-type TabId = 'profile' | 'password';
+type TabId = 'profile' | 'password' | 'categories';
 
 interface Tab {
   id: TabId;
@@ -31,9 +32,10 @@ interface Tab {
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'categories'>('profile');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
   // Profile state
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -182,6 +184,11 @@ const Settings: React.FC = () => {
     { id: 'profile', label: 'Profile Information', icon: User },
     { id: 'password', label: 'Change Password', icon: Lock },
   ];
+
+  // Add Categories tab for shop owners and storekeepers
+  if (user?.role === 'shop_owner' || user?.role === 'storekeeper') {
+    tabs.push({ id: 'categories', label: 'Manage Categories', icon: Tag });
+  }
 
   return (
     <div className="space-y-6">
@@ -416,8 +423,64 @@ const Settings: React.FC = () => {
               </div>
             </form>
           )}
+
+          {/* Categories Tab */}
+          {activeTab === 'categories' && (user?.role === 'shop_owner' || user?.role === 'storekeeper') && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Product Categories
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Manage categories for your products. Default categories (Phones, Laptops, Accessories) are provided, and you can add custom categories.
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setCategoryModalOpen(true)}
+                className="w-full md:w-auto flex items-center justify-center px-6 py-3 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-colors"
+              >
+                <Tag className="h-4 w-4 mr-2" />
+                Manage Categories
+              </button>
+
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-2">Default Categories</h3>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="flex items-center">
+                    <Tag className="h-4 w-4 mr-2 text-[#1973AE]" />
+                    <span className="font-medium">Phones</span> - Mobile phones and smartphones
+                  </li>
+                  <li className="flex items-center">
+                    <Tag className="h-4 w-4 mr-2 text-[#1973AE]" />
+                    <span className="font-medium">Laptops</span> - Laptops and notebook computers
+                  </li>
+                  <li className="flex items-center">
+                    <Tag className="h-4 w-4 mr-2 text-[#1973AE]" />
+                    <span className="font-medium">Accessories</span> - Phone and laptop accessories
+                  </li>
+                </ul>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                  You can add more categories specific to your shop needs by clicking the "Manage Categories" button above.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Category Management Modal */}
+      {categoryModalOpen && (
+        <CategoryManagement
+          isOpen={categoryModalOpen}
+          onClose={() => setCategoryModalOpen(false)}
+          onCategoriesUpdated={() => {
+            showMessage('success', 'Categories updated successfully');
+          }}
+        />
+      )}
     </div>
   );
 };
