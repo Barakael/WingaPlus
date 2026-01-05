@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, FileText, BarChart3, TrendingUp, Calendar, Filter, Wrench } from 'lucide-react';
+import { Download, FileText, BarChart3, TrendingUp, Calendar, Filter, Wrench, DollarSign, MoreVertical, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 
@@ -10,6 +10,7 @@ const Reports: React.FC = () => {
   const [sales, setSales] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -130,34 +131,30 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Reports & Analytics
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             Generate and download detailed reports
           </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <div className="flex items-center space-x-4 mb-4">
-          <Filter className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-          <span className="font-medium text-gray-900 dark:text-white">Filters</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Compact Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Date Range
             </label>
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
@@ -167,13 +164,13 @@ const Reports: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Report Type
             </label>
             <select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="sales">Sales Report</option>
               <option value="services">Services Report</option>
@@ -184,119 +181,82 @@ const Reports: React.FC = () => {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+      {/* Stats Grid - Shop Dashboard Style */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Total Sales Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
+              <p className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+                TSh {totalSales.toLocaleString()}
+              </p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">TSh {totalSales.toLocaleString()}</p>
-            </div>
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+        {/* Total Ganji Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Ganji</p>
+              <p className="text-lg sm:text-2xl font-bold text-[#1973AE] dark:text-[#5da3d5] mt-1">
+                TSh {totalGanji.toLocaleString()}
+              </p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Ganji (Sales + Services)</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">TSh {totalGanji.toLocaleString()}</p>
-            </div>
+            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-[#1973AE]" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-              <FileText className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+        {/* Active Warranties Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Active Warranties</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                {sales.filter(s => s.warranty_months > 0).length}
+              </p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Warranties</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{sales.filter(s => s.warranty_months > 0).length}</p>
-            </div>
+            <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
-              <Wrench className="h-6 w-6 text-[#1973AE] dark:text-[#5da3d5]" />
+        {/* Service Ganji Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Service Ganji</p>
+              <p className="text-lg sm:text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">
+                TSh {totalServiceGanji.toLocaleString()}
+              </p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Service Ganji</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">TSh {totalServiceGanji.toLocaleString()}</p>
-            </div>
+            <Wrench className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
           </div>
-        </div>
-      </div>
-
-      {/* Download Reports */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Download Reports
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <button
-            onClick={downloadSalesReport}
-            className="p-4 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-all duration-200 flex items-center justify-center"
-          >
-            <Download className="h-5 w-5 mr-2" />
-            Sales Report
-          </button>
-
-          <button
-            onClick={downloadServicesReport}
-            className="p-4 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-all duration-200 flex items-center justify-center"
-          >
-            <Download className="h-5 w-5 mr-2" />
-            Services Report
-          </button>
-
-          <button
-            onClick={downloadInventoryReport}
-            className="p-4 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-all duration-200 flex items-center justify-center"
-          >
-            <Download className="h-5 w-5 mr-2" />
-            Inventory Report
-          </button>
-
-          <button
-            onClick={downloadWarrantyReport}
-            className="p-4 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] transition-all duration-200 flex items-center justify-center"
-          >
-            <Download className="h-5 w-5 mr-2" />
-            Warranty Report
-          </button>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">
           Recent Sales Activity
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {recentSales.map((sale) => {
             const product = products.find(p => p.id === sale.product_id);
             return (
-              <div key={sale.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div key={sale.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
                     {product?.name}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {sale.customer_name} • Qty: {sale.quantity}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-green-600">
+                  <p className="text-sm sm:text-base font-semibold text-green-600">
                     TSh {sale.total_amount}
                   </p>
                   <p className="text-xs text-gray-500">
@@ -307,6 +267,44 @@ const Reports: React.FC = () => {
             );
           })}
         </div>
+      </div>
+
+      {/* Floating Download Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {/* Download Options Menu */}
+        {downloadMenuOpen && (
+          <div className="absolute bottom-16 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 min-w-[180px] mb-2">
+            <button
+              onClick={() => {
+                downloadSalesReport();
+                setDownloadMenuOpen(false);
+              }}
+              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center text-sm text-gray-700 dark:text-gray-300"
+            >
+              <Download className="h-4 w-4 mr-2 text-green-600" />
+              Sales Report
+            </button>
+            <button
+              onClick={() => {
+                downloadInventoryReport();
+                setDownloadMenuOpen(false);
+              }}
+              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center text-sm text-gray-700 dark:text-gray-300"
+            >
+              <Download className="h-4 w-4 mr-2 text-blue-600" />
+              Inventory Report
+            </button>
+          </div>
+        )}
+
+        {/* Main Floating Button */}
+        <button
+          onClick={() => setDownloadMenuOpen(!downloadMenuOpen)}
+          className="bg-[#1973AE] hover:bg-[#0d5a8a] text-white rounded-full p-4 shadow-lg transition-all duration-200 flex items-center justify-center"
+          title="Download Reports"
+        >
+          <Download className="h-6 w-6" />
+        </button>
       </div>
     </div>
   );
