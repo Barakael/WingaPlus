@@ -26,6 +26,31 @@ class Shop extends Model
 
     protected $appends = ['effective_email'];
 
+    /**
+     * Boot the model and add event listeners
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When a new shop is created, automatically create default categories
+        static::created(function ($shop) {
+            $defaultCategories = [
+                ['name' => 'Phones', 'description' => 'Mobile phones and smartphones'],
+                ['name' => 'Laptops', 'description' => 'Laptops and notebook computers'],
+                ['name' => 'Accessories', 'description' => 'Phone and laptop accessories'],
+            ];
+
+            foreach ($defaultCategories as $category) {
+                Category::create([
+                    'name' => $category['name'],
+                    'description' => $category['description'],
+                    'shop_id' => $shop->id,
+                ]);
+            }
+        });
+    }
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
@@ -62,5 +87,10 @@ class Shop extends Model
     public function targets(): HasMany
     {
         return $this->hasMany(Target::class);
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
     }
 }

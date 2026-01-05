@@ -27,7 +27,7 @@ return new class extends Migration
 
         // Seed default categories for all shops
         $shops = DB::table('shops')->get();
-        $defaultCategories = ['Phones', 'Accessories', 'Computers'];
+        $defaultCategories = ['Phones', 'Laptops', 'Accessories'];
         
         foreach ($shops as $shop) {
             foreach ($defaultCategories as $categoryName) {
@@ -53,6 +53,6 @@ return new class extends Migration
         });
 
         // Remove default categories
-        DB::table('categories')->whereIn('name', ['Phones', 'Accessories', 'Computers'])->delete();
+        DB::table('categories')->whereIn('name', ['Phones', 'Laptops', 'Accessories'])->delete();
     }
 };
