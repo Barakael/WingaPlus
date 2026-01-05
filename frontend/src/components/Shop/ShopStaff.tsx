@@ -3,6 +3,7 @@ import { Users, Plus, RefreshCw, Eye, Edit, Trash2, Search, TrendingUp, Shopping
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
+import AddStorekeeperModal from './components/AddStorekeeperModal';
 
 interface StaffMember {
   id: number;
@@ -522,6 +523,13 @@ const ShopStaff: React.FC = () => {
 
       {/* TODO: Add modals for view, add, and edit staff */}
       {/* These would be similar to the product modals created earlier */}
+
+      {/* Add Storekeeper Modal */}
+      <AddStorekeeperModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSuccess={fetchStaff}
+      />
     </div>
   );
 };

@@ -128,6 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::put('/user/profile', [UserController::class, 'profile']);
     Route::put('/user/change-password', [UserController::class, 'changePassword']);
+    Route::post('/users/invite-storekeeper', [UserController::class, 'inviteStorekeeper']);
     // Authenticated shop owner shop setup & retrieval
     Route::get('/my/shop', [MyShopController::class, 'show']);
     Route::post('/my/shop', [MyShopController::class, 'store']);
@@ -135,6 +136,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('categories', CategoryController::class);
 });
+
+// Storekeeper setup password route (public - uses token)
+Route::post('/storekeeper/setup-password', [UserController::class, 'setupPassword']);
 
 // Super Admin routes (protected by auth)
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {

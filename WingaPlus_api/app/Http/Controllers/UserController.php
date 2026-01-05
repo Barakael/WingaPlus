@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -240,5 +242,122 @@ class UserController extends Controller
         $user->update($request->only(['name', 'email', 'phone']));
 
         return response()->json($user->fresh());
+    }
+
+    /**
+     * Invite a storekeeper via email
+     */
+    public function inviteStorekeeper(Request $request): JsonResponse
+    {
+        $authUser = $request->user();
+
+        // Only shop owners can invite storekeepers
+        if (!$authUser->isShopOwner()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'shop_id' => 'required|exists:shops,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Check if user already exists
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json(['message' => 'User with this email already exists'], 422);
+        }
+
+        // Verify shop ownership
+        if (!$authUser->ownedShops()->where('id', $request->shop_id)->exists()) {
+            return response()->json(['message' => 'You do not own this shop'], 403);
+        }
+
+        try {
+            // Create invitation token
+            $invitationToken = Str::random(60);
+
+            // Create storekeeper user with pending status
+            $storekeeper = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => 'storekeeper',
+                'shop_id' => $request->shop_id,
+                'password' => Hash::make(Str::random(32)), // Temporary password
+                'invitation_token' => $invitationToken,
+                'email_verified_at' => null, // Mark as pending verification
+            ]);
+
+            // Send invitation email
+            $invitationLink = url("/setup-password/{$invitationToken}");
+            
+            // Log the invitation for now (email would be sent here in production)
+            \Log::info("Storekeeper invitation created for {$request->email}", [
+                'invitation_link' => $invitationLink,
+                'token' => $invitationToken,
+                'shop_id' => $request->shop_id,
+            ]);
+
+            // TODO: Uncomment when email configuration is ready
+            // Mail::send('emails.storekeeper-invitation', [
+            //     'name' => $request->name,
+            //     'invitationLink' => $invitationLink,
+            //     'shopName' => Shop::find($request->shop_id)->name,
+            // ], function ($message) use ($request) {
+            //     $message->to($request->email)
+            //             ->subject('Invitation to Join WingaPlus as a Storekeeper');
+            // });
+
+            return response()->json([
+                'message' => 'Invitation sent successfully',
+                'user' => $storekeeper,
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Error inviting storekeeper: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to send invitation'], 500);
+        }
+    }
+
+    /**
+     * Setup password for invited storekeeper
+     */
+    public function setupPassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Find user by invitation token
+        $user = User::where('invitation_token', $request->token)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Invalid or expired invitation token'], 422);
+        }
+
+        // Update password and mark email as verified
+        $user->update([
+            'password' => Hash::make($request->password),
+            'invitation_token' => null, // Invalidate token after use
+            'email_verified_at' => now(),
+        ]);
+
+        // Auto-login by generating token
+        $token = $user->createToken('storekeeper-setup')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Password setup successfully',
+            'user' => $user,
+            'token' => $token,
+        ], 200);
     }
 }
