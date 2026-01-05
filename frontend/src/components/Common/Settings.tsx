@@ -229,19 +229,22 @@ const Settings: React.FC = () => {
       {/* Settings Tabs */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="flex">
+          <nav className="flex overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center px-6 py-2 md:py-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center px-3 sm:px-4 md:px-6 py-3 md:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.id
                     ? 'border-[#1973AE] text-[#1973AE] dark:text-[#5da3d5]'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <tab.icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                <tab.icon className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline sm:inline">{tab.label}</span>
+                <span className="inline xs:hidden sm:hidden">
+                  {tab.id === 'profile' ? 'Profile' : tab.id === 'password' ? 'Password' : 'Categories'}
+                </span>
               </button>
             ))}
           </nav>
@@ -446,7 +449,7 @@ const Settings: React.FC = () => {
                 Manage Categories
               </button>
 
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+              <div className="hidden md:flex bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-2">Default Categories</h3>
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li className="flex items-center">
