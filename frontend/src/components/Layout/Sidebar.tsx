@@ -22,15 +22,41 @@ interface SidebarProps {
   onClose: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  dashboardMode?: 'shop' | 'salesman';
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChange, dashboardMode = 'shop' }) => {
   const { user } = useAuth();
 
   const getMenuItems = () => {
     const baseItems = [
       { id: 'dashboard', label: 'Dashboard', icon: Home },
     ];
+
+    // For shop owners with dual dashboard mode
+    if (user?.role === 'shop_owner' && dashboardMode === 'shop') {
+      return [
+        ...baseItems,
+        { id: 'products', label: 'Products', icon: Package },
+        { id: 'sales', label: 'Store', icon: ShoppingCart },
+        { id: 'staff', label: 'Staff', icon: Users },
+        { id: 'reports', label: 'Reports', icon: BarChart3 },
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ];
+    }
+
+    // For shop owners in salesman mode
+    if (user?.role === 'shop_owner' && dashboardMode === 'salesman') {
+      return [
+        ...baseItems,
+        { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
+        { id: 'services', label: 'Ufundi', icon: Wrench },
+        { id: 'targets', label: 'Targets', icon: Target },
+        { id: 'expenditures', label: 'Matumizi', icon: Wallet },
+        { id: 'warranties', label: 'Warranties', icon: Shield },
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ];
+    }
 
     switch (user?.role) {
       case 'super_admin':
@@ -41,26 +67,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           { id: 'reports', label: 'Reports', icon: BarChart3 },
           { id: 'settings', label: 'Settings', icon: Settings },
         ];
-      case 'shop_owner':
-        return [
-          ...baseItems,
-          { id: 'products', label: 'Products', icon: Package },
-          // Categories (QR) removed to decouple sales from QR codes
-          { id: 'sales', label: 'Store', icon: ShoppingCart },
-          { id: 'services', label: 'Services', icon: Wrench },
-          { id: 'winga', label: 'Winga', icon: Target },
-          { id: 'staff', label: 'Staff', icon: Users },
-          { id: 'warranties', label: 'Warranties', icon: Shield },
-          { id: 'reports', label: 'Reports', icon: BarChart3 },
-          { id: 'settings', label: 'Settings', icon: Settings },
-        ];
       case 'salesman':
         return [
           ...baseItems,
           { id: 'my-sales', label: 'My Sales', icon: ShoppingCart },
-           { id: 'services', label: 'Ufundi', icon: Wrench },
+          { id: 'services', label: 'Ufundi', icon: Wrench },
           { id: 'targets', label: 'Targets', icon: Target },
-          { id: 'expenditures', label: 'Matumizi', icon: Wallet },         
+          { id: 'expenditures', label: 'Matumizi', icon: Wallet },
           { id: 'warranties', label: 'Warranties', icon: Shield },
           { id: 'settings', label: 'Settings', icon: Settings },
         ];
