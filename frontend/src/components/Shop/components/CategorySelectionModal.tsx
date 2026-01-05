@@ -59,7 +59,7 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
           </div>
 
           {/* Category Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {categories.map((category) => {
               const Icon = getCategoryIcon(category.name);
               const colorClass = getCategoryColor(category.name);
@@ -73,11 +73,11 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
                   <div className={`w-16 h-16 mx-auto bg-gradient-to-r ${colorClass} rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                     <Icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-2">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white text-center mb-2">
                     {category.name}
                   </h3>
                   {category.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    <p className="hidden md:block text-sm text-gray-600 dark:text-gray-400 text-center">
                       {category.description}
                     </p>
                   )}
