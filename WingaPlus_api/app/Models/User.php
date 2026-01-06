@@ -27,6 +27,7 @@ class User extends Authenticatable
         'role',
         'status',
         'shop_id',
+        'invitation_token',
     ];
 
     /**
