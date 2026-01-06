@@ -260,7 +260,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:255',
-            'shop_id' => 'required|exists:shops,id',
+            'shop_id' => 'required|integer|exists:shops,id',
         ]);
 
         if ($validator->fails()) {
@@ -273,7 +273,12 @@ class UserController extends Controller
         }
 
         // Verify shop ownership
-        if (!$authUser->ownedShops()->where('id', $request->shop_id)->exists()) {
+        $shop = Shop::find($request->shop_id);
+        if (!$shop) {
+            return response()->json(['message' => 'Shop not found'], 404);
+        }
+
+        if ($authUser->id !== $shop->owner_id) {
             return response()->json(['message' => 'You do not own this shop'], 403);
         }
 
@@ -356,7 +361,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Password setup successfully',
-            'user' => $user,
+            'user' => $user->load(['shop', 'ownedShops']),
             'token' => $token,
         ], 200);
     }

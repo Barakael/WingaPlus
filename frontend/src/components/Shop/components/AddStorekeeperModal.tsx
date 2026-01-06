@@ -34,6 +34,25 @@ const AddStorekeeperModal: React.FC<AddStorekeeperModalProps> = ({ isOpen, onClo
 
     try {
       setLoading(true);
+      
+      // Get shop_id from user object
+      // For shop owners: shop relationship OR first owned shop
+      let shopId = user?.shop?.id || user?.shop_id;
+      
+      // If still no shop_id, try to get from owned_shops array (snake_case from API)
+      if (!shopId && user?.owned_shops && Array.isArray(user.owned_shops) && user.owned_shops.length > 0) {
+        shopId = user.owned_shops[0].id;
+      }
+
+      console.log('User object:', user);
+      console.log('Resolved shopId:', shopId);
+
+      if (!shopId) {
+        showErrorToast('Unable to determine shop. Please ensure you are a shop owner.');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`${BASE_URL}/api/users/invite-storekeeper`, {
         method: 'POST',
         headers: {
@@ -45,7 +64,7 @@ const AddStorekeeperModal: React.FC<AddStorekeeperModalProps> = ({ isOpen, onClo
           email,
           name,
           phone: phone || null,
-          shop_id: user?.shop_id || user?.id,
+          shop_id: shopId,
         }),
       });
 

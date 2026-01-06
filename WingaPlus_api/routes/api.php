@@ -18,7 +18,7 @@ Route::get('/user', function (Request $request) {
     $user = $request->user();
     // Load shop relationship for shop owners
     if ($user && $user->role === 'shop_owner') {
-        $user->load('ownedShop');
+        $user->load('ownedShops');
     }
     // Load shop relationship for other users
     if ($user && $user->shop_id) {
@@ -39,6 +39,7 @@ Route::post('/login', function (Request $request) {
 
         if (auth()->attempt($credentials)) {
             $user = auth()->user();
+            $user->load('shop', 'ownedShops');
             $token = $user->createToken('api-token')->plainTextToken;
 
             return response()->json([
