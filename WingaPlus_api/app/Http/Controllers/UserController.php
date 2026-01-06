@@ -30,10 +30,11 @@ class UserController extends Controller
         // Filter based on user permissions
         if ($user->isShopOwner()) {
             $shopIds = $user->ownedShops()->pluck('id');
-            $query->where(function ($q) use ($shopIds) {
+            $userId = $user->id;
+            $query->where(function ($q) use ($shopIds, $userId) {
                 $q->whereIn('shop_id', $shopIds)
                   ->orWhere('role', 'salesman')
-                  ->orWhere('id', $user->id);
+                  ->orWhere('id', $userId);
             });
         }
 
