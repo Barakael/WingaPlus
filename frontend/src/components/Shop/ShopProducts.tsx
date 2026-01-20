@@ -31,6 +31,70 @@ interface Category {
   description?: string;
 }
 
+const resolveUserShopId = (user: any): number | string | null => {
+  if (!user) return null;
+
+  const directShopId = user.shop_id ?? user.shopId ?? user.shop?.id;
+  if (directShopId) {
+    return directShopId;
+  }
+
+  const ownedShops =
+    (Array.isArray(user.owned_shops) && user.owned_shops) ||
+    (Array.isArray(user.ownedShops) && user.ownedShops) ||
+    null;
+
+  if (ownedShops && ownedShops.length > 0) {
+    return ownedShops[0]?.id ?? null;
+  }
+
+  if (user.owned_shop?.id) {
+    return user.owned_shop.id;
+  }
+
+  if (user.ownedShop?.id) {
+    return user.ownedShop.id;
+  }
+
+  return null;
+};
+
+const toNumber = (value: any): number | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  const parsed = typeof value === 'number' ? value : parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const normalizeProduct = (
+  rawProduct: any,
+  fallbackShopId: number | string | null
+): Product => {
+  const stockQuantity = toNumber(rawProduct?.stock_quantity ?? rawProduct?.stock) ?? 0;
+  const minStockLevel = toNumber(rawProduct?.min_stock_level ?? rawProduct?.min_stock) ?? 0;
+  const price = toNumber(rawProduct?.price) ?? 0;
+  const costPrice = toNumber(rawProduct?.cost_price);
+  const resolvedShopId = toNumber(rawProduct?.shop_id) ?? toNumber(fallbackShopId) ?? 0;
+  const categoryId = toNumber(
+    rawProduct?.category_id ?? rawProduct?.category?.id ?? rawProduct?.categoryId
+  );
+
+  return {
+    ...rawProduct,
+    shop_id: resolvedShopId,
+    stock_quantity: stockQuantity,
+    min_stock_level: minStockLevel,
+    price,
+    cost_price: costPrice,
+    category_id: categoryId ?? undefined,
+    category_name:
+      rawProduct?.category_name ??
+      rawProduct?.category?.name ??
+      rawProduct?.categoryName,
+  };
+};
+
 const ShopProducts: React.FC = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
@@ -61,8 +125,10 @@ const ShopProducts: React.FC = () => {
     if (!user) return;
     try {
       setLoading(true);
-      
-      const response = await fetch(`${BASE_URL}/api/products?shop_id=${user.shop_id || user.id}`, {
+      const shopId = resolveUserShopId(user);
+      const querySuffix = shopId ? `?shop_id=${encodeURIComponent(String(shopId))}` : '';
+
+      const response = await fetch(`${BASE_URL}/api/products${querySuffix}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Accept': 'application/json',
@@ -74,9 +140,21 @@ const ShopProducts: React.FC = () => {
       }
 
       const data = await response.json();
-      const productsData = data?.data?.data || data?.data || [];
-      setProducts(productsData);
-      setFilteredProducts(productsData);
+      const collections = [
+        data?.data?.data,
+        data?.data?.items,
+        data?.data,
+        data?.products,
+        data?.items,
+        data,
+      ];
+      const rawProducts =
+        (collections.find((collection) => Array.isArray(collection)) as any[]) || [];
+      const normalizedProducts = rawProducts.map((product: any) =>
+        normalizeProduct(product, shopId)
+      );
+      setProducts(normalizedProducts);
+      setFilteredProducts(normalizedProducts);
     } catch (err) {
       console.error('Error fetching products:', err);
       showErrorToast('Failed to load products');
