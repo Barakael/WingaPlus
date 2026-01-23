@@ -25,9 +25,13 @@ class Product extends Model
         'status',
         'source',
         'imei',
+        'serial_number',
         'ram',
         'color',
         'storage',
+        'device_type',
+        'phone_color_id',
+        'laptop_variant_id',
     ];
 
     protected $casts = [
@@ -48,6 +52,30 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function phoneColor(): BelongsTo
+    {
+        return $this->belongsTo(PhoneColor::class, 'phone_color_id');
+    }
+
+    public function laptopVariant(): BelongsTo
+    {
+        return $this->belongsTo(LaptopVariant::class, 'laptop_variant_id');
+    }
+
+    // Get device full specification
+    public function getDeviceSpecification(): ?string
+    {
+        if ($this->device_type === 'phone' && $this->phoneColor) {
+            return $this->phoneColor->full_specification;
+        }
+        
+        if ($this->device_type === 'laptop' && $this->laptopVariant) {
+            return $this->laptopVariant->full_specification;
+        }
+        
+        return null;
     }
 
     // Check if product is low on stock
