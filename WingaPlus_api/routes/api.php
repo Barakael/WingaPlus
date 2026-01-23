@@ -13,6 +13,7 @@ use App\Http\Controllers\MyShopController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpenditureController;
+use App\Http\Controllers\DeviceModelController;
 
 Route::get('/user', function (Request $request) {
     $user = $request->user();
@@ -135,6 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/my/shop', [MyShopController::class, 'store']);
     // Products & Categories
     Route::apiResource('products', ProductController::class);
+    Route::post('/products/bulk', [ProductController::class, 'bulkStore']);
     Route::apiResource('categories', CategoryController::class);
 });
 
@@ -160,4 +162,20 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     
     // Reports
     Route::get('/reports', [SuperAdminController::class, 'getReports']);
+});
+
+// Device model search routes (protected by auth)
+Route::middleware('auth:sanctum')->prefix('devices')->group(function () {
+    // Search devices
+    Route::get('/search', [DeviceModelController::class, 'search']);
+    Route::get('/smart-search', [DeviceModelController::class, 'smartSearch']);
+    
+    // Phone endpoints
+    Route::get('/phones/{phoneModelId}/variants', [DeviceModelController::class, 'getPhoneVariants']);
+    Route::get('/phones/variants/{variantId}/colors', [DeviceModelController::class, 'getPhoneColors']);
+    Route::get('/phones/colors/{phoneColorId}/specification', [DeviceModelController::class, 'getPhoneSpecification']);
+    
+    // Laptop endpoints
+    Route::get('/laptops/{laptopModelId}/variants', [DeviceModelController::class, 'getLaptopVariants']);
+    Route::get('/laptops/variants/{laptopVariantId}/specification', [DeviceModelController::class, 'getLaptopSpecification']);
 });
