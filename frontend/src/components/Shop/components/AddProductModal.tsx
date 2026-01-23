@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { X, Save, Image as ImageIcon, Smartphone, Laptop, Headphones } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Save, Smartphone, Laptop, Headphones } from 'lucide-react';
 import { BASE_URL } from '../../api/api';
 import { showSuccessToast, showErrorToast } from '../../../lib/toast';
+import DeviceSelector from '../DeviceSelector';
 
 interface Category {
   id: number;
@@ -16,6 +17,17 @@ interface AddProductModalProps {
   selectedCategory: Category;
 }
 
+interface DeviceSelection {
+  deviceType: 'phone' | 'laptop';
+  phone_color_id?: number;
+  laptop_variant_id?: number;
+  specification: string;
+  units: Array<{
+    imei?: string;
+    serial_number?: string;
+  }>;
+}
+
 const AddProductModal: React.FC<AddProductModalProps> = ({
   isOpen,
   onClose,
@@ -23,8 +35,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   selectedCategory,
 }) => {
   const [loading, setLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [deviceSelection, setDeviceSelection] = useState<DeviceSelection | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     category_id: selectedCategory.id.toString(),
@@ -44,7 +55,9 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   const categoryName = selectedCategory.name.toLowerCase();
   const isPhones = categoryName.includes('phone');
   const isComputers = categoryName.includes('computer') || categoryName.includes('laptop');
-  // const isAccessories = !isPhones && !isComputers; // reserved for future use
+  
+  // Use DeviceSelector for phones and laptops
+  const useDeviceSelector = isPhones || isComputers;
 
   // Reset form when modal opens
   useEffect(() => {
@@ -64,12 +77,20 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         color: '',
         storage: '',
       });
-      setImagePreview('');
+      setDeviceSelection(null);
     }
   }, [isOpen, selectedCategory.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // For phones/laptops with DeviceSelector, use bulk create API
+    if (useDeviceSelector && deviceSelection) {
+      await handleBulkCreate();
+      return;
+    }
+    
+    // For accessories, use regular create API
     setLoading(true);
 
     try {
@@ -115,7 +136,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         color: '',
         storage: '',
       });
-      setImagePreview('');
       
       onSuccess();
     } catch (err) {
@@ -126,17 +146,77 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     }
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+  const handleBulkCreate = async () => {
+    if (!deviceSelection) return;
+    
+    setLoading(true);
+
+    try {
+      const payload = {
+        device_type: deviceSelection.deviceType,
+        phone_color_id: deviceSelection.phone_color_id,
+        laptop_variant_id: deviceSelection.laptop_variant_id,
+        price: parseFloat(formData.price.toString()),
+        cost_price: parseFloat(formData.cost_price.toString()),
+        source: formData.source || null,
+        category_id: parseInt(formData.category_id),
+        units: deviceSelection.units,
       };
-      reader.readAsDataURL(file);
-      setFormData({ ...formData, image_url: `uploaded_${file.name}` });
+
+      const response = await fetch(`${BASE_URL}/api/products/bulk`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to create products');
+      }
+
+      const result = await response.json();
+      
+      if (result.results.failed.length > 0) {
+        showErrorToast(
+          `${result.results.success.length} products created, ${result.results.failed.length} failed. Check console for details.`
+        );
+        console.error('Failed products:', result.results.failed);
+      } else {
+        showSuccessToast(`Successfully created ${result.results.success.length} products!`);
+      }
+      
+      // Reset form
+      setFormData({
+        name: '',
+        category_id: selectedCategory.id.toString(),
+        description: '',
+        stock_quantity: 0,
+        min_stock_level: 5,
+        cost_price: 0,
+        price: 0,
+        image_url: '',
+        source: '',
+        imei: '',
+        ram: '',
+        color: '',
+        storage: '',
+      });
+      setDeviceSelection(null);
+      
+      onSuccess();
+    } catch (err) {
+      console.error('Error creating products:', err);
+      showErrorToast(err instanceof Error ? err.message : 'Failed to create products');
+    } finally {
+      setLoading(false);
     }
   };
+
+
 
   const handleClose = () => {
     if (!loading) {
@@ -155,7 +235,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         color: '',
         storage: '',
       });
-      setImagePreview('');
       onClose();
     }
   };
@@ -207,21 +286,23 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
 
           {/* Product Form */}
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Product Name */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Product Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                required
-                disabled={loading}
-                placeholder={isPhones ? "e.g., iPhone 15 Pro" : isComputers ? "e.g., HP Laptop 15s" : "e.g., Phone Case"}
-              />
-            </div>
+            {/* Product Name (only for accessories - devices get name from DeviceSelector) */}
+            {!useDeviceSelector && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Product Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                  disabled={loading}
+                  placeholder="e.g., Phone Case"
+                />
+              </div>
+            )}
 
             {/* Source (optional for all) */}
             <div>
@@ -238,128 +319,49 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               />
             </div>
 
-            {/* Category-Specific Fields */}
-            {isPhones && (
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50 space-y-3">
-                <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 flex items-center">
-                  <Smartphone className="h-4 w-4 mr-2" />
-                  Phone Details
-                </h4>
+            {/* Device Selector for Phones and Laptops */}
+            {useDeviceSelector ? (
+              <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-700">
+                <DeviceSelector
+                  deviceType={isPhones ? 'phone' : 'laptop'}
+                  onDeviceSelect={setDeviceSelection}
+                  categoryId={selectedCategory.id}
+                />
+              </div>
+            ) : (
+              /* Stock and Min Stock for Accessories only */
+              <>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      IMEI <span className="text-red-500">*</span>
+                      Stock Quantity <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
-                      value={formData.imei}
-                      onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required={isPhones}
+                      type="number"
+                      value={formData.stock_quantity}
+                      onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
                       disabled={loading}
-                      placeholder="123456789012345"
+                      min="0"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Color <span className="text-red-500">*</span>
+                      Min Stock Level <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
-                      value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required={isPhones}
+                      type="number"
+                      value={formData.min_stock_level}
+                      onChange={(e) => setFormData({ ...formData, min_stock_level: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
                       disabled={loading}
-                      placeholder="e.g., Space Black"
+                      min="0"
                     />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Storage <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.storage}
-                      onChange={(e) => setFormData({ ...formData, storage: e.target.value })}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required={isPhones}
-                      disabled={loading}
-                    >
-                      <option value="">Select storage...</option>
-                      <option value="64GB">64GB</option>
-                      <option value="128GB">128GB</option>
-                      <option value="256GB">256GB</option>
-                      <option value="512GB">512GB</option>
-                      <option value="1TB">1TB</option>
-                    </select>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {isComputers && (
-              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50 space-y-3">
-                <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 flex items-center">
-                  <Laptop className="h-4 w-4 mr-2" />
-                  Computer/Laptop Details
-                </h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      RAM <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.ram}
-                      onChange={(e) => setFormData({ ...formData, ram: e.target.value })}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required={isComputers}
-                      disabled={loading}
-                    >
-                      <option value="">Select RAM...</option>
-                      <option value="4GB">4GB</option>
-                      <option value="8GB">8GB</option>
-                      <option value="16GB">16GB</option>
-                      <option value="32GB">32GB</option>
-                      <option value="64GB">64GB</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Color <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required={isComputers}
-                      disabled={loading}
-                      placeholder="e.g., Silver"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Storage <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.storage}
-                      onChange={(e) => setFormData({ ...formData, storage: e.target.value })}
-                      className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required={isComputers}
-                      disabled={loading}
-                    >
-                      <option value="">Select storage...</option>
-                      <option value="128GB SSD">128GB SSD</option>
-                      <option value="256GB SSD">256GB SSD</option>
-                      <option value="512GB SSD">512GB SSD</option>
-                      <option value="1TB SSD">1TB SSD</option>
-                      <option value="2TB SSD">2TB SSD</option>
-                      <option value="500GB HDD">500GB HDD</option>
-                      <option value="1TB HDD">1TB HDD</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+              </>
             )}
 
             {/* Description */}
@@ -376,41 +378,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                 rows={2}
               />
             </div> */}
-
-            {/* Stock Quantity and Min Level - 2 columns */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Stock Qty <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={formData.stock_quantity}
-                  onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Min Level <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={formData.min_stock_level}
-                  onChange={(e) => setFormData({ ...formData, min_stock_level: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#1973AE] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  required
-                  disabled={loading}
-                />
-              </div>
-            </div>
 
             {/* Cost Price and Selling Price - 2 columns */}
             <div className="grid grid-cols-2 gap-3">
@@ -485,7 +452,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (useDeviceSelector && !deviceSelection)}
                 className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-4 rounded-lg font-medium hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm"
               >
                 {loading ? (
@@ -496,7 +463,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Create Product
+                    {useDeviceSelector && deviceSelection 
+                      ? `Create ${deviceSelection.units.length} Product${deviceSelection.units.length > 1 ? 's' : ''}`
+                      : 'Create Product'
+                    }
                   </>
                 )}
               </button>
