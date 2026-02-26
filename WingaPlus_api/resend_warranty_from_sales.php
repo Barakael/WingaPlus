@@ -30,7 +30,10 @@ echo "ID | Customer | Email | Product | Warranty End\n";
 echo str_repeat("-", 100) . "\n";
 
 foreach ($salesWithWarranty->take(5) as $sale) {
-    $details = json_decode($sale->warranty_details, true);
+    // warranty_details might be array or JSON string
+    $details = is_array($sale->warranty_details) 
+        ? $sale->warranty_details 
+        : json_decode($sale->warranty_details, true);
     $email = $details['customer_email'] ?? 'NO EMAIL';
     $productName = $sale->phone_name ?? $sale->product_name;
     echo sprintf(
@@ -71,8 +74,10 @@ $failCount = 0;
 $noEmailCount = 0;
 
 foreach ($salesToResend as $sale) {
-    // Extract warranty details from JSON
-    $details = json_decode($sale->warranty_details, true);
+    // warranty_details might be array or JSON string
+    $details = is_array($sale->warranty_details) 
+        ? $sale->warranty_details 
+        : json_decode($sale->warranty_details, true);
     
     if (!isset($details['customer_email']) || empty($details['customer_email'])) {
         echo "⚠️  Sale ID {$sale->id}: No customer email in warranty details\n";
