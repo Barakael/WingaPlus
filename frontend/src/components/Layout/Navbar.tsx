@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getRoleDisplayName } from '../../lib/roleMapping';
 import DashboardTabSwitcher from './DashboardTabSwitcher';
+import BrandLogo from '../BrandLogo';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -28,16 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, dashboardMode = 'shop', on
               <Menu className="h-6 w-6" />
             </button>
             <div className="flex items-center ml-2 lg:ml-0 flex-shrink-0">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 backdrop-blur-sm rounded-lg flex items-center justify-center bg-[#1973AE]">
-                  <span className="text-white dark:text-white font-bold text-sm lg:text-white">WP</span>
-                </div>
-              </div>
-              <div className="ml-1 hidden sm:block">
-                <h1 className="text-xl font-bold text-[#1973AE] dark:text-[#1973AE] lg:text-gray-900 lg:dark:text-white whitespace-nowrap">
-                  WingaPro
-                </h1>
-              </div>
+              <BrandLogo />
             </div>
           </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff, UserPlus, User, HelpCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { showSuccessToast, showErrorToast } from '../../lib/toast';
+import BrandLogo from '../BrandLogo';
 
 const LoginForm: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -87,12 +88,7 @@ const LoginForm: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 bg-gradient-to-r from-[#1973AE] to-[#0d5a8a] rounded-2xl flex items-center justify-center mx-auto mb-2">
-              <span className="text-white font-bold text-xl">WP</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              WingaPro
-            </h1>
+            <BrandLogo variant="auth" />
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </p>
