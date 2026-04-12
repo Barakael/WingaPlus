@@ -308,11 +308,18 @@ class SuperAdminController extends Controller
      */
     public function getReports(Request $request)
     {
-        // Sales by shop
-        $salesByShop = Sale::select('shop_id', DB::raw('COUNT(*) as total_sales'), DB::raw('SUM(total_amount) as total_revenue'))
-            ->groupBy('shop_id')
-            ->with('shop')
+        // Sales by shop — join through salesman (users) since sales has no shop_id column
+        $salesByShopRaw = Sale::selectRaw('users.shop_id, COUNT(*) as total_sales, SUM(sales.total_amount) as total_revenue')
+            ->join('users', 'sales.salesman_id', '=', 'users.id')
+            ->whereNotNull('sales.salesman_id')
+            ->whereNotNull('users.shop_id')
+            ->groupBy('users.shop_id')
             ->get();
+
+        $salesByShop = $salesByShopRaw->map(function ($row) {
+            $row->shop = Shop::find($row->shop_id);
+            return $row;
+        });
 
         // Sales by salesman
         $salesBySalesman = Sale::select('salesman_id', DB::raw('COUNT(*) as total_sales'), DB::raw('SUM(total_amount) as total_revenue'))
