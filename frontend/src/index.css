@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* PWA install prompt slide-up animation */
+@keyframes slideUpSheet {
+  from { transform: translateY(110%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
 /* Make status bar/notch area blue */
 html, body {
   background-color: #1973AE;
