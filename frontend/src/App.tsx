@@ -25,6 +25,7 @@ import ShopsManagement from './components/SuperAdmin/ShopsManagement';
 import UsersManagement from './components/SuperAdmin/UsersManagement';
 import SystemReports from './components/SuperAdmin/SystemReports';
 import ExpenditureView from './components/Expenditures/ExpenditureView';
+import InstallPrompt from './components/PWA/InstallPrompt';
 
 // Page labels for breadcrumbs
 const pageLabels: Record<string, string> = {
@@ -306,6 +307,7 @@ function App() {
           }}
         />
         <AppContent />
+        <InstallPrompt />
       </AuthProvider>
     </ThemeProvider>
   );
