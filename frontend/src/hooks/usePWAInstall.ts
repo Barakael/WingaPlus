@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-const DISMISSED_KEY = 'pwa_install_dismissed';
-const PROMPT_DELAY_MS = 12_000;
+const SESSION_DISMISSED_KEY = 'pwa_install_dismissed_session';
+const PROMPT_DELAY_MS = 3_000;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -38,11 +38,12 @@ export function usePWAInstall(): UsePWAInstallReturn {
 
   const isIOS = detectIOS();
   const isInstalled = detectInstalled();
-  const alreadyDismissed = localStorage.getItem(DISMISSED_KEY) === '1';
+  // Only suppress within this session if user already tapped X
+  const sessionDismissed = sessionStorage.getItem(SESSION_DISMISSED_KEY) === '1';
 
   useEffect(() => {
-    // Nothing to show if already installed or user dismissed before
-    if (isInstalled || alreadyDismissed) return;
+    // Stop showing only when already installed or dismissed this session
+    if (isInstalled || sessionDismissed) return;
 
     // Android — capture beforeinstallprompt
     const handleBeforeInstall = (e: Event) => {
@@ -75,13 +76,15 @@ export function usePWAInstall(): UsePWAInstallReturn {
     deferredPrompt.current = null;
     setCanInstall(false);
     setShowPrompt(false);
-    if (outcome === 'accepted') {
-      localStorage.setItem(DISMISSED_KEY, '1');
+    // No localStorage — if user uninstalls they'll see the prompt again on next session
+    if (outcome === 'dismissed') {
+      sessionStorage.setItem(SESSION_DISMISSED_KEY, '1');
     }
   }, []);
 
   const dismiss = useCallback(() => {
-    localStorage.setItem(DISMISSED_KEY, '1');
+    // Only dismiss for this session — reappears on every new visit
+    sessionStorage.setItem(SESSION_DISMISSED_KEY, '1');
     setShowPrompt(false);
   }, []);
 
