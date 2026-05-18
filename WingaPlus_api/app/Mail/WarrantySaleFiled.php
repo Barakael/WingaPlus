@@ -9,6 +9,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Sale;
+use App\Models\Shop;
+use App\Models\User;
+use App\Services\WarrantyCardRenderer;
+use Carbon\Carbon;
 
 class WarrantySaleFiled extends Mailable
 {
@@ -17,14 +21,16 @@ class WarrantySaleFiled extends Mailable
     public $sale;
     public $warranty;
     public $userName;
+    public $issuerUser;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Sale $sale, $warranty = null, $userName = null)
+    public function __construct(Sale $sale, $warranty = null, $userName = null, ?User $issuerUser = null)
     {
         $this->sale = $sale;
         $this->warranty = $warranty;
+        $this->issuerUser = $issuerUser;
         // Try to get the store name or full name from the salesman user
         if ($sale->salesman_id) {
             $user = \App\Models\User::find($sale->salesman_id);
@@ -40,13 +46,30 @@ class WarrantySaleFiled extends Mailable
     public function build()
     {
         $productName = $this->warranty ? $this->warranty->phone_name : $this->sale->product_name;
-        
+        $warrantyDetails = $this->sale->warranty_details ?? [];
+        $issuerShop = $this->resolveIssuerShop();
+        $cardRenderer = app(WarrantyCardRenderer::class);
+        $cardImage = $cardRenderer->renderDataUri([
+            'business_name' => $issuerShop?->name ?: $this->userName,
+            'business_phone' => $issuerShop?->phone ?: ($this->issuerUser?->phone ?: $this->sale->customer_phone),
+            'business_email' => $issuerShop?->effective_email ?: ($this->issuerUser?->email ?: null),
+            'logo_path' => $issuerShop?->logo_path,
+            'customer_name' => $this->sale->customer_name,
+            'product_name' => $this->warranty?->phone_name ?: $this->sale->product_name,
+            'purchase_date' => $this->formatDate($this->sale->created_at ?: now()),
+            'warranty_period' => ($this->sale->warranty_months ?? ($this->warranty?->warranty_period ?? null)) ? (($this->sale->warranty_months ?? $this->warranty?->warranty_period).' months') : 'N/A',
+            'warranty_expires' => $this->formatDate($this->sale->warranty_end ?? ($this->warranty?->expiry_date ?? null)),
+            'imei_serial' => $warrantyDetails['imei_number'] ?? $this->sale->imei ?? $this->sale->serial_number ?? null,
+            'specification' => $this->buildSpecification($warrantyDetails),
+        ]);
+
         return $this->subject("Warranty Filed by {$this->userName} - {$productName}")
                     ->view('emails.warranty_filed')
                     ->with('sale', $this->sale)
                     ->with('warranty', $this->warranty)
-                    ->with('warrantyDetails', $this->sale->warranty_details ?? [])
-                    ->with('userName', $this->userName);
+                    ->with('warrantyDetails', $warrantyDetails)
+                    ->with('userName', $this->userName)
+                    ->with('cardImage', $cardImage);
     }
 
     /**
@@ -57,5 +80,50 @@ class WarrantySaleFiled extends Mailable
     public function attachments(): array
     {
         return [];
+    }
+
+    private function resolveIssuerShop(): ?Shop
+    {
+        $issuer = $this->issuerUser;
+        if (!$issuer && $this->sale->salesman_id) {
+            $issuer = User::with(['shop', 'ownedShop'])->find($this->sale->salesman_id);
+        }
+
+        if (!$issuer) {
+            return null;
+        }
+
+        if ($issuer->role === 'shop_owner') {
+            return $issuer->ownedShop()->first();
+        }
+
+        if ($issuer->shop_id) {
+            return $issuer->shop()->first();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $warrantyDetails
+     */
+    private function buildSpecification(array $warrantyDetails): string
+    {
+        $pieces = array_filter([
+            $warrantyDetails['storage'] ?? $this->sale->storage ?? null,
+            $warrantyDetails['color'] ?? $this->sale->color ?? null,
+            $warrantyDetails['ram'] ?? $this->sale->ram ?? null,
+        ]);
+
+        return $pieces ? implode(' | ', $pieces) : 'N/A';
+    }
+
+    private function formatDate($date): string
+    {
+        if (!$date) {
+            return 'N/A';
+        }
+
+        return Carbon::parse($date)->format('M d, Y');
     }
 }
