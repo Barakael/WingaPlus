@@ -10,6 +10,7 @@ use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SuperAdminController extends Controller
 {
@@ -95,7 +96,12 @@ class SuperAdminController extends Controller
             'owner_id' => 'nullable|exists:users,id',
             'status' => 'nullable|in:active,inactive,suspended',
             'description' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $validated['logo_path'] = $request->file('logo')->store('shop-logos', 'public');
+        }
 
         $shop = Shop::create($validated);
 
@@ -130,7 +136,23 @@ class SuperAdminController extends Controller
             'owner_id' => 'nullable|exists:users,id',
             'status' => 'nullable|in:active,inactive,suspended',
             'description' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'remove_logo' => 'nullable|boolean',
         ]);
+
+        if (($validated['remove_logo'] ?? false) && $shop->logo_path) {
+            Storage::disk('public')->delete($shop->logo_path);
+            $validated['logo_path'] = null;
+        }
+
+        if ($request->hasFile('logo')) {
+            if ($shop->logo_path) {
+                Storage::disk('public')->delete($shop->logo_path);
+            }
+            $validated['logo_path'] = $request->file('logo')->store('shop-logos', 'public');
+        }
+
+        unset($validated['logo'], $validated['remove_logo']);
 
         $oldData = $shop->toArray();
         $shop->update($validated);
