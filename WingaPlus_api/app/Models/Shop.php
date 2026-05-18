@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Shop extends Model
 {
@@ -17,6 +18,7 @@ class Shop extends Model
         'owner_id',
         'status',
         'description',
+        'logo_path',
     ];
 
     protected $casts = [
@@ -24,7 +26,7 @@ class Shop extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $appends = ['effective_email'];
+    protected $appends = ['effective_email', 'logo_url'];
 
     /**
      * Boot the model and add event listeners
@@ -62,6 +64,18 @@ class Shop extends Model
     public function getEffectiveEmailAttribute(): ?string
     {
         return $this->email ?: $this->owner?->email;
+    }
+
+    /**
+     * Get the public URL for the uploaded logo.
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->logo_path);
     }
 
     public function users(): HasMany
