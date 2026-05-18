@@ -134,6 +134,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Authenticated shop owner shop setup & retrieval
     Route::get('/my/shop', [MyShopController::class, 'show']);
     Route::post('/my/shop', [MyShopController::class, 'store']);
+    Route::put('/my/shop', [MyShopController::class, 'update']);
+    Route::patch('/my/shop', [MyShopController::class, 'update']);
     // Products & Categories
     Route::apiResource('products', ProductController::class);
     Route::post('/products/bulk', [ProductController::class, 'bulkStore']);
