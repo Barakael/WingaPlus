@@ -67,7 +67,7 @@ export function usePWAInstall(): UsePWAInstallReturn {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       clearTimeout(timer);
     };
-  }, [isInstalled, alreadyDismissed, isIOS]);
+  }, [isInstalled, sessionDismissed, isIOS]);
 
   const triggerInstall = useCallback(async () => {
     if (!deferredPrompt.current) return;
