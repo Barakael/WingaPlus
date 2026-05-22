@@ -149,3 +149,103 @@ export const getReports = async () => {
   
   return response.json();
 };
+
+export interface ReportsQueryParams {
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface ReportSummary {
+  joined_shops: number;
+  joined_wingas: number;
+  active_shops: number;
+  active_wingas: number;
+}
+
+export interface ReportSalesByShop {
+  shop_id: number;
+  total_sales: number;
+  total_revenue: number;
+  shop: {
+    id: number;
+    name: string;
+    location?: string;
+    status?: string;
+  } | null;
+}
+
+export interface ReportSalesBySalesman {
+  salesman_id: number;
+  total_sales: number;
+  total_revenue: number;
+  salesman: {
+    id: number;
+    name: string;
+    email?: string;
+    shop?: {
+      id: number;
+      name: string;
+    } | null;
+  } | null;
+}
+
+export interface ReportActivity {
+  id: number;
+  action: string;
+  model: string;
+  description: string;
+  created_at: string;
+  user?: {
+    id: number;
+    name: string;
+    email?: string;
+  } | null;
+}
+
+export interface ReportsResponse {
+  period: {
+    date_from?: string | null;
+    date_to?: string | null;
+  };
+  summary: ReportSummary;
+  sales_by_shop: ReportSalesByShop[];
+  sales_by_salesman: ReportSalesBySalesman[];
+  recent_activity: ReportActivity[];
+}
+
+export const getReportsWithFilters = async (params: ReportsQueryParams = {}) => {
+  const queryParams = new URLSearchParams(params as Record<string, string>).toString();
+  const response = await fetch(`${BASE_URL}/api/admin/reports${queryParams ? `?${queryParams}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch reports');
+  }
+
+  return response.json() as Promise<ReportsResponse>;
+};
+
+export interface LogsQueryParams {
+  action?: string;
+  model?: string;
+  user_id?: string;
+  date_from?: string;
+  date_to?: string;
+  q?: string;
+  page?: string;
+  per_page?: string;
+}
+
+export const getLogs = async (params: LogsQueryParams = {}) => {
+  const queryParams = new URLSearchParams(params as Record<string, string>).toString();
+  const response = await fetch(`${BASE_URL}/api/admin/logs${queryParams ? `?${queryParams}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch logs');
+  }
+
+  return response.json();
+};
