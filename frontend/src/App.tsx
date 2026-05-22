@@ -24,6 +24,7 @@ import Settings from './components/Common/Settings';
 import ShopsManagement from './components/SuperAdmin/ShopsManagement';
 import UsersManagement from './components/SuperAdmin/UsersManagement';
 import SystemReports from './components/SuperAdmin/SystemReports';
+import SystemLogs from './components/SuperAdmin/SystemLogs';
 import ExpenditureView from './components/Expenditures/ExpenditureView';
 import InstallPrompt from './components/PWA/InstallPrompt';
 
@@ -41,6 +42,7 @@ const pageLabels: Record<string, string> = {
   'services': 'Services',
   'file-service': 'File Service',
   'reports': 'Reports',
+  'logs': 'Logs',
   'inventory': 'Inventory',
   'stock-movements': 'Stock Movements',
   'my-sales': 'My Sales',
@@ -230,6 +232,8 @@ const AppContent: React.FC = () => {
       case 'reports':
         // Use SystemReports for super_admin, Reports for others
         return user?.role === 'super_admin' ? <SystemReports /> : <Reports />;
+      case 'logs':
+        return user?.role === 'super_admin' ? <SystemLogs /> : <Reports />;
       case 'inventory':
         return <InventoryPage />;
       case 'stock-movements':
