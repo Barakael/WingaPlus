@@ -3,4 +3,4 @@
 // export const BASE_URL = 'http://127.0.0.1:8001'; // local dev only
 
 // for production - use domain name to match SSL certificate
-export const BASE_URL = 'https://wingapro.app';
+export const BASE_URL = 'http://127.0.0.1:8000'
