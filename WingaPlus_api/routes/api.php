@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\ActivityLog;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ServiceController;
@@ -43,6 +44,14 @@ Route::post('/login', function (Request $request) {
             $user->load('shop', 'ownedShops');
             $token = $user->createToken('api-token')->plainTextToken;
 
+            ActivityLog::logActivity(
+                $user->id,
+                'login',
+                'User',
+                $user->id,
+                "User logged in: {$user->email}"
+            );
+
             return response()->json([
                 'user' => $user,
                 'token' => $token,
@@ -56,6 +65,16 @@ Route::post('/login', function (Request $request) {
 })->name('login');
 
 Route::post('/logout', function (Request $request) {
+    $user = $request->user();
+    if ($user) {
+        ActivityLog::logActivity(
+            $user->id,
+            'logout',
+            'User',
+            $user->id,
+            "User logged out: {$user->email}"
+        );
+    }
     $request->user()->currentAccessToken()->delete();
     return response()->json(['message' => 'Logged out successfully']);
 })->middleware('auth:sanctum');
@@ -80,6 +99,15 @@ Route::post('/register', function (Request $request) {
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
+
+        ActivityLog::logActivity(
+            $user->id,
+            'register',
+            'User',
+            $user->id,
+            "New user registration: {$user->email}",
+            ['new' => $user->toArray()]
+        );
 
         return response()->json([
             'user' => $user,
@@ -164,6 +192,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     
     // Reports
     Route::get('/reports', [SuperAdminController::class, 'getReports']);
+    Route::get('/logs', [SuperAdminController::class, 'getLogs']);
 });
 
 // Device model search routes (protected by auth)
