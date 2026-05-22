@@ -13,7 +13,8 @@ import {
   Wrench,
   Target,
   Settings,
-  Wallet
+  Wallet,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -66,6 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeTab, onTabChan
           { id: 'shops', label: 'Shops', icon: Store },
           { id: 'users', label: 'Users', icon: Users },
           { id: 'reports', label: 'Reports', icon: BarChart3 },
+          { id: 'logs', label: 'Logs', icon: Activity },
           { id: 'settings', label: 'Settings', icon: Settings },
         ];
       case 'salesman':
