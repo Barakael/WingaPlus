@@ -6,8 +6,10 @@ use App\Models\User;
 use App\Models\Shop;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Service;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -111,7 +113,8 @@ class SuperAdminController extends Controller
             'create',
             'Shop',
             $shop->id,
-            "Created shop: {$shop->name}"
+            "Created shop: {$shop->name}",
+            ['new' => $shop->toArray()]
         );
 
         return response()->json([
@@ -189,7 +192,8 @@ class SuperAdminController extends Controller
             'delete',
             'Shop',
             $id,
-            "Deleted shop: {$shopName}"
+            "Deleted shop: {$shopName}",
+            ['old' => $shop->toArray()]
         );
 
         return response()->json([
@@ -317,7 +321,8 @@ class SuperAdminController extends Controller
             'delete',
             'User',
             $id,
-            "Deleted user: {$userName}"
+            "Deleted user: {$userName}",
+            ['old' => $user->toArray()]
         );
 
         return response()->json([
@@ -330,38 +335,193 @@ class SuperAdminController extends Controller
      */
     public function getReports(Request $request)
     {
-        // Sales by shop — join through salesman (users) since sales has no shop_id column
-        $salesByShopRaw = Sale::selectRaw('users.shop_id, COUNT(*) as total_sales, SUM(sales.total_amount) as total_revenue')
+        if ($authError = $this->ensureSuperAdmin($request)) {
+            return $authError;
+        }
+
+        $validated = $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ]);
+
+        $dateFrom = $validated['date_from'] ?? null;
+        $dateTo = $validated['date_to'] ?? null;
+
+        // Sales by shop — join through salesman (users) since sales has no shop_id column.
+        $salesByShopQuery = Sale::query()
+            ->selectRaw('users.shop_id, COUNT(*) as total_sales, COALESCE(SUM(sales.total_amount), 0) as total_revenue')
             ->join('users', 'sales.salesman_id', '=', 'users.id')
             ->whereNotNull('sales.salesman_id')
             ->whereNotNull('users.shop_id')
-            ->groupBy('users.shop_id')
-            ->get();
+            ->groupBy('users.shop_id');
+        $this->applySalesDateRange($salesByShopQuery, $dateFrom, $dateTo);
+        $salesByShopRaw = $salesByShopQuery->get();
 
         $salesByShop = $salesByShopRaw->map(function ($row) {
-            $row->shop = Shop::find($row->shop_id);
-            return $row;
+            return [
+                'shop_id' => $row->shop_id,
+                'total_sales' => (int) $row->total_sales,
+                'total_revenue' => (float) $row->total_revenue,
+                'shop' => Shop::find($row->shop_id),
+            ];
         });
 
-        // Sales by salesman
-        $salesBySalesman = Sale::select('salesman_id', DB::raw('COUNT(*) as total_sales'), DB::raw('SUM(total_amount) as total_revenue'))
+        // Sales by salesman.
+        $salesBySalesmanQuery = Sale::query()
+            ->select('salesman_id', DB::raw('COUNT(*) as total_sales'), DB::raw('COALESCE(SUM(total_amount), 0) as total_revenue'))
             ->whereNotNull('salesman_id')
             ->groupBy('salesman_id')
             ->with('salesman')
             ->orderBy('total_sales', 'DESC')
-            ->limit(10)
-            ->get();
+            ->limit(10);
+        $this->applySalesDateRange($salesBySalesmanQuery, $dateFrom, $dateTo);
+        $salesBySalesman = $salesBySalesmanQuery->get()->map(function ($row) {
+            return [
+                'salesman_id' => $row->salesman_id,
+                'total_sales' => (int) $row->total_sales,
+                'total_revenue' => (float) $row->total_revenue,
+                'salesman' => $row->salesman,
+            ];
+        });
 
-        // Recent activity logs
+        $joinedShopsQuery = Shop::query();
+        $joinedWingasQuery = User::query()->where('role', 'salesman');
+        if ($dateFrom) {
+            $joinedShopsQuery->whereDate('created_at', '>=', $dateFrom);
+            $joinedWingasQuery->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $joinedShopsQuery->whereDate('created_at', '<=', $dateTo);
+            $joinedWingasQuery->whereDate('created_at', '<=', $dateTo);
+        }
+
+        // Active shops and wingas = anyone with at least one sale/service in selected period.
+        $salesActivity = Sale::query()
+            ->join('users', 'sales.salesman_id', '=', 'users.id')
+            ->whereNotNull('sales.salesman_id')
+            ->whereNotNull('users.shop_id');
+        $this->applySalesDateRange($salesActivity, $dateFrom, $dateTo);
+
+        $serviceActivity = Service::query()
+            ->join('users', 'services.salesman_id', '=', 'users.id')
+            ->whereNotNull('services.salesman_id')
+            ->whereNotNull('users.shop_id');
+        $this->applyServiceDateRange($serviceActivity, $dateFrom, $dateTo);
+
+        $salesShopActivity = clone $salesActivity;
+        $serviceShopActivity = clone $serviceActivity;
+        $salesWingaActivity = clone $salesActivity;
+        $serviceWingaActivity = clone $serviceActivity;
+
+        $activeShopIds = $salesShopActivity->pluck('users.shop_id')
+            ->merge($serviceShopActivity->pluck('users.shop_id'))
+            ->unique()
+            ->values();
+        $activeWingaIds = $salesWingaActivity->pluck('sales.salesman_id')
+            ->merge($serviceWingaActivity->pluck('services.salesman_id'))
+            ->unique()
+            ->values();
+
+        // Recent activity logs.
         $recentActivity = ActivityLog::with('user')
             ->orderBy('created_at', 'DESC')
             ->limit(20)
             ->get();
 
         return response()->json([
+            'period' => [
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+            ],
+            'summary' => [
+                'joined_shops' => $joinedShopsQuery->count(),
+                'joined_wingas' => $joinedWingasQuery->count(),
+                'active_shops' => $activeShopIds->count(),
+                'active_wingas' => $activeWingaIds->count(),
+            ],
             'sales_by_shop' => $salesByShop,
             'sales_by_salesman' => $salesBySalesman,
             'recent_activity' => $recentActivity,
         ]);
+    }
+
+    /**
+     * Get paginated and filterable activity logs.
+     */
+    public function getLogs(Request $request)
+    {
+        if ($authError = $this->ensureSuperAdmin($request)) {
+            return $authError;
+        }
+
+        $validated = $request->validate([
+            'action' => 'nullable|string|max:50',
+            'model' => 'nullable|string|max:100',
+            'user_id' => 'nullable|integer|exists:users,id',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'q' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $query = ActivityLog::query()->with('user')->orderByDesc('created_at');
+
+        if (!empty($validated['action'])) {
+            $query->where('action', $validated['action']);
+        }
+        if (!empty($validated['model'])) {
+            $query->where('model', $validated['model']);
+        }
+        if (!empty($validated['user_id'])) {
+            $query->where('user_id', $validated['user_id']);
+        }
+        if (!empty($validated['date_from'])) {
+            $query->whereDate('created_at', '>=', $validated['date_from']);
+        }
+        if (!empty($validated['date_to'])) {
+            $query->whereDate('created_at', '<=', $validated['date_to']);
+        }
+        if (!empty($validated['q'])) {
+            $q = $validated['q'];
+            $query->where(function ($inner) use ($q) {
+                $inner->where('description', 'like', "%{$q}%")
+                    ->orWhere('action', 'like', "%{$q}%")
+                    ->orWhere('model', 'like', "%{$q}%");
+            });
+        }
+
+        $perPage = $validated['per_page'] ?? 20;
+        $logs = $query->paginate($perPage);
+
+        return response()->json($logs);
+    }
+
+    private function ensureSuperAdmin(Request $request): ?JsonResponse
+    {
+        if (!$request->user() || $request->user()->role !== 'super_admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return null;
+    }
+
+    private function applySalesDateRange($query, ?string $dateFrom, ?string $dateTo): void
+    {
+        if ($dateFrom) {
+            $query->whereDate(DB::raw('COALESCE(sales.sale_date, sales.created_at)'), '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate(DB::raw('COALESCE(sales.sale_date, sales.created_at)'), '<=', $dateTo);
+        }
+    }
+
+    private function applyServiceDateRange($query, ?string $dateFrom, ?string $dateTo): void
+    {
+        if ($dateFrom) {
+            $query->whereDate(DB::raw('COALESCE(services.service_date, services.created_at)'), '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate(DB::raw('COALESCE(services.service_date, services.created_at)'), '<=', $dateTo);
+        }
     }
 }
