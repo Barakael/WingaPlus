@@ -1,56 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { BarChart3, TrendingUp, Activity } from 'lucide-react';
-import { getReports } from '../../services/superAdmin';
+import { BarChart3, TrendingUp, Activity, Store, UserCheck } from 'lucide-react';
+import { getReportsWithFilters, type ReportsResponse } from '../../services/superAdmin';
 import { showErrorToast } from '../../lib/toast';
 
-interface SalesByShop {
-  shop_name: string;
-  total_sales: number;
-  total_amount: string;
-}
-
-interface SalesBySalesman {
-  salesman_name: string;
-  shop_name: string;
-  total_sales: number;
-  total_amount: string;
-}
-
-interface RecentActivity {
-  user_name: string;
-  action: string;
-  model: string;
-  description: string;
-  created_at: string;
-}
-
-interface ReportsData {
-  sales_by_shop: SalesByShop[];
-  sales_by_salesman: SalesBySalesman[];
-  recent_activities: RecentActivity[];
-}
-
 const SystemReports: React.FC = () => {
-  const [reports, setReports] = useState<ReportsData>({
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [reports, setReports] = useState<ReportsResponse>({
+    period: {
+      date_from: null,
+      date_to: null,
+    },
+    summary: {
+      joined_shops: 0,
+      joined_wingas: 0,
+      active_shops: 0,
+      active_wingas: 0,
+    },
     sales_by_shop: [],
     sales_by_salesman: [],
-    recent_activities: [],
+    recent_activity: [],
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchReports();
+    fetchReports({});
   }, []);
 
-  const fetchReports = async () => {
+  const fetchReports = async (params: { date_from?: string; date_to?: string }) => {
     try {
       setLoading(true);
-      const data = await getReports();
-      setReports(data.data || {
-        sales_by_shop: [],
-        sales_by_salesman: [],
-        recent_activities: [],
-      });
+      const data = await getReportsWithFilters(params);
+      setReports(data);
     } catch (error: any) {
       showErrorToast('Failed to load reports');
       console.error('Error fetching reports:', error);
@@ -66,6 +47,19 @@ const SystemReports: React.FC = () => {
       currency: 'TZS',
       minimumFractionDigits: 0,
     }).format(numAmount);
+  };
+
+  const applyDateFilter = () => {
+    fetchReports({
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+    });
+  };
+
+  const resetDateFilter = () => {
+    setDateFrom('');
+    setDateTo('');
+    fetchReports({});
   };
 
   const formatDate = (dateString: string) => {
@@ -91,6 +85,41 @@ const SystemReports: React.FC = () => {
         </div>
       </div>
 
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Date from</label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Date to</label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+          <button
+            onClick={applyDateFilter}
+            className="px-4 py-2 bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] text-sm font-medium"
+          >
+            Apply Filter
+          </button>
+          <button
+            onClick={resetDateFilter}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
       {loading ? (
         <div className="text-center py-12">
           <div className="w-12 h-12 border-4 border-[#1973AE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -98,6 +127,37 @@ const SystemReports: React.FC = () => {
         </div>
       ) : (
         <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Joined Shops</p>
+                <Store className="w-5 h-5 text-blue-500" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{reports.summary.joined_shops}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Joined Wingas</p>
+                <UserCheck className="w-5 h-5 text-blue-500" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{reports.summary.joined_wingas}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Active Shops</p>
+                <Store className="w-5 h-5 text-green-500" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{reports.summary.active_shops}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Active Wingas</p>
+                <UserCheck className="w-5 h-5 text-green-500" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{reports.summary.active_wingas}</p>
+            </div>
+          </div>
+
           {/* Sales by Shop */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600">
@@ -134,13 +194,13 @@ const SystemReports: React.FC = () => {
                       {reports.sales_by_shop.map((shop, index) => (
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                            {shop.shop_name}
+                            {shop.shop?.name || `Shop #${shop.shop_id}`}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                             {shop.total_sales} sales
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
-                            {formatCurrency(shop.total_amount)}
+                            {formatCurrency(shop.total_revenue)}
                           </td>
                         </tr>
                       ))}
@@ -190,16 +250,16 @@ const SystemReports: React.FC = () => {
                       {reports.sales_by_salesman.map((salesman, index) => (
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                            {salesman.salesman_name}
+                            {salesman.salesman?.name || `Winga #${salesman.salesman_id}`}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            {salesman.shop_name}
+                            {salesman.salesman?.shop?.name || 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                             {salesman.total_sales} sales
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
-                            {formatCurrency(salesman.total_amount)}
+                            {formatCurrency(salesman.total_revenue)}
                           </td>
                         </tr>
                       ))}
@@ -222,13 +282,13 @@ const SystemReports: React.FC = () => {
               </div>
             </div>
             <div className="p-6">
-              {reports.recent_activities.length === 0 ? (
+              {reports.recent_activity.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                   No recent activities
                 </p>
               ) : (
                 <div className="space-y-4">
-                  {reports.recent_activities.map((activity, index) => (
+                  {reports.recent_activity.map((activity, index) => (
                     <div
                       key={index}
                       className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:shadow-md transition-shadow"
@@ -241,7 +301,7 @@ const SystemReports: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {activity.user_name}
+                            {activity.user?.name || 'System'}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {formatDate(activity.created_at)}
