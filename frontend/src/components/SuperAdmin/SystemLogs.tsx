@@ -1,5 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Activity } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Activity, Download } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from 'recharts';
 import { getLogs } from '../../services/superAdmin';
 import { showErrorToast } from '../../lib/toast';
 
@@ -40,6 +54,7 @@ const SystemLogs: React.FC = () => {
   const [query, setQuery] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const fetchLogs = async (pageNumber = page) => {
     try {
@@ -96,6 +111,80 @@ const SystemLogs: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+
+  const actionChartData = useMemo(() => {
+    const grouped: Record<string, number> = {};
+    logs.data.forEach((item) => {
+      grouped[item.action] = (grouped[item.action] || 0) + 1;
+    });
+    return Object.entries(grouped).map(([name, value]) => ({ name, value }));
+  }, [logs.data]);
+
+  const modelChartData = useMemo(() => {
+    const grouped: Record<string, number> = {};
+    logs.data.forEach((item) => {
+      const modelName = item.model || 'Unknown';
+      grouped[modelName] = (grouped[modelName] || 0) + 1;
+    });
+    return Object.entries(grouped).map(([name, value]) => ({ name, value }));
+  }, [logs.data]);
+
+  const dailyTrendData = useMemo(() => {
+    const grouped: Record<string, number> = {};
+    logs.data.forEach((item) => {
+      const day = new Date(item.created_at).toISOString().slice(0, 10);
+      grouped[day] = (grouped[day] || 0) + 1;
+    });
+    return Object.entries(grouped)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [logs.data]);
+
+  const downloadCsv = (filename: string, rows: Array<Record<string, string | number>>) => {
+    const headers = Object.keys(rows[0] || {});
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers
+          .map((header) => `"${String(row[header] ?? '').replace(/"/g, '""')}"`)
+          .join(',')
+      ),
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportFilteredLogs = () => {
+    downloadCsv(
+      'system_logs_filtered.csv',
+      logs.data.map((item) => ({
+        id: item.id,
+        action: item.action,
+        model: item.model || 'N/A',
+        user: item.user?.name || 'System',
+        description: item.description,
+        created_at: formatDate(item.created_at),
+      }))
+    );
+    setShowExportMenu(false);
+  };
+
+  const exportActionSummary = () => {
+    downloadCsv('system_logs_action_summary.csv', actionChartData);
+    setShowExportMenu(false);
+  };
+
+  const exportModelSummary = () => {
+    downloadCsv('system_logs_model_summary.csv', modelChartData);
+    setShowExportMenu(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -156,64 +245,108 @@ const SystemLogs: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-        <div className="p-6 bg-gradient-to-r from-purple-500 to-purple-600">
-          <div className="flex items-center text-white">
-            <Activity className="h-8 w-8 mr-3" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Activity className="h-7 w-7 text-purple-600" />
             <div>
-              <h2 className="text-xl font-bold">Activity Logs</h2>
-              <p className="text-purple-100">Total: {logs.total}</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Logs Overview</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total records on current page: {logs.data.length}</p>
             </div>
           </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Total matching: {logs.total}</p>
         </div>
 
-        <div className="p-6">
-          {loading ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">Loading logs...</p>
-          ) : logs.data.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">No logs found.</p>
-          ) : (
-            <div className="space-y-3">
-              {logs.data.map((item) => (
-                <div key={item.id} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {item.user?.name || 'System'} - {item.action}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(item.created_at)}</p>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.description}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-                      {item.action}
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700 dark:bg-gray-900 dark:text-gray-200">
-                      {item.model || 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+        {loading ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-8">Loading logs...</p>
+        ) : logs.data.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-8">No logs found.</p>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Actions Distribution</h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={actionChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#9333ea" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Models Distribution</h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={modelChartData} dataKey="value" nameKey="name" outerRadius={95} label>
+                      {modelChartData.map((entry, index) => (
+                        <Cell key={`cell-${entry.name}`} fill={['#1973AE', '#16a34a', '#9333ea', '#ea580c', '#2563eb'][index % 5]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 xl:col-span-2">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Daily Log Trend (Current Page)</h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dailyTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="count" stroke="#1973AE" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="px-2 pb-20 flex items-center justify-between">
+        <button
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Page {logs.current_page} of {logs.last_page}
+        </p>
+        <button
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= logs.last_page}
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-40">
+        <div className="relative">
+          {showExportMenu && (
+            <div className="absolute bottom-14 right-0 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 min-w-56 border border-gray-200 dark:border-gray-700">
+              <button onClick={exportFilteredLogs} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Export Filtered Logs</button>
+              <button onClick={exportActionSummary} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Export Action Summary</button>
+              <button onClick={exportModelSummary} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Export Model Summary</button>
             </div>
           )}
-        </div>
-
-        <div className="px-6 pb-6 flex items-center justify-between">
           <button
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50"
+            onClick={() => setShowExportMenu((prev) => !prev)}
+            className="h-12 w-12 rounded-full bg-[#1973AE] text-white shadow-lg hover:bg-[#0d5a8a] flex items-center justify-center"
+            aria-label="Open export menu"
           >
-            Previous
-          </button>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Page {logs.current_page} of {logs.last_page}
-          </p>
-          <button
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= logs.last_page}
-            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50"
-          >
-            Next
+            <Download className="w-5 h-5" />
           </button>
         </div>
       </div>
