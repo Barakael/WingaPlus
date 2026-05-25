@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -234,13 +235,36 @@ class UserController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => 'nullable|string|max:255',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'remove_logo' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($request->only(['name', 'email', 'phone']));
+        $wantsLogoUpdate = $request->hasFile('logo') || $request->boolean('remove_logo');
+        if ($wantsLogoUpdate && !in_array($user->role, ['salesman', 'shop_owner'], true)) {
+            return response()->json([
+                'message' => 'Only winga and shop owner accounts can update logo',
+            ], 403);
+        }
+
+        $payload = $request->only(['name', 'email', 'phone']);
+
+        if ($request->boolean('remove_logo') && $user->logo_path) {
+            Storage::disk('public')->delete($user->logo_path);
+            $payload['logo_path'] = null;
+        }
+
+        if ($request->hasFile('logo')) {
+            if ($user->logo_path) {
+                Storage::disk('public')->delete($user->logo_path);
+            }
+            $payload['logo_path'] = $request->file('logo')->store('user-logos', 'public');
+        }
+
+        $user->update($payload);
 
         return response()->json($user->fresh());
     }
