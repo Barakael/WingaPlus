@@ -54,13 +54,14 @@ class WarrantyFiled extends Mailable
      */
     public function build()
     {
-        $issuerShop = $this->resolveIssuerShop();
+        $issuerUser = $this->resolveIssuerUser();
+        $issuerShop = $this->resolveIssuerShop($issuerUser);
         $cardRenderer = app(WarrantyCardRenderer::class);
         $cardImage = $cardRenderer->renderDataUri([
             'business_name' => $issuerShop?->name ?: ($this->warranty->store_name ?: $this->userName),
-            'business_phone' => $issuerShop?->phone ?: ($this->issuerUser?->phone ?: $this->warranty->customer_phone),
-            'business_email' => $issuerShop?->effective_email ?: ($this->issuerUser?->email ?: null),
-            'logo_path' => $issuerShop?->logo_path,
+            'business_phone' => $issuerShop?->phone ?: ($issuerUser?->phone ?: $this->warranty->customer_phone),
+            'business_email' => $issuerShop?->effective_email ?: ($issuerUser?->email ?: null),
+            'logo_path' => $this->resolveLogoPath($issuerUser, $issuerShop),
             'customer_name' => $this->sale->customer_name,
             'product_name' => $this->sale->product_name,
             'purchase_date' => $this->formatDate($this->sale->created_at),
@@ -89,9 +90,13 @@ class WarrantyFiled extends Mailable
         return [];
     }
 
-    private function resolveIssuerShop(): ?Shop
+    private function resolveIssuerUser(): ?User
     {
-        $issuer = $this->issuerUser;
+        return $this->issuerUser;
+    }
+
+    private function resolveIssuerShop(?User $issuer): ?Shop
+    {
         if (!$issuer) {
             return null;
         }
@@ -105,6 +110,22 @@ class WarrantyFiled extends Mailable
         }
 
         return null;
+    }
+
+    private function resolveLogoPath(?User $issuer, ?Shop $issuerShop): ?string
+    {
+        if (!$issuer) {
+            return $issuerShop?->logo_path;
+        }
+
+        if ($issuer->role === 'salesman') {
+            return $issuer->logo_path ?: $issuerShop?->logo_path;
+        }
+        if ($issuer->role === 'shop_owner') {
+            return $issuerShop?->logo_path ?: $issuer->logo_path;
+        }
+
+        return $issuerShop?->logo_path ?: $issuer->logo_path;
     }
 
     private function formatDate($date): string
