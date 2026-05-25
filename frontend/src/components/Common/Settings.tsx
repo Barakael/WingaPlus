@@ -287,36 +287,47 @@ const Settings: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-2">
                       Warranty Logo
                     </label>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={(e) => handleLogoChange(e.target.files?.[0])}
-                      className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#1973AE]/10 file:text-[#1973AE] hover:file:bg-[#1973AE]/20"
-                    />
-                    {logoPreview ? (
-                      <div className="mt-3 space-y-2">
-                        <img
-                          src={logoPreview}
-                          alt="Logo preview"
-                          className="h-16 w-auto rounded border border-gray-300 dark:border-gray-600 bg-white p-1"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLogoFile(null);
-                            setLogoPreview('');
-                            setRemoveLogo(true);
-                          }}
-                          className="text-xs text-red-600 hover:text-red-700"
-                        >
-                          Remove logo
-                        </button>
+                    <div className="mt-2 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 items-start">
+                      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-3">
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Current Active Logo</p>
+                        {logoPreview ? (
+                          <img
+                            src={logoPreview}
+                            alt="Current warranty logo"
+                            className="h-24 w-full object-contain rounded-lg border border-gray-300 dark:border-gray-600 bg-white p-2"
+                          />
+                        ) : (
+                          <div className="h-24 w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">No logo uploaded</span>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        This logo appears on warranty cards.
-                      </p>
-                    )}
+
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          onChange={(e) => handleLogoChange(e.target.files?.[0])}
+                          className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#1973AE]/10 file:text-[#1973AE] hover:file:bg-[#1973AE]/20"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          This logo is used on warranty cards.
+                        </p>
+                        {logoPreview && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLogoFile(null);
+                              setLogoPreview('');
+                              setRemoveLogo(true);
+                            }}
+                            className="text-xs text-red-600 hover:text-red-700"
+                          >
+                            Remove logo
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
