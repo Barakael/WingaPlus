@@ -58,6 +58,7 @@ const Settings: React.FC = () => {
     if (url.startsWith('data:')) {
       return url;
     }
+    const apiAssetBase = BASE_URL || '/api';
 
     const appendCacheBust = (value: string) =>
       cacheBust ? `${value}${value.includes('?') ? '&' : '?'}t=${Date.now()}` : value;
@@ -68,7 +69,7 @@ const Settings: React.FC = () => {
       try {
         const parsed = new URL(url);
         if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
-          return appendCacheBust(`${BASE_URL}${parsed.pathname}${parsed.search}`);
+          return appendCacheBust(`${apiAssetBase}${parsed.pathname}${parsed.search}`);
         }
         return appendCacheBust(url);
       } catch {
@@ -78,12 +79,12 @@ const Settings: React.FC = () => {
 
     // Relative URL from API (e.g. /storage/user-logos/abc.jpg)
     if (url.startsWith('/')) {
-      return appendCacheBust(`${BASE_URL}${url}`);
+      return appendCacheBust(`${apiAssetBase}${url}`);
     }
 
     // Plain path/filename fallback.
     const normalized = url.includes('/') ? `/${url}` : `/storage/${url}`;
-    return appendCacheBust(`${BASE_URL}${normalized}`);
+    return appendCacheBust(`${apiAssetBase}${normalized}`);
   };
 
   // Password state
