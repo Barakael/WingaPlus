@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Lock, Mail, Phone, Save, Eye, EyeOff, AlertCircle, CheckCircle, Tag } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
@@ -48,6 +48,40 @@ const Settings: React.FC = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [removeLogo, setRemoveLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+
+  const resolveLogoUrl = (url?: string | null, cacheBust = false) => {
+    if (!url) return '';
+    if (url.startsWith('data:')) {
+      return url;
+    }
+
+    const appendCacheBust = (value: string) =>
+      cacheBust ? `${value}${value.includes('?') ? '&' : '?'}t=${Date.now()}` : value;
+
+    // If backend sends absolute URL (often from APP_URL), normalize localhost hosts
+    // to the configured API base so previews work in dev and on remote devices.
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+          return appendCacheBust(`${BASE_URL}${parsed.pathname}${parsed.search}`);
+        }
+        return appendCacheBust(url);
+      } catch {
+        return appendCacheBust(url);
+      }
+    }
+
+    // Relative URL from API (e.g. /storage/user-logos/abc.jpg)
+    if (url.startsWith('/')) {
+      return appendCacheBust(`${BASE_URL}${url}`);
+    }
+
+    // Plain path/filename fallback.
+    const normalized = url.includes('/') ? `/${url}` : `/storage/${url}`;
+    return appendCacheBust(`${BASE_URL}${normalized}`);
+  };
 
   // Password state
   const [passwordForm, setPasswordForm] = useState<PasswordChange>({
@@ -85,7 +119,7 @@ const Settings: React.FC = () => {
           email: userData.email || '',
           phone: userData.phone || '',
         });
-        setLogoPreview(userData.logo_url || '');
+        setLogoPreview(resolveLogoUrl(userData.logo_url || '', true));
         setLogoFile(null);
         setRemoveLogo(false);
       }
@@ -107,6 +141,7 @@ const Settings: React.FC = () => {
 
     try {
       const formData = new FormData();
+      formData.append('_method', 'PUT');
       formData.append('name', profileForm.name);
       formData.append('phone', profileForm.phone);
       if (logoFile) {
@@ -117,7 +152,7 @@ const Settings: React.FC = () => {
       }
 
       const response = await fetch(`${BASE_URL}/api/user/profile`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Accept': 'application/json',
@@ -144,6 +179,7 @@ const Settings: React.FC = () => {
   };
 
   const canUpdateLogo = user?.role === 'salesman' || user?.role === 'shop_owner';
+  const hasLogo = Boolean(logoPreview);
 
   const handleLogoChange = (file?: File) => {
     if (!file) {
@@ -287,47 +323,71 @@ const Settings: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-2">
                       Warranty Logo
                     </label>
-                    <div className="mt-2 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 items-start">
-                      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-3">
-                        <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Current Active Logo</p>
-                        {logoPreview ? (
-                          <img
-                            src={logoPreview}
-                            alt="Current warranty logo"
-                            className="h-24 w-full object-contain rounded-lg border border-gray-300 dark:border-gray-600 bg-white p-2"
-                          />
-                        ) : (
-                          <div className="h-24 w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800">
-                            <span className="text-xs text-gray-400 dark:text-gray-500">No logo uploaded</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          onChange={(e) => handleLogoChange(e.target.files?.[0])}
-                          className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#1973AE]/10 file:text-[#1973AE] hover:file:bg-[#1973AE]/20"
+                    <div className="mt-2 flex flex-col items-center justify-center gap-4 text-center">
+                      {logoPreview ? (
+                        <img
+                          src={logoPreview}
+                          alt="Current warranty logo"
+                          className="h-24 w-24 object-cover rounded-full border border-gray-300 dark:border-gray-600 bg-white p-1"
                         />
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          This logo is used on warranty cards.
-                        </p>
-                        {logoPreview && (
+                      ) : (
+                        <div className="h-24 w-24 rounded-full border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800">
+                          <span className="text-[10px] text-center px-1 text-gray-400 dark:text-gray-500">No logo</span>
+                        </div>
+                      )}
+
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(e) => handleLogoChange(e.target.files?.[0])}
+                        className="hidden"
+                      />
+
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        {!hasLogo && (
                           <button
                             type="button"
-                            onClick={() => {
-                              setLogoFile(null);
-                              setLogoPreview('');
-                              setRemoveLogo(true);
-                            }}
-                            className="text-xs text-red-600 hover:text-red-700"
+                            onClick={() => logoInputRef.current?.click()}
+                            className="px-3 py-2 text-xs rounded-lg bg-[#1973AE] text-white hover:bg-[#0d5a8a]"
                           >
-                            Remove logo
+                            Upload Logo
                           </button>
+                        )}
+                        {hasLogo && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => logoInputRef.current?.click()}
+                              className="px-3 py-2 text-xs rounded-lg bg-[#1973AE] text-white hover:bg-[#0d5a8a]"
+                            >
+                              Edit Logo
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLogoFile(null);
+                                setLogoPreview('');
+                                setRemoveLogo(true);
+                              }}
+                              className="px-3 py-2 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400"
+                            >
+                              Remove Logo
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={loading}
+                              className="px-3 py-2 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-60"
+                            >
+                              {loading ? 'Saving...' : 'Save Logo'}
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      This logo is used on warranty cards.
+                    </p>
                   </div>
                 )}
 
