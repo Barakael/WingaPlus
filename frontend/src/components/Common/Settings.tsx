@@ -11,6 +11,7 @@ interface UserProfile {
   email: string;
   username: string;
   phone?: string;
+  logo_url?: string | null;
   role: string;
   shop_name?: string;
   created_at: string;
@@ -44,6 +45,9 @@ const Settings: React.FC = () => {
     email: '',
     phone: '',
   });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>('');
+  const [removeLogo, setRemoveLogo] = useState(false);
 
   // Password state
   const [passwordForm, setPasswordForm] = useState<PasswordChange>({
@@ -81,6 +85,9 @@ const Settings: React.FC = () => {
           email: userData.email || '',
           phone: userData.phone || '',
         });
+        setLogoPreview(userData.logo_url || '');
+        setLogoFile(null);
+        setRemoveLogo(false);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -99,17 +106,23 @@ const Settings: React.FC = () => {
     setLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append('name', profileForm.name);
+      formData.append('phone', profileForm.phone);
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
+      if (removeLogo) {
+        formData.append('remove_logo', '1');
+      }
+
       const response = await fetch(`${BASE_URL}/api/user/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          name: profileForm.name,
-          phone: profileForm.phone,
-        }),
+        body: formData,
       });
 
       if (response.ok) {
@@ -128,6 +141,20 @@ const Settings: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const canUpdateLogo = user?.role === 'salesman' || user?.role === 'shop_owner';
+
+  const handleLogoChange = (file?: File) => {
+    if (!file) {
+      setLogoFile(null);
+      return;
+    }
+    setLogoFile(file);
+    setRemoveLogo(false);
+    const reader = new FileReader();
+    reader.onload = () => setLogoPreview(typeof reader.result === 'string' ? reader.result : '');
+    reader.readAsDataURL(file);
   };
 
   // Handle password change
@@ -255,6 +282,44 @@ const Settings: React.FC = () => {
           {activeTab === 'profile' && (
             <form onSubmit={handleProfileUpdate} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {canUpdateLogo && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-2">
+                      Warranty Logo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={(e) => handleLogoChange(e.target.files?.[0])}
+                      className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#1973AE]/10 file:text-[#1973AE] hover:file:bg-[#1973AE]/20"
+                    />
+                    {logoPreview ? (
+                      <div className="mt-3 space-y-2">
+                        <img
+                          src={logoPreview}
+                          alt="Logo preview"
+                          className="h-16 w-auto rounded border border-gray-300 dark:border-gray-600 bg-white p-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLogoFile(null);
+                            setLogoPreview('');
+                            setRemoveLogo(true);
+                          }}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          Remove logo
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        This logo appears on warranty cards.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 md:mb-2">
                     Full Name
