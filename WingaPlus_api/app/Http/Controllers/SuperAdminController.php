@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SuperAdminController extends Controller
 {
@@ -98,11 +99,14 @@ class SuperAdminController extends Controller
             'owner_id' => 'nullable|exists:users,id',
             'status' => 'nullable|in:active,inactive,suspended',
             'description' => 'nullable|string',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'logo' => 'nullable|file|extensions:jpg,jpeg,png,webp|max:4096',
         ]);
 
         if ($request->hasFile('logo')) {
-            $validated['logo_path'] = $request->file('logo')->store('shop-logos', 'public');
+            $logo = $request->file('logo');
+            $extension = strtolower($logo->getClientOriginalExtension() ?: 'png');
+            $filename = (string) Str::uuid() . '.' . $extension;
+            $validated['logo_path'] = $logo->storeAs('shop-logos', $filename, 'public');
         }
 
         $shop = Shop::create($validated);
@@ -139,7 +143,7 @@ class SuperAdminController extends Controller
             'owner_id' => 'nullable|exists:users,id',
             'status' => 'nullable|in:active,inactive,suspended',
             'description' => 'nullable|string',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'logo' => 'nullable|file|extensions:jpg,jpeg,png,webp|max:4096',
             'remove_logo' => 'nullable|boolean',
         ]);
 
@@ -149,10 +153,13 @@ class SuperAdminController extends Controller
         }
 
         if ($request->hasFile('logo')) {
+            $logo = $request->file('logo');
             if ($shop->logo_path) {
                 Storage::disk('public')->delete($shop->logo_path);
             }
-            $validated['logo_path'] = $request->file('logo')->store('shop-logos', 'public');
+            $extension = strtolower($logo->getClientOriginalExtension() ?: 'png');
+            $filename = (string) Str::uuid() . '.' . $extension;
+            $validated['logo_path'] = $logo->storeAs('shop-logos', $filename, 'public');
         }
 
         unset($validated['logo'], $validated['remove_logo']);
