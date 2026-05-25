@@ -66,7 +66,7 @@ class User extends Authenticatable
             return null;
         }
 
-        return Storage::disk('public')->url($this->logo_path);
+        return '/storage/' . ltrim($this->logo_path, '/');
     }
 
     /**
