@@ -1,3 +1,3 @@
 // Base API URL for frontend requests.
-// In production fallback to same-origin so requests go to /api/* on the main domain.
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Set VITE_API_BASE_URL in .env.production on deploy (e.g. https://api.domain.com).
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
