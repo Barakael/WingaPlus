@@ -20,6 +20,27 @@ const ShopSetup: React.FC = () => {
     description: '',
   });
 
+  const resolveLogoUrl = (url?: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('data:')) return url;
+    const apiAssetBase = BASE_URL || '/api';
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+          return `${apiAssetBase}${parsed.pathname}${parsed.search}`;
+        }
+        return url;
+      } catch {
+        return url;
+      }
+    }
+
+    if (url.startsWith('/')) return `${apiAssetBase}${url}`;
+    return `${apiAssetBase}/${url}`;
+  };
+
   useEffect(() => {
     const fetchShop = async () => {
       if (!user) return;
@@ -44,7 +65,7 @@ const ShopSetup: React.FC = () => {
             email: data.data.email || data.data.effective_email || '',
             description: data.data.description || '',
           });
-          setLogoPreview(data.data.logo_url || '');
+          setLogoPreview(resolveLogoUrl(data.data.logo_url || ''));
         }
       } catch (e) {
         // ignore
@@ -92,7 +113,7 @@ const ShopSetup: React.FC = () => {
       setHasShop(true);
       setShopId(data?.data?.id ? String(data.data.id) : shopId);
       if (data?.data?.logo_url) {
-        setLogoPreview(data.data.logo_url);
+        setLogoPreview(resolveLogoUrl(data.data.logo_url));
       } else if (removeLogo) {
         setLogoPreview('');
       }
