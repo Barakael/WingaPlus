@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Lock, Mail, Phone, Save, Eye, EyeOff, AlertCircle, CheckCircle, Tag } from 'lucide-react';
+import { User, Lock, Mail, Phone, Save, Eye, EyeOff, AlertCircle, CheckCircle, Tag, MoreVertical } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import { getRoleDisplayName } from '../../lib/roleMapping';
@@ -49,6 +49,9 @@ const Settings: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [removeLogo, setRemoveLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
+  const profileFormRef = useRef<HTMLFormElement | null>(null);
+  const logoMenuRef = useRef<HTMLDivElement | null>(null);
+  const [logoMenuOpen, setLogoMenuOpen] = useState(false);
 
   const resolveLogoUrl = (url?: string | null, cacheBust = false) => {
     if (!url) return '';
@@ -101,6 +104,18 @@ const Settings: React.FC = () => {
       loadUserProfile();
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!logoMenuRef.current) return;
+      if (!logoMenuRef.current.contains(event.target as Node)) {
+        setLogoMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   const loadUserProfile = async () => {
     try {
@@ -180,6 +195,7 @@ const Settings: React.FC = () => {
 
   const canUpdateLogo = user?.role === 'salesman' || user?.role === 'shop_owner';
   const hasLogo = Boolean(logoPreview);
+  const hasPendingLogoChanges = Boolean(logoFile) || removeLogo;
 
   const handleLogoChange = (file?: File) => {
     if (!file) {
@@ -316,7 +332,7 @@ const Settings: React.FC = () => {
         <div className="p-4 md:p-8">
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <form ref={profileFormRef} onSubmit={handleProfileUpdate} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {canUpdateLogo && (
                   <div className="md:col-span-2">
@@ -324,17 +340,77 @@ const Settings: React.FC = () => {
                       Warranty Logo
                     </label>
                     <div className="mt-2 flex flex-col items-center justify-center gap-4 text-center">
-                      {logoPreview ? (
-                        <img
-                          src={logoPreview}
-                          alt="Current warranty logo"
-                          className="h-24 w-24 object-cover rounded-full border border-gray-300 dark:border-gray-600 bg-white p-1"
-                        />
-                      ) : (
-                        <div className="h-24 w-24 rounded-full border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800">
-                          <span className="text-[10px] text-center px-1 text-gray-400 dark:text-gray-500">No logo</span>
-                        </div>
-                      )}
+                      <div ref={logoMenuRef} className="relative group">
+                        {logoPreview ? (
+                          <img
+                            src={logoPreview}
+                            alt="Current warranty logo"
+                            onClick={() => setLogoMenuOpen((prev) => !prev)}
+                            className="h-24 w-24 object-cover rounded-full border border-gray-300 dark:border-gray-600 bg-white p-1 cursor-pointer"
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => logoInputRef.current?.click()}
+                            className="h-24 w-24 rounded-full border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800"
+                          >
+                            <span className="text-[10px] text-center px-1 text-gray-400 dark:text-gray-500">No logo</span>
+                          </button>
+                        )}
+
+                        {hasLogo && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setLogoMenuOpen((prev) => !prev)}
+                              className={`absolute -right-1 -bottom-1 h-7 w-7 rounded-full bg-[#1973AE] text-white shadow flex items-center justify-center transition-opacity ${
+                                logoMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                              }`}
+                              aria-label="Open logo actions"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </button>
+
+                            {logoMenuOpen && (
+                              <div className="absolute top-28 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 min-w-40 border border-gray-200 dark:border-gray-700 z-30">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLogoMenuOpen(false);
+                                    logoInputRef.current?.click();
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                                >
+                                  Edit Logo
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLogoMenuOpen(false);
+                                    setLogoFile(null);
+                                    setLogoPreview('');
+                                    setRemoveLogo(true);
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                                >
+                                  Remove Logo
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLogoMenuOpen(false);
+                                    profileFormRef.current?.requestSubmit();
+                                  }}
+                                  disabled={loading || !hasPendingLogoChanges}
+                                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-50"
+                                >
+                                  {loading ? 'Saving...' : 'Save Logo'}
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
 
                       <input
                         ref={logoInputRef}
@@ -344,46 +420,15 @@ const Settings: React.FC = () => {
                         className="hidden"
                       />
 
-                      <div className="flex flex-wrap items-center justify-center gap-2">
-                        {!hasLogo && (
-                          <button
-                            type="button"
-                            onClick={() => logoInputRef.current?.click()}
-                            className="px-3 py-2 text-xs rounded-lg bg-[#1973AE] text-white hover:bg-[#0d5a8a]"
-                          >
-                            Upload Logo
-                          </button>
-                        )}
-                        {hasLogo && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => logoInputRef.current?.click()}
-                              className="px-3 py-2 text-xs rounded-lg bg-[#1973AE] text-white hover:bg-[#0d5a8a]"
-                            >
-                              Edit Logo
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setLogoFile(null);
-                                setLogoPreview('');
-                                setRemoveLogo(true);
-                              }}
-                              className="px-3 py-2 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400"
-                            >
-                              Remove Logo
-                            </button>
-                            <button
-                              type="submit"
-                              disabled={loading}
-                              className="px-3 py-2 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-60"
-                            >
-                              {loading ? 'Saving...' : 'Save Logo'}
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      {!hasLogo && (
+                        <button
+                          type="button"
+                          onClick={() => logoInputRef.current?.click()}
+                          className="px-3 py-2 text-xs rounded-lg bg-[#1973AE] text-white hover:bg-[#0d5a8a]"
+                        >
+                          Upload Logo
+                        </button>
+                      )}
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                       This logo is used on warranty cards.
