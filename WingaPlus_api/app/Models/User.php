@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -23,12 +24,15 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'logo_path',
         'password',
         'role',
         'status',
         'shop_id',
         'invitation_token',
     ];
+
+    protected $appends = ['logo_url'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -51,6 +55,18 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the public URL for the uploaded user logo.
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->logo_path);
     }
 
     /**
