@@ -47,13 +47,14 @@ class WarrantySaleFiled extends Mailable
     {
         $productName = $this->warranty ? $this->warranty->phone_name : $this->sale->product_name;
         $warrantyDetails = $this->sale->warranty_details ?? [];
-        $issuerShop = $this->resolveIssuerShop();
+        $issuerUser = $this->resolveIssuerUser();
+        $issuerShop = $this->resolveIssuerShop($issuerUser);
         $cardRenderer = app(WarrantyCardRenderer::class);
         $cardImage = $cardRenderer->renderDataUri([
             'business_name' => $issuerShop?->name ?: $this->userName,
-            'business_phone' => $issuerShop?->phone ?: ($this->issuerUser?->phone ?: $this->sale->customer_phone),
-            'business_email' => $issuerShop?->effective_email ?: ($this->issuerUser?->email ?: null),
-            'logo_path' => $issuerShop?->logo_path,
+            'business_phone' => $issuerShop?->phone ?: ($issuerUser?->phone ?: $this->sale->customer_phone),
+            'business_email' => $issuerShop?->effective_email ?: ($issuerUser?->email ?: null),
+            'logo_path' => $this->resolveLogoPath($issuerUser, $issuerShop),
             'customer_name' => $this->sale->customer_name,
             'product_name' => $this->warranty?->phone_name ?: $this->sale->product_name,
             'purchase_date' => $this->formatDate($this->sale->created_at ?: now()),
@@ -82,13 +83,18 @@ class WarrantySaleFiled extends Mailable
         return [];
     }
 
-    private function resolveIssuerShop(): ?Shop
+    private function resolveIssuerUser(): ?User
     {
         $issuer = $this->issuerUser;
         if (!$issuer && $this->sale->salesman_id) {
             $issuer = User::with(['shop', 'ownedShop'])->find($this->sale->salesman_id);
         }
 
+        return $issuer;
+    }
+
+    private function resolveIssuerShop(?User $issuer): ?Shop
+    {
         if (!$issuer) {
             return null;
         }
@@ -102,6 +108,25 @@ class WarrantySaleFiled extends Mailable
         }
 
         return null;
+    }
+
+    private function resolveLogoPath(?User $issuer, ?Shop $issuerShop): ?string
+    {
+        if (!$issuer) {
+            return $issuerShop?->logo_path;
+        }
+
+        // Role-based single logo priority:
+        // - salesman: user logo first, then shop logo
+        // - shop_owner: shop logo first, then user logo
+        if ($issuer->role === 'salesman') {
+            return $issuer->logo_path ?: $issuerShop?->logo_path;
+        }
+        if ($issuer->role === 'shop_owner') {
+            return $issuerShop?->logo_path ?: $issuer->logo_path;
+        }
+
+        return $issuerShop?->logo_path ?: $issuer->logo_path;
     }
 
     /**
