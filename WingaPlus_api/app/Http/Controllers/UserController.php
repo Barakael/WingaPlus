@@ -235,7 +235,7 @@ class UserController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => 'nullable|string|max:255',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'logo' => 'nullable|file|extensions:jpg,jpeg,png,webp|max:4096',
             'remove_logo' => 'nullable|boolean',
         ]);
 
@@ -258,10 +258,13 @@ class UserController extends Controller
         }
 
         if ($request->hasFile('logo')) {
+            $logo = $request->file('logo');
             if ($user->logo_path) {
                 Storage::disk('public')->delete($user->logo_path);
             }
-            $payload['logo_path'] = $request->file('logo')->store('user-logos', 'public');
+            $extension = strtolower($logo->getClientOriginalExtension() ?: 'png');
+            $filename = (string) Str::uuid() . '.' . $extension;
+            $payload['logo_path'] = $logo->storeAs('user-logos', $filename, 'public');
         }
 
         $user->update($payload);
