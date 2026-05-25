@@ -2,11 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const disablePwa = process.env.DISABLE_PWA === 'true';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
+    ...(!disablePwa ? [VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon-wing.png', 'logo.png', 'dark.png', 'offline.html', 'icons/*.png'],
       manifest: {
@@ -75,7 +77,7 @@ export default defineConfig({
         enabled: true,
         type: 'module',
       },
-    }),
+    })] : []),
   ],
   optimizeDeps: {
     exclude: ['lucide-react'],
