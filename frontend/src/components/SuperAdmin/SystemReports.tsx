@@ -288,7 +288,7 @@ const SystemReports: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Shops Revenue</h2>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
                   <BarChart data={shopRevenueChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
@@ -303,7 +303,7 @@ const SystemReports: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Wingas Revenue</h2>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
                   <BarChart data={wingaRevenueChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
@@ -318,7 +318,7 @@ const SystemReports: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Joined vs Active</h2>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
                   <PieChart>
                     <Pie data={summaryChartData} dataKey="value" nameKey="name" outerRadius={110} label>
                       {summaryChartData.map((entry, index) => (
@@ -334,7 +334,7 @@ const SystemReports: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity Types</h2>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
                   <BarChart data={activityTypeChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
