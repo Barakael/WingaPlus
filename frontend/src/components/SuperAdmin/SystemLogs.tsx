@@ -266,7 +266,7 @@ const SystemLogs: React.FC = () => {
             <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Actions Distribution</h3>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220}>
                   <BarChart data={actionChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
@@ -281,7 +281,7 @@ const SystemLogs: React.FC = () => {
             <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Models Distribution</h3>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220}>
                   <PieChart>
                     <Pie data={modelChartData} dataKey="value" nameKey="name" outerRadius={95} label>
                       {modelChartData.map((entry, index) => (
@@ -297,7 +297,7 @@ const SystemLogs: React.FC = () => {
             <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 xl:col-span-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Daily Log Trend (Current Page)</h3>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220}>
                   <LineChart data={dailyTrendData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
