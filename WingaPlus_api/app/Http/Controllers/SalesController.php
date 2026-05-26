@@ -102,6 +102,9 @@ class SalesController extends BaseController
 
             DB::commit();
 
+            $emailSent = false;
+            $emailError = null;
+
             // Send warranty email if sale has warranty
             if ($hasWarranty && !empty($validated['warranty_details']['customer_email'] ?? null)) {
                 try {
@@ -122,10 +125,21 @@ class SalesController extends BaseController
                     Mail::to($validated['warranty_details']['customer_email'])->send(
                         new WarrantySaleFiled($sale, $mockWarranty, $userName, $issuerUser)
                     );
+                    $emailSent = true;
                 } catch (\Exception $e) {
                     // Log email error but don't fail the sale
+                    $emailError = $e->getMessage();
                     \Log::error('Failed to send warranty email: ' . $e->getMessage());
                 }
+            } elseif (!$hasWarranty) {
+                // No warranty email expected for non-warranty sales.
+                $emailSent = true;
+            }
+
+            // Surface email delivery state to frontend without changing payload shape.
+            $sale->setAttribute('email_sent', $emailSent);
+            if ($emailError) {
+                $sale->setAttribute('email_error', $emailError);
             }
 
             return $this->sendResponse($sale, 'Sale created successfully', 201);
