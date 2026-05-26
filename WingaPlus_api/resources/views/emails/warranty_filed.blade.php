@@ -12,11 +12,19 @@
             Please keep this email card for future warranty support.
         </p>
 
-        <img
-            src="{{ $cardImage }}"
-            alt="Warranty Card"
-            style="display:block;width:100%;max-width:700px;height:auto;margin:0 auto;border-radius:8px;border:1px solid #d1d5db;"
-        />
+        @if(!empty($cardImageBinary) && isset($message))
+            <img
+                src="{{ $message->embedData($cardImageBinary, $cardImageName ?? 'warranty-card.png', 'image/png') }}"
+                alt="Warranty Card"
+                style="display:block;width:100%;max-width:700px;height:auto;margin:0 auto;border-radius:8px;border:1px solid #d1d5db;"
+            />
+        @else
+            <img
+                src="{{ $cardImage }}"
+                alt="Warranty Card"
+                style="display:block;width:100%;max-width:700px;height:auto;margin:0 auto;border-radius:8px;border:1px solid #d1d5db;"
+            />
+        @endif
     </div>
 </body>
 </html>

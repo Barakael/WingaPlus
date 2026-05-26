@@ -13,6 +13,16 @@ class WarrantyCardRenderer
      */
     public function renderDataUri(array $data): string
     {
+        return 'data:image/png;base64,'.base64_encode($this->renderBinary($data));
+    }
+
+    /**
+     * Render a warranty card PNG and return raw binary.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function renderBinary(array $data): string
+    {
         $image = imagecreatetruecolor(1300, 1850);
         imageantialias($image, true);
 
@@ -108,7 +118,7 @@ class WarrantyCardRenderer
         $binary = (string) ob_get_clean();
         imagedestroy($image);
 
-        return 'data:image/png;base64,'.base64_encode($binary);
+        return $binary;
     }
 
     private function drawCentered(\GdImage $image, int $font, int $y, string $text, int $color): void
@@ -161,7 +171,8 @@ class WarrantyCardRenderer
         $dstW = (int) floor($srcW * $ratio);
         $dstH = (int) floor($srcH * $ratio);
 
-        imagecopyresampled($image, $logo, (1300 - $dstW) / 2, 92, 0, 0, $dstW, $dstH, $srcW, $srcH);
+        $dstX = (int) floor((1300 - $dstW) / 2);
+        imagecopyresampled($image, $logo, $dstX, 92, 0, 0, $dstW, $dstH, $srcW, $srcH);
         imagedestroy($logo);
     }
 
