@@ -1,3 +1,6 @@
-// Base API URL for frontend requests.
-// In production fallback to same-origin so requests go to /api/* on the main domain.
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Base API URL (production / hosted API). Keep this pointed at the hosted backend.
+// export const BASE_URL = 'http://95.111.247.129';
+// export const BASE_URL = 'http://127.0.0.1:8001'; // local dev only
+
+// for production - use domain name to match SSL certificate
+export const BASE_URL = 'http://127.0.0.1:8000'
