@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, User, Phone, Mail, DollarSign, HardDrive, Smartphone } from 'lucide-react';
+import { Shield, User, Phone, Mail, HardDrive, Smartphone } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import SuccessModal from './SuccessModal';
@@ -126,6 +126,7 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       // Backend returns sendResponse($sale, ...) so sale is in data.data or data.data depending on wrapper
       // Our controller returns { success: true, data: { ... }, message }
       const salePayload = data?.data ?? data;
+      const emailSent = salePayload?.email_sent !== false;
 
       // Build warranty-like object expected by the modal/view
       const warrantyDetails = salePayload?.warranty_details ?? {};
@@ -147,13 +148,17 @@ const WarrantyFiling: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         status: salePayload?.warranty_status ?? 'unknown',
         expiry_date: salePayload?.warranty_end ?? null,
         submitted_at: salePayload?.created_at ?? new Date().toISOString(),
-        email_sent: true,
+        email_sent: emailSent,
         linked_sale: salePayload ?? null,
       } as any;
 
       setSubmittedWarranty(warrantyData);
       setShowSuccessModal(true);
-      showSuccessToast('🛡️ Warranty filed successfully!');
+      if (emailSent) {
+        showSuccessToast('🛡️ Warranty filed and email sent successfully!');
+      } else {
+        showErrorToast('⚠️ Warranty saved, but email was not delivered. Please retry sending.');
+      }
 
       // Reset form
       setWarrantyPeriod('');
