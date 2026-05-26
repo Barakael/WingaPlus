@@ -56,6 +56,7 @@ class WarrantyFiled extends Mailable
     {
         $issuerUser = $this->resolveIssuerUser();
         $issuerShop = $this->resolveIssuerShop($issuerUser);
+        $replyToEmail = $this->resolveReplyToEmail($issuerUser, $issuerShop);
         $cardRenderer = app(WarrantyCardRenderer::class);
         $cardImage = $cardRenderer->renderDataUri([
             'business_name' => $issuerShop?->name ?: ($this->warranty->store_name ?: $this->userName),
@@ -70,14 +71,41 @@ class WarrantyFiled extends Mailable
             'imei_serial' => $this->warrantyDetails['imei_number'] ?? null,
             'specification' => implode(' | ', array_filter([$this->warrantyDetails['storage'] ?? null, $this->warrantyDetails['color'] ?? null])) ?: 'N/A',
         ]);
+        $cardImageBinary = null;
+        $cardImageName = 'warranty-card.png';
+        try {
+            $cardImageBinary = $cardRenderer->renderBinary([
+                'business_name' => $issuerShop?->name ?: ($this->warranty->store_name ?: $this->userName),
+                'business_phone' => $issuerShop?->phone ?: ($issuerUser?->phone ?: $this->warranty->customer_phone),
+                'business_email' => $issuerShop?->effective_email ?: ($issuerUser?->email ?: null),
+                'logo_path' => $this->resolveLogoPath($issuerUser, $issuerShop),
+                'customer_name' => $this->sale->customer_name,
+                'product_name' => $this->sale->product_name,
+                'purchase_date' => $this->formatDate($this->sale->created_at),
+                'warranty_period' => ($this->sale->warranty_months ?? null) ? ($this->sale->warranty_months.' months') : 'N/A',
+                'warranty_expires' => $this->formatDate($this->sale->warranty_end),
+                'imei_serial' => $this->warrantyDetails['imei_number'] ?? null,
+                'specification' => implode(' | ', array_filter([$this->warrantyDetails['storage'] ?? null, $this->warrantyDetails['color'] ?? null])) ?: 'N/A',
+            ]);
+        } catch (\Throwable $e) {
+            // Fallback to data URI when inline binary generation fails.
+        }
 
-        return $this->subject("Warranty Filed by {$this->userName} - {$this->warranty->phone_name}")
-                    ->view('emails.warranty_filed')
-                    ->with('warranty', $this->warranty)
-                    ->with('sale', $this->sale)
-                    ->with('warrantyDetails', $this->warrantyDetails)
-                    ->with('userName', $this->userName)
-                    ->with('cardImage', $cardImage);
+        $mail = $this->subject("Warranty Filed by {$this->userName} - {$this->warranty->phone_name}")
+            ->view('emails.warranty_filed')
+            ->with('warranty', $this->warranty)
+            ->with('sale', $this->sale)
+            ->with('warrantyDetails', $this->warrantyDetails)
+            ->with('userName', $this->userName)
+            ->with('cardImage', $cardImage)
+            ->with('cardImageBinary', $cardImageBinary)
+            ->with('cardImageName', $cardImageName);
+
+        if ($replyToEmail) {
+            $mail->replyTo($replyToEmail, $this->userName);
+        }
+
+        return $mail;
     }
 
     /**
@@ -126,6 +154,26 @@ class WarrantyFiled extends Mailable
         }
 
         return $issuerShop?->logo_path ?: $issuer->logo_path;
+    }
+
+    private function resolveReplyToEmail(?User $issuer, ?Shop $issuerShop): ?string
+    {
+        $shopEmail = $issuerShop?->effective_email;
+        if ($shopEmail && filter_var($shopEmail, FILTER_VALIDATE_EMAIL)) {
+            return $shopEmail;
+        }
+
+        $userEmail = $issuer?->email;
+        if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+            return $userEmail;
+        }
+
+        $fallbackEmail = config('mail.reply_to.address');
+        if ($fallbackEmail && filter_var($fallbackEmail, FILTER_VALIDATE_EMAIL)) {
+            return $fallbackEmail;
+        }
+
+        return null;
     }
 
     private function formatDate($date): string
