@@ -86,10 +86,7 @@ return [
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-
-        'gmail-api' => [
-            'transport' => 'gmail-api',
-        ],
+                'gmail-api',
                 'smtp',
                 'log',
             ],
@@ -99,10 +96,7 @@ return [
         'roundrobin' => [
             'transport' => 'roundrobin',
             'mailers' => [
-
-        'gmail-api' => [
-            'transport' => 'gmail-api',
-        ],
+                'gmail-api',
                 'ses',
                 'postmark',
             ],
@@ -125,6 +119,11 @@ return [
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
+    ],
+
+    'reply_to' => [
+        'address' => env('MAIL_REPLY_TO_ADDRESS'),
+        'name' => env('MAIL_REPLY_TO_NAME'),
     ],
 
 ];
