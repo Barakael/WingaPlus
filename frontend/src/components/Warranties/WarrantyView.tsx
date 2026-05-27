@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Shield, CheckCircle, AlertTriangle, Clock, Eye, RefreshCw, Search } from 'lucide-react';
+import { Shield, RefreshCw, Search } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import ViewWarrantyModal from './ViewWarrantyModal';
+import WarrantyCardPreviewModal from './WarrantyCardPreviewModal';
+import { showErrorToast, showSuccessToast } from '../../lib/toast';
 
 interface WarrantyViewProps {
   onFileWarranty: () => void;
   openSaleForm?: (prefill?: any, onComplete?: () => void) => void;
 }
 
-const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleForm }) => {
+const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
   const { user } = useAuth();
   const [warranties, setWarranties] = useState<any[]>([]);
   const [loadingWarranties, setLoadingWarranties] = useState(true);
@@ -22,6 +24,12 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
   // Modal states
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedWarranty, setSelectedWarranty] = useState<any>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewWarranty, setPreviewWarranty] = useState<any>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [regeneratingWarrantyId, setRegeneratingWarrantyId] = useState<number | null>(null);
+  const isShopOwnerDebug = user?.role === 'shop_owner';
 
   // Fetch sales that have warranties
   const fetchWarranties = async () => {
@@ -121,23 +129,110 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
     setSelectedWarranty(null);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'Expired':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case 'pending':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'in_progress':
-        return <AlertTriangle className="h-5 w-5 text-[#1973AE]" />;
-      case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'rejected':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      default:
-        return <Clock className="h-5 w-5 text-gray-500" />;
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem('token');
+    if (!token) return {};
+    return { Authorization: `Bearer ${token}` };
+  };
+
+  const revokePreviewObjectUrl = (url: string | null) => {
+    if (url?.startsWith('blob:')) {
+      URL.revokeObjectURL(url);
     }
+  };
+
+  const fetchWarrantyPreviewImage = async (saleId: number): Promise<string> => {
+    const response = await fetch(`${BASE_URL}/api/sales/${saleId}/warranty-card/preview?t=${Date.now()}`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+
+    if (!response.ok) {
+      let message = 'Failed to load warranty card preview';
+      try {
+        const payload = await response.json();
+        if (payload?.message) {
+          message = payload.message;
+        }
+      } catch (error) {
+        // no-op
+      }
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  };
+
+  const handlePreviewWarranty = async (warranty: any) => {
+    setPreviewWarranty(warranty);
+    setPreviewModalOpen(true);
+    setPreviewLoading(true);
+
+    try {
+      const nextUrl = await fetchWarrantyPreviewImage(warranty.id);
+      setPreviewImageUrl((prev) => {
+        revokePreviewObjectUrl(prev);
+        return nextUrl;
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load warranty preview';
+      showErrorToast(message);
+      setPreviewImageUrl(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleRegenerateWarranty = async (warranty: any) => {
+    setRegeneratingWarrantyId(warranty.id);
+    try {
+      const response = await fetch(`${BASE_URL}/api/sales/${warranty.id}/warranty-card/regenerate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        let message = 'Failed to regenerate warranty card';
+        try {
+          const payload = await response.json();
+          if (payload?.message) {
+            message = payload.message;
+          }
+        } catch (error) {
+          // no-op
+        }
+        throw new Error(message);
+      }
+
+      const nextUrl = await fetchWarrantyPreviewImage(warranty.id);
+      setPreviewImageUrl((prev) => {
+        revokePreviewObjectUrl(prev);
+        return nextUrl;
+      });
+      setPreviewWarranty(warranty);
+      setPreviewModalOpen(true);
+      showSuccessToast('Warranty card regenerated for preview');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to regenerate warranty card';
+      showErrorToast(message);
+    } finally {
+      setRegeneratingWarrantyId(null);
+      setPreviewLoading(false);
+    }
+  };
+
+  const closePreviewModal = () => {
+    setPreviewModalOpen(false);
+    setPreviewWarranty(null);
+    setPreviewImageUrl((prev) => {
+      revokePreviewObjectUrl(prev);
+      return null;
+    });
   };
 
   const getDaysRemaining = (expiryDate: string) => {
@@ -250,7 +345,11 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell min-w-[80px]">Color</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[80px]">Storage</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden 2xl:table-cell min-w-[100px]">Expiry Date</th>
-                  {/* <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[140px]">Actions</th> */}
+                  {isShopOwnerDebug && (
+                    <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[170px]">
+                      Debug Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -302,20 +401,31 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
                         </div>
                       )}
                     </td>
-                    {/* <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
-                      <div className="flex items-center justify-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewWarranty(warranty);
-                          }}
-                          className="p-1 text-[#1973AE] hover:text-[#0d5a8a] dark:text-[#5da3d5] dark:hover:text-[#7db3d9] transition-colors"
-                          title="View Warranty Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td> */}
+                    {isShopOwnerDebug && (
+                      <td className="py-2 px-2 sm:py-3 sm:px-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePreviewWarranty(warranty);
+                            }}
+                            className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200"
+                          >
+                            Preview
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRegenerateWarranty(warranty);
+                            }}
+                            disabled={regeneratingWarrantyId === warranty.id}
+                            className="px-2 py-1 text-xs bg-[#1973AE] text-white rounded hover:bg-[#0d5a8a] disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {regeneratingWarrantyId === warranty.id ? 'Regenerating...' : 'Regenerate'}
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -385,6 +495,16 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty, openSaleFor
         warranty={selectedWarranty}
         isOpen={viewModalOpen}
         onClose={handleCloseViewModal}
+      />
+
+      <WarrantyCardPreviewModal
+        isOpen={previewModalOpen}
+        onClose={closePreviewModal}
+        warrantyTitle={previewWarranty ? `${previewWarranty.customer_name} - ${previewWarranty.phone_name || previewWarranty.laptop_name || 'Warranty Card'}` : 'Warranty Card'}
+        imageUrl={previewImageUrl}
+        loading={previewLoading}
+        onRegenerate={() => previewWarranty && handleRegenerateWarranty(previewWarranty)}
+        regenerating={previewWarranty ? regeneratingWarrantyId === previewWarranty.id : false}
       />
     </div>
   );
