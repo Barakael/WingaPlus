@@ -47,7 +47,7 @@ class WarrantyCardRenderer
 
         // Fine-tuned vertical alignment for template fields.
         $this->drawTemplateText($image, $this->normalize($data['customer_name'] ?? ''), 96, 182, 15, $textColor, $sx, $sy, 220);
-        $this->drawTemplateText($image, $this->normalize($data['business_name'] ?? ''), 237, 273, 13, $textColor, $sx, $sy, 210);
+        $this->drawTemplateText($image, $this->normalize($data['business_name'] ?? ''), 237, 270, 13, $textColor, $sx, $sy, 210);
 
         // Values are placed just below labels, matching the supplied template layout.
         $this->drawTemplateText($image, $this->normalize($data['product_name'] ?? ''), 109, 442, 13, $blue, $sx, $sy, 210);
