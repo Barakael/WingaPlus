@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaleRequest;
 use App\Mail\WarrantySaleFiled;
 use App\Models\Sale;
+use App\Models\User;
+use App\Services\WarrantyCardRenderer;
 use App\Services\WarrantyService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -154,6 +157,47 @@ class SalesController extends BaseController
     return $this->sendResponse($sale, 'Sale retrieved successfully');
     }
 
+    public function previewWarrantyCard(Request $request, Sale $sale)
+    {
+        $authError = $this->ensureShopOwner($request);
+        if ($authError) {
+            return $authError;
+        }
+
+        if (!$sale->has_warranty) {
+            return $this->sendError('This sale does not have a warranty card', [], 422);
+        }
+
+        $payload = $this->buildWarrantyCardPayload($sale);
+        $binary = app(WarrantyCardRenderer::class)->renderBinary($payload);
+
+        return response($binary, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
+
+    public function regenerateWarrantyCard(Request $request, Sale $sale)
+    {
+        $authError = $this->ensureShopOwner($request);
+        if ($authError) {
+            return $authError;
+        }
+
+        if (!$sale->has_warranty) {
+            return $this->sendError('This sale does not have a warranty card', [], 422);
+        }
+
+        // Render once to validate current template+data, but do not send email.
+        $payload = $this->buildWarrantyCardPayload($sale);
+        app(WarrantyCardRenderer::class)->renderBinary($payload);
+
+        return $this->sendResponse([
+            'sale_id' => $sale->id,
+            'preview_url' => url("/api/sales/{$sale->id}/warranty-card/preview").'?t='.now()->timestamp,
+            'regenerated_at' => now()->toIso8601String(),
+        ], 'Warranty card regenerated for preview');
+    }
+
     public function update(SaleRequest $request, Sale $sale)
     {
         $validated = $request->validated();
@@ -223,5 +267,70 @@ class SalesController extends BaseController
             DB::rollBack();
             return $this->sendError('Failed to delete sale', ['error' => $e->getMessage()], 500);
         }
+    }
+
+    private function ensureShopOwner(Request $request): ?\Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return $this->sendError('Unauthenticated', [], 401);
+        }
+
+        if ($user->role !== 'shop_owner') {
+            return $this->sendError('Only shop owners can use warranty debug tools', [], 403);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildWarrantyCardPayload(Sale $sale): array
+    {
+        $details = is_array($sale->warranty_details) ? $sale->warranty_details : [];
+        $issuerUser = $sale->salesman_id ? User::with(['shop', 'ownedShop'])->find($sale->salesman_id) : null;
+        $issuerShop = null;
+
+        if ($issuerUser) {
+            if ($issuerUser->role === 'shop_owner') {
+                $issuerShop = $issuerUser->ownedShop()->first();
+            } elseif ($issuerUser->shop_id) {
+                $issuerShop = $issuerUser->shop()->first();
+            }
+        }
+
+        $logoPath = null;
+        if ($issuerUser) {
+            if ($issuerUser->role === 'salesman') {
+                $logoPath = $issuerUser->logo_path ?: $issuerShop?->logo_path;
+            } elseif ($issuerUser->role === 'shop_owner') {
+                $logoPath = $issuerShop?->logo_path ?: $issuerUser->logo_path;
+            } else {
+                $logoPath = $issuerShop?->logo_path ?: $issuerUser->logo_path;
+            }
+        } elseif ($issuerShop) {
+            $logoPath = $issuerShop->logo_path;
+        }
+
+        $pieces = array_filter([
+            $details['storage'] ?? $sale->storage ?? null,
+            $details['color'] ?? $sale->color ?? null,
+            $details['ram'] ?? $sale->ram ?? null,
+        ]);
+
+        return [
+            'business_name' => $issuerShop?->name ?: ($issuerUser?->store_name ?: ($issuerUser?->name ?: 'WingaPro')),
+            'business_phone' => $issuerShop?->phone ?: ($issuerUser?->phone ?: ($sale->customer_phone ?: '')),
+            'business_email' => $issuerShop?->effective_email ?: ($issuerUser?->email ?: null),
+            'logo_path' => $logoPath,
+            'customer_name' => $sale->customer_name,
+            'product_name' => $details['phone_name'] ?? $details['laptop_name'] ?? $sale->product_name ?? 'N/A',
+            'purchase_date' => optional($sale->created_at)->format('M d, Y') ?: now()->format('M d, Y'),
+            'warranty_period' => ($sale->warranty_months ?? null) ? ($sale->warranty_months.' months') : 'N/A',
+            'warranty_expires' => $sale->warranty_end ? \Illuminate\Support\Carbon::parse($sale->warranty_end)->format('M d, Y') : 'N/A',
+            'imei_serial' => $details['imei_number'] ?? $sale->imei ?? $sale->serial_number ?? $details['serial_number'] ?? 'N/A',
+            'specification' => $pieces ? implode(' | ', $pieces) : 'N/A',
+        ];
     }
 }
