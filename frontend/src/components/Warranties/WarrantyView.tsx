@@ -361,8 +361,8 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[80px]">Storage</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden 2xl:table-cell min-w-[100px]">Expiry Date</th>
                   {isShopOwnerActions && (
-                    <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[170px]">
-                      Action Buttons
+                    <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[170px]">
+                      Actions
                     </th>
                   )}
                 </tr>
@@ -418,7 +418,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
                     </td>
                     {isShopOwnerActions && (
                       <td className="py-2 px-2 sm:py-3 sm:px-4 relative">
-                        <div className="flex items-center justify-end">
+                        <div className="flex items-center justify-center">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -432,7 +432,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
 
                           {openActionMenuId === warranty.id && (
                             <div
-                              className="absolute right-2 top-10 z-20 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
+                              className="absolute left-1/2 -translate-x-1/2 top-10 z-20 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <button
