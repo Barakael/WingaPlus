@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, RefreshCw, Search } from 'lucide-react';
+import { Shield, RefreshCw, Search, MoreVertical } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BASE_URL } from '../api/api';
 import ViewWarrantyModal from './ViewWarrantyModal';
@@ -29,6 +29,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [downloadingWarrantyId, setDownloadingWarrantyId] = useState<number | null>(null);
+  const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
   const isShopOwnerActions = user?.role === 'shop_owner';
 
   // Fetch sales that have warranties
@@ -241,6 +242,14 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
     });
   };
 
+  React.useEffect(() => {
+    const handleDocumentClick = () => setOpenActionMenuId(null);
+    if (openActionMenuId !== null) {
+      document.addEventListener('click', handleDocumentClick);
+    }
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, [openActionMenuId]);
+
   const getDaysRemaining = (expiryDate: string) => {
     const now = new Date();
     const expiry = new Date(expiryDate);
@@ -408,36 +417,54 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
                       )}
                     </td>
                     {isShopOwnerActions && (
-                      <td className="py-2 px-2 sm:py-3 sm:px-4">
-                        <div className="flex items-center gap-2">
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 relative">
+                        <div className="flex items-center justify-end">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handlePreviewWarranty(warranty);
+                              setOpenActionMenuId((prev) => (prev === warranty.id ? null : warranty.id));
                             }}
-                            className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200"
+                            className="p-1.5 rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                            title="Action Buttons"
                           >
-                            Preview
+                            <MoreVertical className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownloadWarranty(warranty);
-                            }}
-                            disabled={downloadingWarrantyId === warranty.id}
-                            className="px-2 py-1 text-xs bg-[#1973AE] text-white rounded hover:bg-[#0d5a8a] disabled:opacity-60 disabled:cursor-not-allowed"
-                          >
-                            {downloadingWarrantyId === warranty.id ? 'Downloading...' : 'Download'}
-                          </button>
-                          {/* <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRegenerateWarranty(warranty);
-                            }}
-                            className="px-2 py-1 text-xs bg-[#1973AE] text-white rounded"
-                          >
-                            Regenerate
-                          </button> */}
+
+                          {openActionMenuId === warranty.id && (
+                            <div
+                              className="absolute right-2 top-10 z-20 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handlePreviewWarranty(warranty);
+                                }}
+                                className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                Preview
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handleDownloadWarranty(warranty);
+                                }}
+                                disabled={downloadingWarrantyId === warranty.id}
+                                className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {downloadingWarrantyId === warranty.id ? 'Downloading...' : 'Download'}
+                              </button>
+                              {/* <button
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handleRegenerateWarranty(warranty);
+                                }}
+                                className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                Regenerate
+                              </button> */}
+                            </div>
+                          )}
                         </div>
                       </td>
                     )}
