@@ -131,6 +131,10 @@ Route::get('/sales/{sale}', [SalesController::class, 'show']);
 Route::put('/sales/{sale}', [SalesController::class, 'update']);
 Route::patch('/sales/{sale}', [SalesController::class, 'update']);
 Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/sales/{sale}/warranty-card/preview', [SalesController::class, 'previewWarrantyCard']);
+    Route::post('/sales/{sale}/warranty-card/regenerate', [SalesController::class, 'regenerateWarrantyCard']);
+});
 
 // Service routes
 Route::get('/services', [ServiceController::class, 'index']);
