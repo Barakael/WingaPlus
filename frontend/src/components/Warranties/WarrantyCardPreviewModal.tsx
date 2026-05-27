@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, RefreshCw } from 'lucide-react';
+import { X, RefreshCw, Download } from 'lucide-react';
 
 interface WarrantyCardPreviewModalProps {
   isOpen: boolean;
@@ -22,6 +22,11 @@ const WarrantyCardPreviewModal: React.FC<WarrantyCardPreviewModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const fileNameBase = warrantyTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'warranty-card';
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden">
@@ -39,6 +44,16 @@ const WarrantyCardPreviewModal: React.FC<WarrantyCardPreviewModalProps> = ({
               <RefreshCw className={`h-4 w-4 mr-2 ${regenerating ? 'animate-spin' : ''}`} />
               Regenerate
             </button>
+            {imageUrl && !loading && (
+              <a
+                href={imageUrl}
+                download={`${fileNameBase}-preview.png`}
+                className="inline-flex items-center px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </a>
+            )}
             <button
               onClick={onClose}
               className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"

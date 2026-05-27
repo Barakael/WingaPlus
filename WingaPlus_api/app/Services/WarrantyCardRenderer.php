@@ -45,7 +45,8 @@ class WarrantyCardRenderer
 
         $this->drawLogoOnTemplate($image, $data['logo_path'] ?? null, $sx, $sy);
 
-        $this->drawTemplateText($image, $this->normalize($data['customer_name'] ?? ''), 96, 176, 15, $textColor, $sx, $sy, 220);
+        // Fine-tuned vertical alignment for template fields.
+        $this->drawTemplateText($image, $this->normalize($data['customer_name'] ?? ''), 96, 184, 15, $textColor, $sx, $sy, 220);
         $this->drawTemplateText($image, $this->normalize($data['business_name'] ?? ''), 229, 286, 14, $textColor, $sx, $sy, 220);
 
         // Values are placed just below labels, matching the supplied template layout.
@@ -53,11 +54,11 @@ class WarrantyCardRenderer
         $this->drawTemplateText($image, $this->normalize($data['purchase_date'] ?? ''), 414, 442, 13, $blue, $sx, $sy, 185);
         $this->drawTemplateText($image, $this->normalize($data['imei_serial'] ?? ''), 109, 564, 13, $blue, $sx, $sy, 210);
         $this->drawTemplateText($image, $this->normalize($data['warranty_period'] ?? ''), 414, 564, 13, $blue, $sx, $sy, 185);
-        $this->drawTemplateText($image, $this->normalize($data['specification'] ?? ''), 109, 686, 13, $blue, $sx, $sy, 210);
-        $this->drawTemplateText($image, $this->normalize($data['warranty_expires'] ?? ''), 414, 686, 13, $blue, $sx, $sy, 185);
+        $this->drawTemplateText($image, $this->normalize($data['specification'] ?? ''), 109, 696, 13, $blue, $sx, $sy, 210);
+        $this->drawTemplateText($image, $this->normalize($data['warranty_expires'] ?? ''), 414, 696, 13, $blue, $sx, $sy, 185);
 
-        $this->drawTemplateText($image, $this->normalize($data['business_phone'] ?? ''), 487, 949, 11, $white, $sx, $sy, 165);
-        $this->drawTemplateText($image, $this->normalize($data['business_email'] ?? ''), 487, 977, 11, $white, $sx, $sy, 165);
+        $this->drawTemplateText($image, $this->normalize($data['business_phone'] ?? ''), 390, 933, 11, $white, $sx, $sy, 165);
+        $this->drawTemplateText($image, $this->normalize($data['business_email'] ?? ''), 390, 955, 11, $white, $sx, $sy, 165);
 
         ob_start();
         imagepng($image);
