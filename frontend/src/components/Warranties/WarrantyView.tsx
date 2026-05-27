@@ -28,8 +28,8 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
   const [previewWarranty, setPreviewWarranty] = useState<any>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [regeneratingWarrantyId, setRegeneratingWarrantyId] = useState<number | null>(null);
-  const isShopOwnerDebug = user?.role === 'shop_owner';
+  const [downloadingWarrantyId, setDownloadingWarrantyId] = useState<number | null>(null);
+  const isShopOwnerActions = user?.role === 'shop_owner';
 
   // Fetch sales that have warranties
   const fetchWarranties = async () => {
@@ -185,19 +185,20 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
     }
   };
 
-  const handleRegenerateWarranty = async (warranty: any) => {
-    setRegeneratingWarrantyId(warranty.id);
+  // Regenerate action intentionally disabled for now.
+  // const handleRegenerateWarranty = async (warranty: any) => { ... };
+
+  const handleDownloadWarranty = async (warranty: any) => {
+    setDownloadingWarrantyId(warranty.id);
     try {
-      const response = await fetch(`${BASE_URL}/api/sales/${warranty.id}/warranty-card/regenerate`, {
-        method: 'POST',
+      const response = await fetch(`${BASE_URL}/api/sales/${warranty.id}/warranty-card/preview?t=${Date.now()}`, {
         headers: {
-          'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
       });
 
       if (!response.ok) {
-        let message = 'Failed to regenerate warranty card';
+        let message = 'Failed to download warranty card';
         try {
           const payload = await response.json();
           if (payload?.message) {
@@ -209,20 +210,25 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
         throw new Error(message);
       }
 
-      const nextUrl = await fetchWarrantyPreviewImage(warranty.id);
-      setPreviewImageUrl((prev) => {
-        revokePreviewObjectUrl(prev);
-        return nextUrl;
-      });
-      setPreviewWarranty(warranty);
-      setPreviewModalOpen(true);
-      showSuccessToast('Warranty card regenerated for preview');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const fileBase = `${warranty.customer_name || 'warranty'}-${warranty.id}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${fileBase || 'warranty-card'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+      showSuccessToast('Warranty card downloaded');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to regenerate warranty card';
+      const message = error instanceof Error ? error.message : 'Failed to download warranty card';
       showErrorToast(message);
     } finally {
-      setRegeneratingWarrantyId(null);
-      setPreviewLoading(false);
+      setDownloadingWarrantyId(null);
     }
   };
 
@@ -345,9 +351,9 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden lg:table-cell min-w-[80px]">Color</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden xl:table-cell min-w-[80px]">Storage</th>
                   <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white hidden 2xl:table-cell min-w-[100px]">Expiry Date</th>
-                  {isShopOwnerDebug && (
+                  {isShopOwnerActions && (
                     <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 dark:text-white min-w-[170px]">
-                      Debug Actions
+                      Action Buttons
                     </th>
                   )}
                 </tr>
@@ -401,7 +407,7 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
                         </div>
                       )}
                     </td>
-                    {isShopOwnerDebug && (
+                    {isShopOwnerActions && (
                       <td className="py-2 px-2 sm:py-3 sm:px-4">
                         <div className="flex items-center gap-2">
                           <button
@@ -416,13 +422,22 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleRegenerateWarranty(warranty);
+                              handleDownloadWarranty(warranty);
                             }}
-                            disabled={regeneratingWarrantyId === warranty.id}
+                            disabled={downloadingWarrantyId === warranty.id}
                             className="px-2 py-1 text-xs bg-[#1973AE] text-white rounded hover:bg-[#0d5a8a] disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            {regeneratingWarrantyId === warranty.id ? 'Regenerating...' : 'Regenerate'}
+                            {downloadingWarrantyId === warranty.id ? 'Downloading...' : 'Download'}
                           </button>
+                          {/* <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRegenerateWarranty(warranty);
+                            }}
+                            className="px-2 py-1 text-xs bg-[#1973AE] text-white rounded"
+                          >
+                            Regenerate
+                          </button> */}
                         </div>
                       </td>
                     )}
@@ -503,8 +518,6 @@ const WarrantyView: React.FC<WarrantyViewProps> = ({ onFileWarranty }) => {
         warrantyTitle={previewWarranty ? `${previewWarranty.customer_name} - ${previewWarranty.phone_name || previewWarranty.laptop_name || 'Warranty Card'}` : 'Warranty Card'}
         imageUrl={previewImageUrl}
         loading={previewLoading}
-        onRegenerate={() => previewWarranty && handleRegenerateWarranty(previewWarranty)}
-        regenerating={previewWarranty ? regeneratingWarrantyId === previewWarranty.id : false}
       />
     </div>
   );
