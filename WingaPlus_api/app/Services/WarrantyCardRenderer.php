@@ -46,16 +46,16 @@ class WarrantyCardRenderer
         $this->drawLogoOnTemplate($image, $data['logo_path'] ?? null, $sx, $sy);
 
         // Fine-tuned vertical alignment for template fields.
-        $this->drawTemplateText($image, $this->normalize($data['customer_name'] ?? ''), 96, 184, 15, $textColor, $sx, $sy, 220);
-        $this->drawTemplateText($image, $this->normalize($data['business_name'] ?? ''), 229, 286, 14, $textColor, $sx, $sy, 220);
+        $this->drawTemplateText($image, $this->normalize($data['customer_name'] ?? ''), 96, 182, 15, $textColor, $sx, $sy, 220);
+        $this->drawTemplateText($image, $this->normalize($data['business_name'] ?? ''), 237, 273, 13, $textColor, $sx, $sy, 210);
 
         // Values are placed just below labels, matching the supplied template layout.
         $this->drawTemplateText($image, $this->normalize($data['product_name'] ?? ''), 109, 442, 13, $blue, $sx, $sy, 210);
         $this->drawTemplateText($image, $this->normalize($data['purchase_date'] ?? ''), 414, 442, 13, $blue, $sx, $sy, 185);
-        $this->drawTemplateText($image, $this->normalize($data['imei_serial'] ?? ''), 109, 564, 13, $blue, $sx, $sy, 210);
-        $this->drawTemplateText($image, $this->normalize($data['warranty_period'] ?? ''), 414, 564, 13, $blue, $sx, $sy, 185);
-        $this->drawTemplateText($image, $this->normalize($data['specification'] ?? ''), 109, 696, 13, $blue, $sx, $sy, 210);
-        $this->drawTemplateText($image, $this->normalize($data['warranty_expires'] ?? ''), 414, 696, 13, $blue, $sx, $sy, 185);
+        $this->drawTemplateText($image, $this->normalize($data['imei_serial'] ?? ''), 109, 535, 13, $blue, $sx, $sy, 210);
+        $this->drawTemplateText($image, $this->normalize($data['warranty_period'] ?? ''), 414, 535, 13, $blue, $sx, $sy, 185);
+        $this->drawTemplateText($image, $this->normalize($data['specification'] ?? ''), 109, 615, 13, $blue, $sx, $sy, 210);
+        $this->drawTemplateText($image, $this->normalize($data['warranty_expires'] ?? ''), 414, 615, 13, $blue, $sx, $sy, 175);
 
         $this->drawTemplateText($image, $this->normalize($data['business_phone'] ?? ''), 390, 933, 11, $white, $sx, $sy, 165);
         $this->drawTemplateText($image, $this->normalize($data['business_email'] ?? ''), 390, 955, 11, $white, $sx, $sy, 165);
