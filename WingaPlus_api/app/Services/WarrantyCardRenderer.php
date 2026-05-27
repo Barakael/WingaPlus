@@ -299,15 +299,20 @@ class WarrantyCardRenderer
             return;
         }
 
-        $maxWidth = (int) floor(170 * $sx);
-        $maxHeight = (int) floor(70 * $sy);
-        $ratio = min($maxWidth / $srcW, $maxHeight / $srcH, 1);
-        $dstW = max(1, (int) floor($srcW * $ratio));
-        $dstH = max(1, (int) floor($srcH * $ratio));
-        $dstX = (int) floor((imagesx($image) - $dstW) / 2);
-        $dstY = (int) floor(54 * $sy);
+        $diameter = max(1, (int) floor(70 * min($sx, $sy)));
+        $circleLogo = $this->createCircularLogo($logo, $diameter);
+        if (!$circleLogo) {
+            imagedestroy($logo);
+            return;
+        }
 
-        imagecopyresampled($image, $logo, $dstX, $dstY, 0, 0, $dstW, $dstH, $srcW, $srcH);
+        $dstX = (int) floor((imagesx($image) - $diameter) / 2);
+        $dstY = (int) floor(52 * $sy);
+
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
+        imagecopy($image, $circleLogo, $dstX, $dstY, 0, 0, $diameter, $diameter);
+        imagedestroy($circleLogo);
         imagedestroy($logo);
     }
 
@@ -422,5 +427,49 @@ class WarrantyCardRenderer
         }
 
         return $ellipsis;
+    }
+
+    private function createCircularLogo(\GdImage $source, int $diameter): ?\GdImage
+    {
+        $srcW = imagesx($source);
+        $srcH = imagesy($source);
+        $cropSize = min($srcW, $srcH);
+        if ($cropSize < 1) {
+            return null;
+        }
+
+        $cropX = (int) floor(($srcW - $cropSize) / 2);
+        $cropY = (int) floor(($srcH - $cropSize) / 2);
+
+        $square = imagecreatetruecolor($diameter, $diameter);
+        imagealphablending($square, false);
+        imagesavealpha($square, true);
+        $transparent = imagecolorallocatealpha($square, 0, 0, 0, 127);
+        imagefilledrectangle($square, 0, 0, $diameter, $diameter, $transparent);
+
+        imagecopyresampled(
+            $square,
+            $source,
+            0,
+            0,
+            $cropX,
+            $cropY,
+            $diameter,
+            $diameter,
+            $cropSize,
+            $cropSize
+        );
+
+        for ($x = 0; $x < $diameter; $x++) {
+            for ($y = 0; $y < $diameter; $y++) {
+                $dx = $x - ($diameter / 2);
+                $dy = $y - ($diameter / 2);
+                if (($dx * $dx + $dy * $dy) > (($diameter / 2) * ($diameter / 2))) {
+                    imagesetpixel($square, $x, $y, $transparent);
+                }
+            }
+        }
+
+        return $square;
     }
 }
