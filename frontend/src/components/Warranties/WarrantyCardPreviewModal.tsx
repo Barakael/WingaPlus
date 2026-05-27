@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, RefreshCw, Download } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 
 interface WarrantyCardPreviewModalProps {
   isOpen: boolean;
@@ -7,8 +7,6 @@ interface WarrantyCardPreviewModalProps {
   warrantyTitle: string;
   imageUrl: string | null;
   loading: boolean;
-  onRegenerate: () => void;
-  regenerating: boolean;
 }
 
 const WarrantyCardPreviewModal: React.FC<WarrantyCardPreviewModalProps> = ({
@@ -17,8 +15,6 @@ const WarrantyCardPreviewModal: React.FC<WarrantyCardPreviewModalProps> = ({
   warrantyTitle,
   imageUrl,
   loading,
-  onRegenerate,
-  regenerating,
 }) => {
   if (!isOpen) return null;
 
@@ -32,18 +28,10 @@ const WarrantyCardPreviewModal: React.FC<WarrantyCardPreviewModalProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Warranty Card Preview (Debug)</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Warranty Card Preview</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">{warrantyTitle}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={onRegenerate}
-              disabled={regenerating}
-              className="inline-flex items-center px-3 py-2 text-sm bg-[#1973AE] text-white rounded-lg hover:bg-[#0d5a8a] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${regenerating ? 'animate-spin' : ''}`} />
-              Regenerate
-            </button>
             {imageUrl && !loading && (
               <a
                 href={imageUrl}
